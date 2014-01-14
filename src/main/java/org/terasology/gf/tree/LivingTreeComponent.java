@@ -17,6 +17,9 @@ package org.terasology.gf.tree;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * @author Marcin Sciesinski <marcins78@gmail.com>
+ */
 public class LivingTreeComponent implements Component {
     public String type;
 }

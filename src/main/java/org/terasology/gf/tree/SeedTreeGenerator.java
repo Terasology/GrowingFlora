@@ -20,6 +20,9 @@ import org.terasology.utilities.random.Random;
 import org.terasology.world.ChunkView;
 import org.terasology.world.block.Block;
 
+/**
+ * @author Marcin Sciesinski <marcins78@gmail.com>
+ */
 public class SeedTreeGenerator extends TreeGenerator {
     private Block block;
 

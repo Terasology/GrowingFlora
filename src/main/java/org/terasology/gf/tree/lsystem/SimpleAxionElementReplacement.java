@@ -19,6 +19,9 @@ package org.terasology.gf.tree.lsystem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Marcin Sciesinski <marcins78@gmail.com>
+ */
 public class SimpleAxionElementReplacement implements AxionElementReplacement {
     private float probabilitySum;
     private String defaultReplacement;

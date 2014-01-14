@@ -166,8 +166,8 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
 
         Block oakSapling = blockManager.getBlock("GrowingFlora:OakSapling");
         Block oakSaplingGenerated = blockManager.getBlock("GrowingFlora:OakSaplingGenerated");
-        Block greenLeaf = blockManager.getBlock("Core:GreenLeaf");
-        Block oakTrunk = blockManager.getBlock("Core:OakTrunk");
+        Block greenLeaf = blockManager.getBlock("GrowingFlora:OakLeaf");
+        Block oakTrunk = blockManager.getBlock("GrowingFlora:OakTrunk");
         Block oakBranch = blockManager.getBlock(new BlockUri("GrowingFlora", "OakBranch", "0"));
 
         float trunkAdvance = 0.3f;

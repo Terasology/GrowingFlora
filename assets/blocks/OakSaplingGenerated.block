@@ -1,6 +1,7 @@
 {
     "basedOn": "core:plant",
+    "displayName": "Oak Sapling",
     "entity": {
-        "prefab": "GrowingFlora:OakTreeGenerated"
+        "prefab": "GrowingFlora:OakSaplingGenerated"
     }
 }

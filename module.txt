@@ -3,7 +3,7 @@
     "version" : "0.1.0",
     "author" : "",
     "displayName" : "GrowingFlora",
-    "description" : "",
+    "description" : "Module providing mechanisms for growing plants (trees, bushes, crops)",
     "dependencies" : [
             {
                 "id" : "Core",
