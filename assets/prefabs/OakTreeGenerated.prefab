@@ -1,0 +1,11 @@
+{
+    "LivingTree": {
+        "type": "GrowingFlora:oak"
+    },
+    "LSystemTree": {
+        "axion": "g",
+        "generation": 1,
+        "generated": true
+    },
+    "PartOfTree": {}
+}
