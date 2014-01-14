@@ -1,0 +1,13 @@
+{
+    "id" : "GrowingFlora",
+    "version" : "0.1.0",
+    "author" : "",
+    "displayName" : "GrowingFlora",
+    "description" : "",
+    "dependencies" : [
+            {
+                "id" : "Core",
+                "minVersion" : "0.1.0"
+            }],
+    "isServerSideOnly" : false
+}
