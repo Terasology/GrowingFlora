@@ -21,16 +21,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.engine.CoreRegistry;
 import org.terasology.engine.Time;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.tree.LivingTreeComponent;
 import org.terasology.gf.tree.TreeDefinition;
 import org.terasology.math.Vector3i;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
+import org.terasology.world.WorldComponent;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.*;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
@@ -47,7 +47,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
 
     private static final int GROWTH_SAFE_DISTANCE = 25;
     private static final float MAX_ANGLE_OFFSET = (float) Math.PI / 18f;
-    private static final int GROWTH_INTERVAL = 30 * 1000;
+    private static final int GROWTH_INTERVAL = 60 * 1000;
 
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
@@ -81,7 +81,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                 lSystemTree.generation = 1;
                 lSystemTree.initialized = true;
                 // Update time when sapling was placed
-                lSystemTree.lastGrowthTime = time;
+                lSystemTree.lastGrowthTime = time + rand.nextInt(GROWTH_INTERVAL);
 
                 treeRef.saveComponent(lSystemTree);
             } else if (shouldProcessTreeGrowth(lSystemTree, time)) {
@@ -161,6 +161,8 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         int replaceCount = 0;
         final Vector3i origin = Vector3i.zero();
 
+        EntityRef worldEntity = CoreRegistry.get(EntityManager.class).getEntitiesWith(WorldComponent.class).iterator().next();
+        worldEntity.send(new LargeBlockUpdateStarting());
         for (Map.Entry<Vector3i, Block> newTreeBlock : nextTree.entrySet()) {
             Vector3i relativeLocation = newTreeBlock.getKey();
             Block oldBlock = currentTree.remove(relativeLocation);
@@ -183,6 +185,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                 replaceCount++;
             }
         }
+        worldEntity.send(new LargeBlockUpdateFinished());
 
         for (Map.Entry<Vector3i, Block> oldTreeBlock : currentTree.entrySet()) {
             Vector3i location = oldTreeBlock.getKey();
