@@ -6,15 +6,15 @@ import org.terasology.math.Side;
 import org.terasology.math.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.family.ConnectToSixSidesFamilyFactory;
 import org.terasology.world.block.family.ConnectionCondition;
 import org.terasology.world.block.family.RegisterBlockFamilyFactory;
+import org.terasology.world.block.family.UpdatesWithNeighboursFamilyFactory;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterBlockFamilyFactory("GrowingFlora:branch")
-public class BranchesBlockFamilyFactory extends ConnectToSixSidesFamilyFactory {
+public class BranchesBlockFamilyFactory extends UpdatesWithNeighboursFamilyFactory {
     public BranchesBlockFamilyFactory() {
         super(new BranchConnectionCondition(), (byte) 63);
     }
