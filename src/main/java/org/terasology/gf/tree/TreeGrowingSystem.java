@@ -18,7 +18,6 @@ package org.terasology.gf.tree;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.core.logic.generators.BeforeAddingTreeGenerators;
 import org.terasology.core.world.generator.chunkGenerators.ForestGenerator;
 import org.terasology.core.world.generator.chunkGenerators.TreeGenerator;
 import org.terasology.core.world.generator.chunkGenerators.TreeGeneratorCactus;
@@ -26,7 +25,6 @@ import org.terasology.engine.CoreRegistry;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.In;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -74,11 +72,9 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
     public void shutdown() {
     }
 
-    @ReceiveEvent
-    public void replaceDefaultTreeGeneration(BeforeAddingTreeGenerators event, EntityRef worldEntity) {
+    public static void setupForestGenerator(ForestGenerator forestGenerator) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
-        ForestGenerator forestGenerator = event.getForestGenerator();
         // Cactus
         TreeGenerator cactus = new TreeGeneratorCactus().setTrunkType(blockManager.getBlock("Core:Cactus")).setGenerationProbability(0.05f);
 
@@ -91,8 +87,6 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.MOUNTAINS, oakTree);
         forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.FOREST, oakTree);
         forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.PLAINS, oakTree);
-
-        event.consume();
     }
 
     @Override
