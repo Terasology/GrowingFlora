@@ -51,13 +51,13 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
 
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
-    private List<Block> blockPriorities;
+    private List<String> blockPriorities;
     private float angle;
     private int minGenerations = 30;
     private int maxGenerations = 45;
 
     public AdvancedLSystemTreeDefinition(Map<Character, AxionElementReplacement> axionElementReplacements,
-                                         Map<Character, AxionElementGeneration> blockMap, List<Block> blockPriorities, float angle) {
+                                         Map<Character, AxionElementGeneration> blockMap, List<String> blockPriorities, float angle) {
         this.axionElementReplacements = axionElementReplacements;
         this.blockMap = blockMap;
         this.blockPriorities = blockPriorities;
@@ -92,7 +92,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                 if (hasRoomToGrow(worldProvider, treeLocation)) {
                     logger.debug("Growing tree");
 
-                    Map<Vector3i, Block> currentTree = generateTreeFromAxiom(lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+                    Map<Vector3i, String> currentTree = generateTreeFromAxiom(lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
                     logger.debug("Starting axion generation");
                     String nextAxion;
@@ -109,7 +109,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                     }
                     logger.debug("Finished axion generation");
 
-                    Map<Vector3i, Block> nextTree = generateTreeFromAxiom(nextAxion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+                    Map<Vector3i, String> nextTree = generateTreeFromAxiom(nextAxion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
                     logger.debug("Starting replacement of blocks");
                     updateTreeInGame(worldProvider, blockEntityRegistry, treeLocation, currentTree, nextTree);
@@ -155,27 +155,28 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
     }
 
     private void updateTreeInGame(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i treeLocation,
-                                  Map<Vector3i, Block> currentTree, Map<Vector3i, Block> nextTree) {
+                                  Map<Vector3i, String> currentTree, Map<Vector3i, String> nextTree) {
         Block air = BlockManager.getAir();
+        BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
         int replaceCount = 0;
         final Vector3i origin = Vector3i.zero();
 
         EntityRef worldEntity = CoreRegistry.get(EntityManager.class).getEntitiesWith(WorldComponent.class).iterator().next();
         worldEntity.send(new LargeBlockUpdateStarting());
-        for (Map.Entry<Vector3i, Block> newTreeBlock : nextTree.entrySet()) {
+        for (Map.Entry<Vector3i, String> newTreeBlock : nextTree.entrySet()) {
             Vector3i relativeLocation = newTreeBlock.getKey();
-            Block oldBlock = currentTree.remove(relativeLocation);
-            Block newBlock = newTreeBlock.getValue();
+            String oldBlock = currentTree.remove(relativeLocation);
+            String newBlock = newTreeBlock.getValue();
             Vector3i blockLocation = new Vector3i(treeLocation.x + relativeLocation.x, treeLocation.y + relativeLocation.y, treeLocation.z + relativeLocation.z);
-            Block resultBlock = newBlock.getBlockFamily().getBlockForPlacement(worldProvider, blockEntityRegistry, blockLocation, null, null);
+            Block resultBlock = blockManager.getBlockFamily(newBlock).getBlockForPlacement(worldProvider, blockEntityRegistry, blockLocation, null, null);
 
-            if (oldBlock != null && oldBlock != newBlock) {
+            if (oldBlock != null && !oldBlock.equals(newBlock)) {
                 if (relativeLocation.equals(origin)) {
                     blockEntityRegistry.setBlockRetainComponent(blockLocation, resultBlock, LSystemTreeComponent.class, LivingTreeComponent.class);
                 } else {
                     Block block = worldProvider.getBlock(blockLocation);
-                    if (block.isReplacementAllowed() || block.getBlockFamily() == oldBlock.getBlockFamily())
+                    if (block.isReplacementAllowed() || block.getBlockFamily() == blockManager.getBlockFamily(oldBlock))
                         worldProvider.setBlock(blockLocation, resultBlock);
                 }
                 replaceCount++;
@@ -187,7 +188,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         }
         worldEntity.send(new LargeBlockUpdateFinished());
 
-        for (Map.Entry<Vector3i, Block> oldTreeBlock : currentTree.entrySet()) {
+        for (Map.Entry<Vector3i, String> oldTreeBlock : currentTree.entrySet()) {
             Vector3i location = oldTreeBlock.getKey();
             worldProvider.setBlock(new Vector3i(treeLocation.x + location.x, treeLocation.y + location.y, treeLocation.z + location.z),
                     air);
@@ -214,8 +215,8 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         return result.toString();
     }
 
-    private Map<Vector3i, Block> generateTreeFromAxiom(String currentAxion, float angleOffset, float treeRotation) {
-        Map<Vector3i, Block> treeInMemory = Maps.newHashMap();
+    private Map<Vector3i, String> generateTreeFromAxiom(String currentAxion, float angleOffset, float treeRotation) {
+        Map<Vector3i, String> treeInMemory = Maps.newHashMap();
 
         Deque<Vector3f> stackPosition = Queues.newArrayDeque();
         Deque<Matrix4f> stackOrientation = Queues.newArrayDeque();
@@ -271,18 +272,18 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         return treeInMemory;
     }
 
-    private void setBlock(Map<Vector3i, Block> treeInMemory, Vector3f position, Block block) {
+    private void setBlock(Map<Vector3i, String> treeInMemory, Vector3f position, String blockUri) {
         Vector3i blockPosition = new Vector3i(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f);
         if (blockPosition.y >= 0) {
-            final Block blockAtPosition = treeInMemory.get(blockPosition);
-            if (blockAtPosition == block || hasBlockWithHigherPriority(block, blockAtPosition)) {
+            final String blockAtPosition = treeInMemory.get(blockPosition);
+            if ((blockAtPosition != null && blockAtPosition.equals(blockUri)) || hasBlockWithHigherPriority(blockUri, blockAtPosition)) {
                 return;
             }
-            treeInMemory.put(blockPosition, block);
+            treeInMemory.put(blockPosition, blockUri);
         }
     }
 
-    private boolean hasBlockWithHigherPriority(Block block, Block blockAtPosition) {
+    private boolean hasBlockWithHigherPriority(String block, String blockAtPosition) {
         return blockAtPosition != null && blockPriorities.indexOf(blockAtPosition) < blockPriorities.indexOf(block);
     }
 
@@ -314,19 +315,19 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
     }
 
     private final class Callback implements AxionElementGeneration.AxionElementGenerationCallback {
-        private Map<Vector3i, Block> treeInMemory;
+        private Map<Vector3i, String> treeInMemory;
         private Vector3f position;
         private Matrix4f rotation;
 
-        private Callback(Map<Vector3i, Block> treeInMemory, Vector3f position, Matrix4f rotation) {
+        private Callback(Map<Vector3i, String> treeInMemory, Vector3f position, Matrix4f rotation) {
             this.treeInMemory = treeInMemory;
             this.position = position;
             this.rotation = rotation;
         }
 
         @Override
-        public void setBlock(Vector3f blockPosition, Block block) {
-            AdvancedLSystemTreeDefinition.this.setBlock(treeInMemory, blockPosition, block);
+        public void setBlock(Vector3f blockPosition, String blockUri) {
+            AdvancedLSystemTreeDefinition.this.setBlock(treeInMemory, blockPosition, blockUri);
         }
 
         @Override

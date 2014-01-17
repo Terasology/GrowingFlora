@@ -15,8 +15,6 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.world.block.Block;
-
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -27,7 +25,7 @@ public interface AxionElementGeneration {
     void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter);
 
     public interface AxionElementGenerationCallback {
-        void setBlock(Vector3f position, Block block);
+        void setBlock(Vector3f position, String blockUri);
 
         void advance(float distance);
     }

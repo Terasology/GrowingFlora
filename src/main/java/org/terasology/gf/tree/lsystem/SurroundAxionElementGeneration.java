@@ -16,8 +16,6 @@
 package org.terasology.gf.tree.lsystem;
 
 
-import org.terasology.world.block.Block;
-
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -25,18 +23,18 @@ import javax.vecmath.Vector3f;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class SurroundAxionElementGeneration implements AxionElementGeneration {
-    private Block baseBlock;
-    private Block surroundBlock;
+    private String baseBlock;
+    private String surroundBlock;
     private float advance;
     private float innerRange;
     private float range;
     private int maxZ = Integer.MAX_VALUE;
 
-    public SurroundAxionElementGeneration(Block baseBlock, Block surroundBlock, float advance, float range) {
+    public SurroundAxionElementGeneration(String baseBlock, String surroundBlock, float advance, float range) {
         this(baseBlock, surroundBlock, advance, 0, range);
     }
 
-    public SurroundAxionElementGeneration(Block baseBlock, Block surroundBlock, float advance, float innerRange, float range) {
+    public SurroundAxionElementGeneration(String baseBlock, String surroundBlock, float advance, float innerRange, float range) {
         this.baseBlock = baseBlock;
         this.surroundBlock = surroundBlock;
         this.advance = advance;

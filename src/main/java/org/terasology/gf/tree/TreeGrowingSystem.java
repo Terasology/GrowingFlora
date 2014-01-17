@@ -34,10 +34,8 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldBiomeProvider;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -156,13 +154,11 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         replacementMap.put('T', trunk);
         replacementMap.put('b', smallBranch);
 
-        BlockManager blockManager = CoreRegistry.get(BlockManager.class);
-
-        Block oakSapling = blockManager.getBlock("GrowingFlora:OakSapling");
-        Block oakSaplingGenerated = blockManager.getBlock("GrowingFlora:OakSaplingGenerated");
-        Block greenLeaf = blockManager.getBlock("GrowingFlora:OakLeaf");
-        Block oakTrunk = blockManager.getBlock("GrowingFlora:OakTrunk");
-        Block oakBranch = blockManager.getBlock(new BlockUri("GrowingFlora", "OakBranch", "0"));
+        String oakSapling = "GrowingFlora:OakSapling";
+        String oakSaplingGenerated = "GrowingFlora:OakSaplingGenerated";
+        String greenLeaf = "GrowingFlora:OakLeaf";
+        String oakTrunk = "GrowingFlora:OakTrunk";
+        String oakBranch = "GrowingFlora:OakBranch";
 
         float trunkAdvance = 0.3f;
         float branchAdvance = 0.2f;

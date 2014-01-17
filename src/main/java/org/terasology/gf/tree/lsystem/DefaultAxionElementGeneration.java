@@ -16,8 +16,6 @@
 package org.terasology.gf.tree.lsystem;
 
 
-import org.terasology.world.block.Block;
-
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 
@@ -25,10 +23,10 @@ import javax.vecmath.Vector3f;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class DefaultAxionElementGeneration implements AxionElementGeneration {
-    private Block block;
+    private String block;
     private float advance;
 
-    public DefaultAxionElementGeneration(Block block, float advance) {
+    public DefaultAxionElementGeneration(String block, float advance) {
         this.block = block;
         this.advance = advance;
     }
