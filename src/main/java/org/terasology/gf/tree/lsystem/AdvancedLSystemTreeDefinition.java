@@ -30,7 +30,11 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldComponent;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.*;
+import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockComponent;
+import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.LargeBlockUpdateFinished;
+import org.terasology.world.block.LargeBlockUpdateStarting;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
@@ -176,13 +180,15 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                     blockEntityRegistry.setBlockRetainComponent(blockLocation, resultBlock, LSystemTreeComponent.class, LivingTreeComponent.class);
                 } else {
                     Block block = worldProvider.getBlock(blockLocation);
-                    if (block.isReplacementAllowed() || block.getBlockFamily() == blockManager.getBlockFamily(oldBlock))
+                    if (block.isReplacementAllowed() || block.getBlockFamily() == blockManager.getBlockFamily(oldBlock)) {
                         worldProvider.setBlock(blockLocation, resultBlock);
+                    }
                 }
                 replaceCount++;
             } else if (oldBlock == null) {
-                if (worldProvider.getBlock(blockLocation).isReplacementAllowed())
+                if (worldProvider.getBlock(blockLocation).isReplacementAllowed()) {
                     worldProvider.setBlock(blockLocation, resultBlock);
+                }
                 replaceCount++;
             }
         }
