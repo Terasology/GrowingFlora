@@ -35,10 +35,12 @@ import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.LargeBlockUpdateFinished;
 import org.terasology.world.block.LargeBlockUpdateStarting;
+import org.terasology.world.block.PlaceBlocks;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -158,50 +160,71 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         return (deathChance < random);
     }
 
-    private void updateTreeInGame(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i treeLocation,
-                                  Map<Vector3i, String> currentTree, Map<Vector3i, String> nextTree) {
+    private boolean updateTreeInGame(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i treeLocation,
+                                     Map<Vector3i, String> currentTree, Map<Vector3i, String> nextTree) {
         Block air = BlockManager.getAir();
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
         int replaceCount = 0;
         final Vector3i origin = Vector3i.zero();
 
+        Block originBlockToPlace = null;
+        Map<Vector3i, Block> blocksToReplaceExistingTreeBlocks = new HashMap<>();
+        Map<Vector3i, Block> blocksToPlaceInNewPlaces = new HashMap<>();
+
         EntityRef worldEntity = CoreRegistry.get(EntityManager.class).getEntitiesWith(WorldComponent.class).iterator().next();
-        worldEntity.send(new LargeBlockUpdateStarting());
+
         for (Map.Entry<Vector3i, String> newTreeBlock : nextTree.entrySet()) {
             Vector3i relativeLocation = newTreeBlock.getKey();
             String oldBlock = currentTree.remove(relativeLocation);
             String newBlock = newTreeBlock.getValue();
+
             Vector3i blockLocation = new Vector3i(treeLocation.x + relativeLocation.x, treeLocation.y + relativeLocation.y, treeLocation.z + relativeLocation.z);
             Block resultBlock = blockManager.getBlockFamily(newBlock).getBlockForPlacement(worldProvider, blockEntityRegistry, blockLocation, null, null);
 
             if (oldBlock != null && !oldBlock.equals(newBlock)) {
                 if (relativeLocation.equals(origin)) {
-                    blockEntityRegistry.setBlockRetainComponent(blockLocation, resultBlock, LSystemTreeComponent.class, LivingTreeComponent.class);
+                    originBlockToPlace = resultBlock;
                 } else {
                     Block block = worldProvider.getBlock(blockLocation);
                     if (block.isReplacementAllowed() || block.getBlockFamily() == blockManager.getBlockFamily(oldBlock)) {
-                        worldProvider.setBlock(blockLocation, resultBlock);
+                        blocksToReplaceExistingTreeBlocks.put(blockLocation, resultBlock);
                     }
                 }
                 replaceCount++;
             } else if (oldBlock == null) {
                 if (worldProvider.getBlock(blockLocation).isReplacementAllowed()) {
-                    worldProvider.setBlock(blockLocation, resultBlock);
+                    blocksToPlaceInNewPlaces.put(blockLocation, resultBlock);
                 }
                 replaceCount++;
             }
         }
-        worldEntity.send(new LargeBlockUpdateFinished());
 
-        for (Map.Entry<Vector3i, String> oldTreeBlock : currentTree.entrySet()) {
-            Vector3i location = oldTreeBlock.getKey();
-            worldProvider.setBlock(new Vector3i(treeLocation.x + location.x, treeLocation.y + location.y, treeLocation.z + location.z),
-                    air);
-            replaceCount++;
+        worldEntity.send(new LargeBlockUpdateStarting());
+        try {
+            PlaceBlocks placeBlocks = new PlaceBlocks(blocksToPlaceInNewPlaces);
+            worldProvider.getWorldEntity().send(placeBlocks);
+
+            if (!placeBlocks.isConsumed()) {
+                if (originBlockToPlace != null) {
+                    blockEntityRegistry.setBlockRetainComponent(origin, originBlockToPlace, LSystemTreeComponent.class, LivingTreeComponent.class);
+                }
+
+                for (Map.Entry<Vector3i, String> oldTreeBlock : currentTree.entrySet()) {
+                    Vector3i location = oldTreeBlock.getKey();
+                    // Remove the old block of tree
+                    blocksToReplaceExistingTreeBlocks.put(new Vector3i(treeLocation.x + location.x, treeLocation.y + location.y, treeLocation.z + location.z), air);
+                    replaceCount++;
+                }
+
+                logger.debug("Replaced block count: " + replaceCount);
+
+                return true;
+            }
+            return false;
+        } finally {
+            worldEntity.send(new LargeBlockUpdateFinished());
         }
-
-        logger.debug("Replaced block count: " + replaceCount);
     }
 
     private String generateNextAxion(FastRandom rand, String currentAxion) {
