@@ -118,19 +118,22 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                     Map<Vector3i, String> nextTree = generateTreeFromAxiom(nextAxion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
                     logger.debug("Starting replacement of blocks");
-                    updateTreeInGame(worldProvider, blockEntityRegistry, treeLocation, currentTree, nextTree);
-                    logger.debug("Finished replacement of blocks");
+                    if (!updateTreeInGame(worldProvider, blockEntityRegistry, treeLocation, currentTree, nextTree)) {
+                        logger.debug("Finished replacement of blocks");
 
-                    lSystemTree.axion = nextAxion;
-                    lSystemTree.generation++;
+                        lSystemTree.axion = nextAxion;
+                        lSystemTree.generation++;
 
-                    logger.debug("Generation: " + lSystemTree.generation + ", tree: " + treeLocation);
+                        logger.debug("Generation: " + lSystemTree.generation + ", tree: " + treeLocation);
 
-                    if (checkForDeath(lSystemTree.generation, rand.nextFloat())) {
-                        treeRef.removeComponent(LSystemTreeComponent.class);
+                        if (checkForDeath(lSystemTree.generation, rand.nextFloat())) {
+                            treeRef.removeComponent(LSystemTreeComponent.class);
+                        } else {
+                            lSystemTree.lastGrowthTime = time + rand.nextInt(GROWTH_INTERVAL / 2);
+                            treeRef.saveComponent(lSystemTree);
+                        }
                     } else {
-                        lSystemTree.lastGrowthTime = time + rand.nextInt(GROWTH_INTERVAL / 2);
-                        treeRef.saveComponent(lSystemTree);
+                        logger.debug("Replacement of blocks cancelled");
                     }
                 }
             }
@@ -168,6 +171,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
         int replaceCount = 0;
         final Vector3i origin = Vector3i.zero();
 
+        Vector3i originLocation = null;
         Block originBlockToPlace = null;
         Map<Vector3i, Block> blocksToReplaceExistingTreeBlocks = new HashMap<>();
         Map<Vector3i, Block> blocksToPlaceInNewPlaces = new HashMap<>();
@@ -184,19 +188,21 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
 
             if (oldBlock != null && !oldBlock.equals(newBlock)) {
                 if (relativeLocation.equals(origin)) {
+                    originLocation = blockLocation;
                     originBlockToPlace = resultBlock;
+                    replaceCount++;
                 } else {
                     Block block = worldProvider.getBlock(blockLocation);
                     if (block.isReplacementAllowed() || block.getBlockFamily() == blockManager.getBlockFamily(oldBlock)) {
                         blocksToReplaceExistingTreeBlocks.put(blockLocation, resultBlock);
+                        replaceCount++;
                     }
                 }
-                replaceCount++;
             } else if (oldBlock == null) {
                 if (worldProvider.getBlock(blockLocation).isReplacementAllowed()) {
                     blocksToPlaceInNewPlaces.put(blockLocation, resultBlock);
+                    replaceCount++;
                 }
-                replaceCount++;
             }
         }
 
@@ -207,7 +213,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
 
             if (!placeBlocks.isConsumed()) {
                 if (originBlockToPlace != null) {
-                    blockEntityRegistry.setBlockRetainComponent(origin, originBlockToPlace, LSystemTreeComponent.class, LivingTreeComponent.class);
+                    blockEntityRegistry.setBlockRetainComponent(originLocation, originBlockToPlace, LSystemTreeComponent.class, LivingTreeComponent.class);
                 }
 
                 for (Map.Entry<Vector3i, String> oldTreeBlock : currentTree.entrySet()) {
@@ -215,6 +221,10 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                     // Remove the old block of tree
                     blocksToReplaceExistingTreeBlocks.put(new Vector3i(treeLocation.x + location.x, treeLocation.y + location.y, treeLocation.z + location.z), air);
                     replaceCount++;
+                }
+
+                for (Map.Entry<Vector3i, Block> blockLocation : blocksToReplaceExistingTreeBlocks.entrySet()) {
+                    worldProvider.setBlock(blockLocation.getKey(), blockLocation.getValue());
                 }
 
                 logger.debug("Replaced block count: " + replaceCount);
