@@ -118,7 +118,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
                     Map<Vector3i, String> nextTree = generateTreeFromAxiom(nextAxion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
                     logger.debug("Starting replacement of blocks");
-                    if (!updateTreeInGame(worldProvider, blockEntityRegistry, treeLocation, currentTree, nextTree)) {
+                    if (updateTreeInGame(worldProvider, blockEntityRegistry, treeLocation, currentTree, nextTree)) {
                         logger.debug("Finished replacement of blocks");
 
                         lSystemTree.axion = nextAxion;
