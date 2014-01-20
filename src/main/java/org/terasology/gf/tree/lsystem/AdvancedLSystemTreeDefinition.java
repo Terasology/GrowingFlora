@@ -33,17 +33,13 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.LargeBlockUpdateFinished;
-import org.terasology.world.block.LargeBlockUpdateStarting;
-import org.terasology.world.block.PlaceBlocks;
+import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateFinished;
+import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
+import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
