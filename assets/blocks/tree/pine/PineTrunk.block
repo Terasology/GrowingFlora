@@ -28,8 +28,8 @@
     // Graphics
     "tiles": {
         "sides": "Core:PineBark",
-        "top": "Core:PineTrunk",
-        "bottom": "Core:PineTrunk",
+        "top": "Core:OakTrunk",
+        "bottom": "Core:OakTrunk",
         "center": "Core:PineBark"
     }
 }
