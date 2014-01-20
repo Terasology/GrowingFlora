@@ -70,6 +70,7 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
     @Override
     public void initialise() {
         addTreeType("GrowingFlora:oak", constructOakDefinition());
+        addTreeType("GrowingFlora:pine", constructPineDefinition());
     }
 
     @Override
@@ -86,11 +87,18 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
 
         // Oak
         TreeGenerator oakTree = new SeedTreeGenerator().setBlock(blockManager.getBlock("GrowingFlora:OakSaplingGenerated")).setGenerationProbability(0.08f);
+        // Pine
+        TreeGenerator pineTree = new SeedTreeGenerator().setBlock(blockManager.getBlock("GrowingFlora:PineSaplingGenerated")).setGenerationProbability(0.08f);
 
         // Add the trees to the generator lists
         forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.MOUNTAINS, oakTree);
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.FOREST, oakTree);
+        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.MOUNTAINS, pineTree);
+
+        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.FOREST, pineTree);
+
         forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.PLAINS, oakTree);
+
+        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.SNOW, pineTree);
     }
 
     @Override
@@ -183,6 +191,81 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         SurroundAxionElementGeneration smallBranchGeneration = new SurroundAxionElementGeneration(greenLeaf, greenLeaf, branchAdvance, 2.6f);
         smallBranchGeneration.setMaxZ(0);
         SurroundAxionElementGeneration largeBranchGeneration = new SurroundAxionElementGeneration(oakBranch, greenLeaf, branchAdvance, 1.1f, 3.5f);
+        largeBranchGeneration.setMaxZ(0);
+        blockMap.put('b', smallBranchGeneration);
+        blockMap.put('B', largeBranchGeneration);
+        blockMap.put('M', new AdvanceAxionElementGeneration(branchAdvance));
+
+        return new AdvancedLSystemTreeDefinition(replacementMap, blockMap, Arrays.asList(oakTrunk, oakBranch, greenLeaf), 1.5f);
+    }
+
+    private TreeDefinition constructPineDefinition() {
+        Map<Character, AxionElementReplacement> replacementMap = Maps.newHashMap();
+
+        SimpleAxionElementReplacement sapling = new SimpleAxionElementReplacement("s");
+        sapling.addReplacement(1f, "Tt");
+
+        final FastRandom rnd = new FastRandom();
+
+        SimpleAxionElementReplacement trunkTop = new SimpleAxionElementReplacement("t");
+        trunkTop.addReplacement(0.6f,
+                new SimpleAxionElementReplacement.ReplacementGenerator() {
+                    @Override
+                    public String generateReplacement(String currentAxion) {
+                        // 137.5 degrees is a golden ratio
+                        int deg = rnd.nextInt(130, 147);
+                        return "N+(" + deg + ")[&Mb]Wt";
+                    }
+                });
+        trunkTop.addReplacement(0.4f,
+                new SimpleAxionElementReplacement.ReplacementGenerator() {
+                    @Override
+                    public String generateReplacement(String currentAxion) {
+                        // Always generate at least 2 branches
+                        if (currentAxion.split("b").length < 2) {
+                            // 137.5 degrees is a golden ratio
+                            int deg = rnd.nextInt(130, 147);
+                            return "N+(" + deg + ")[&Mb]Wt";
+                        }
+                        return "NWt";
+                    }
+                });
+
+        SimpleAxionElementReplacement smallBranch = new SimpleAxionElementReplacement("b");
+        smallBranch.addReplacement(0.8f, "Bb");
+
+        SimpleAxionElementReplacement trunk = new SimpleAxionElementReplacement("T");
+        trunk.addReplacement(0.7f, "TN");
+
+        replacementMap.put('s', sapling);
+        replacementMap.put('g', sapling);
+        replacementMap.put('t', trunkTop);
+        replacementMap.put('T', trunk);
+        replacementMap.put('b', smallBranch);
+
+        String oakSapling = "GrowingFlora:PingSapling";
+        String oakSaplingGenerated = "GrowingFlora:PineSaplingGenerated";
+        String greenLeaf = "GrowingFlora:PineLeaf";
+        String oakTrunk = "GrowingFlora:PineTrunk";
+        String oakBranch = "GrowingFlora:PineBranch";
+
+        float trunkAdvance = 0.3f;
+        float branchAdvance = 0.15f;
+
+        Map<Character, AxionElementGeneration> blockMap = Maps.newHashMap();
+        blockMap.put('s', new DefaultAxionElementGeneration(oakSapling, trunkAdvance));
+        blockMap.put('g', new DefaultAxionElementGeneration(oakSaplingGenerated, trunkAdvance));
+
+        // Trunk building blocks
+        blockMap.put('t', new SurroundAxionElementGeneration(greenLeaf, greenLeaf, trunkAdvance, 1.2f));
+        blockMap.put('T', new DefaultAxionElementGeneration(oakTrunk, trunkAdvance));
+        blockMap.put('N', new DefaultAxionElementGeneration(oakTrunk, trunkAdvance));
+        blockMap.put('W', new SurroundAxionElementGeneration(oakBranch, greenLeaf, trunkAdvance, 1.2f));
+
+        // Branch building blocks
+        SurroundAxionElementGeneration smallBranchGeneration = new SurroundAxionElementGeneration(greenLeaf, greenLeaf, branchAdvance, 1.4f);
+        smallBranchGeneration.setMaxZ(0);
+        SurroundAxionElementGeneration largeBranchGeneration = new SurroundAxionElementGeneration(oakBranch, greenLeaf, branchAdvance, 0.8f, 1.8f);
         largeBranchGeneration.setMaxZ(0);
         blockMap.put('b', smallBranchGeneration);
         blockMap.put('B', largeBranchGeneration);

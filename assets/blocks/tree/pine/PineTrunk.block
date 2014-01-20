@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 {
-    "hardness" : 6,
-    "displayName": "Oak Log",
+    "hardness": 6,
+    "displayName": "Pine Log",
 
-    "categories" : ["wood"],
+    "categories": ["wood"],
 
-    "entity" : {
-        "prefab" : "GrowingFlora:OakTrunk"
+    "entity": {
+        "prefab": "GrowingFlora:TreeTrunk"
     },
 
+    "shape": "Engine:pillar",
+
     // Graphics
-    "tiles" : {
-        "sides" : "Core:OakBark",
-        "top" : "Core:OakTrunk",
-        "bottom" : "Core:OakTrunk"
+    "tiles": {
+        "sides": "Core:PineBark",
+        "top": "Core:PineTrunk",
+        "bottom": "Core:PineTrunk",
+        "center": "Core:PineBark"
     }
 }

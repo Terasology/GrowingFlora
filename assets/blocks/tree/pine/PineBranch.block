@@ -1,7 +1,7 @@
 {
-    "displayName": "Oak Branch",
+    "displayName": "Pine Branch",
     "entity": {
-        "prefab": "GrowingFlora:OakBranch"
+        "prefab": "GrowingFlora:TreeBranch"
     },
 
     "rotation": "GrowingFlora:branch",

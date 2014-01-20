@@ -1,0 +1,11 @@
+{
+    "LivingTree": {
+        "type": "GrowingFlora:pine"
+    },
+    "LSystemTree": {
+        "axion": "g",
+        "generation": 1,
+        "generated": true
+    },
+    "PartOfTree": {}
+}
