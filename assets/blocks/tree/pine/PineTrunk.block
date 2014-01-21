@@ -25,10 +25,12 @@
 
     "shape": "Engine:pillar",
 
+    "tile": "GrowingFlora:PineBark",
+
     // Graphics
     "tiles": {
         "sides": "GrowingFlora:PineBark",
-        "topBottom": "GrowingFlora:OakTrunk",
+        "topBottom": "GrowingFlora:PineTrunk",
         "center": "GrowingFlora:PineBark"
     }
 }

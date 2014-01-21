@@ -25,6 +25,8 @@
 
     "shape": "Engine:pillar",
 
+    "tile": "GrowingFlora:OakBark",
+
     // Graphics
     "tiles": {
         "sides": "GrowingFlora:OakBark",
