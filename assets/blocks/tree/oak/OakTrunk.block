@@ -27,9 +27,8 @@
 
     // Graphics
     "tiles": {
-        "sides": "Core:OakBark",
-        "top": "Core:OakTrunk",
-        "bottom": "Core:OakTrunk",
-        "center": "Core:OakBark"
+        "sides": "GrowingFlora:OakBark",
+        "topBottom": "GrowingFlora:OakTrunk",
+        "center": "GrowingFlora:OakBark"
     }
 }
