@@ -39,7 +39,11 @@ import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.util.*;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -49,7 +53,7 @@ public class AdvancedLSystemTreeDefinition implements TreeDefinition {
 
     private static final int GROWTH_SAFE_DISTANCE = 25;
     private static final float MAX_ANGLE_OFFSET = (float) Math.PI / 18f;
-    private static final int GROWTH_INTERVAL = 60 * 1000;
+    private static final int GROWTH_INTERVAL = 120 * 1000;
 
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
