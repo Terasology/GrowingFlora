@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.gf.tree.lsystem;
-
-
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.ForceBlockActive;
+package org.terasology.gf.tree;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-@ForceBlockActive
-public class LSystemTreeComponent implements Component {
-    public String axion;
-    public int generation;
-    public long lastGrowthTime;
-    public float branchAngle;
-    public float rotationAngle;
+public interface PlantRegistry {
+    void addTreeType(String treeId, PlantDefinition plantDefinition);
+
+    PlantDefinition getPlantDefinition(String plantId);
 }

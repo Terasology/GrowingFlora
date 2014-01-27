@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.gf.tree.lsystem;
+package org.terasology.gf.tree;
 
-
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.world.BlockEntityRegistry;
+import org.terasology.world.WorldProvider;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-@ForceBlockActive
-public class LSystemTreeComponent implements Component {
-    public String axion;
-    public int generation;
-    public long lastGrowthTime;
-    public float branchAngle;
-    public float rotationAngle;
+public interface PlantDefinition {
+    boolean initializeSapling(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling);
+
+    void updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef);
 }

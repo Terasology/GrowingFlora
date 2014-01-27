@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 package org.terasology.gf.tree;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.world.block.ForceBlockActive;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class LivingTreeComponent implements Component {
+@ForceBlockActive
+public class GeneratedSaplingComponent implements Component {
     public String type;
 }

@@ -18,10 +18,6 @@ package org.terasology.gf.tree;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.core.world.generator.chunkGenerators.ForestGenerator;
-import org.terasology.core.world.generator.chunkGenerators.TreeGenerator;
-import org.terasology.core.world.generator.chunkGenerators.TreeGeneratorCactus;
-import org.terasology.engine.CoreRegistry;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -38,21 +34,17 @@ import org.terasology.gf.tree.lsystem.SurroundAxionElementGeneration;
 import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldBiomeProvider;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class TreeGrowingSystem implements UpdateSubscriberSystem {
-    private static final Logger logger = LoggerFactory.getLogger(TreeGrowingSystem.class);
+public class PlantGrowingSystem implements UpdateSubscriberSystem {
+    private static final Logger logger = LoggerFactory.getLogger(PlantGrowingSystem.class);
     private static final int CHECK_INTERVAL = 1000;
     @In
     private WorldProvider worldProvider;
@@ -62,69 +54,40 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
     private BlockEntityRegistry blockEntityRegistry;
     @In
     private Time time;
+    @In
+    private PlantRegistry plantRegistry;
 
     private long lastCheckTime;
 
-    private Map<String, TreeDefinition> treeDefinitions = new HashMap<>();
-
     @Override
     public void initialise() {
-        addTreeType("GrowingFlora:oak", constructOakDefinition());
-        addTreeType("GrowingFlora:pine", constructPineDefinition());
+        plantRegistry.addTreeType("GrowingFlora:oak", constructOakDefinition());
+        plantRegistry.addTreeType("GrowingFlora:pine", constructPineDefinition());
     }
 
     @Override
     public void shutdown() {
     }
 
-    public static void setupForestGenerator(ForestGenerator forestGenerator) {
-        BlockManager blockManager = CoreRegistry.get(BlockManager.class);
-
-        // Cactus
-        TreeGenerator cactus = new TreeGeneratorCactus().setTrunkType(blockManager.getBlock("Core:Cactus")).setGenerationProbability(0.05f);
-
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.DESERT, cactus);
-
-        // Oak
-        TreeGenerator oakTree = new SeedTreeGenerator().setBlock(blockManager.getBlock("GrowingFlora:OakSaplingGenerated")).setGenerationProbability(0.08f);
-        // Pine
-        TreeGenerator pineTree = new SeedTreeGenerator().setBlock(blockManager.getBlock("GrowingFlora:PineSaplingGenerated")).setGenerationProbability(0.08f);
-
-        // Add the trees to the generator lists
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.MOUNTAINS, oakTree);
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.MOUNTAINS, pineTree);
-
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.FOREST, pineTree);
-
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.PLAINS, oakTree);
-
-        forestGenerator.addTreeGenerator(WorldBiomeProvider.Biome.SNOW, pineTree);
-    }
-
     @Override
     public void update(float delta) {
-        long gameTimeInMs = time.getGameTimeInMs();
-        if (lastCheckTime + CHECK_INTERVAL < gameTimeInMs) {
-            Iterable<EntityRef> treeRefs = entityManager.getEntitiesWith(LivingTreeComponent.class, BlockComponent.class);
-            for (EntityRef treeRef : treeRefs) {
-                LivingTreeComponent tree = treeRef.getComponent(LivingTreeComponent.class);
-                if (tree != null) {
-                    TreeDefinition treeDefinition = treeDefinitions.get(tree.type);
-                    treeDefinition.updateTree(worldProvider, blockEntityRegistry, treeRef);
+        long currentTime = time.getGameTimeInMs();
+        if (lastCheckTime + CHECK_INTERVAL < currentTime) {
+            for (EntityRef treeRef : entityManager.getEntitiesWith(LivingPlantComponent.class)) {
+                LivingPlantComponent plant = treeRef.getComponent(LivingPlantComponent.class);
+                if (plant != null) {
+                    PlantDefinition plantDefinition = plantRegistry.getPlantDefinition(plant.type);
+                    plantDefinition.updatePlant(worldProvider, blockEntityRegistry, treeRef);
                 } else {
-                    logger.error("Got an entity without a component (LivingTreeComponent) even though a list of entities that do have it was requested");
+                    logger.error("Got an entity without a component (LivingPlantComponent) even though a list of entities that do have it was requested");
                 }
             }
 
-            lastCheckTime = gameTimeInMs;
+            lastCheckTime = currentTime;
         }
     }
 
-    public void addTreeType(String type, TreeDefinition treeDefinition) {
-        treeDefinitions.put(type, treeDefinition);
-    }
-
-    private TreeDefinition constructOakDefinition() {
+    private PlantDefinition constructOakDefinition() {
         Map<Character, AxionElementReplacement> replacementMap = Maps.newHashMap();
 
         SimpleAxionElementReplacement sapling = new SimpleAxionElementReplacement("s");
@@ -196,10 +159,10 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         blockMap.put('B', largeBranchGeneration);
         blockMap.put('M', new AdvanceAxionElementGeneration(branchAdvance));
 
-        return new AdvancedLSystemTreeDefinition(replacementMap, blockMap, Arrays.asList(oakTrunk, oakBranch, greenLeaf), 1.5f);
+        return new AdvancedLSystemTreeDefinition("GrowingFlora:oak", "g", replacementMap, blockMap, Arrays.asList(oakTrunk, oakBranch, greenLeaf), 1.5f);
     }
 
-    private TreeDefinition constructPineDefinition() {
+    private PlantDefinition constructPineDefinition() {
         Map<Character, AxionElementReplacement> replacementMap = Maps.newHashMap();
 
         SimpleAxionElementReplacement sapling = new SimpleAxionElementReplacement("s");
@@ -243,7 +206,7 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         replacementMap.put('T', trunk);
         replacementMap.put('b', smallBranch);
 
-        String oakSapling = "GrowingFlora:PingSapling";
+        String oakSapling = "GrowingFlora:PineSapling";
         String oakSaplingGenerated = "GrowingFlora:PineSaplingGenerated";
         String greenLeaf = "GrowingFlora:PineLeaf";
         String oakTrunk = "GrowingFlora:PineTrunk";
@@ -271,6 +234,6 @@ public class TreeGrowingSystem implements UpdateSubscriberSystem {
         blockMap.put('B', largeBranchGeneration);
         blockMap.put('M', new AdvanceAxionElementGeneration(branchAdvance));
 
-        return new AdvancedLSystemTreeDefinition(replacementMap, blockMap, Arrays.asList(oakTrunk, oakBranch, greenLeaf), 1.5f);
+        return new AdvancedLSystemTreeDefinition("GrowingFlora:pine", "g", replacementMap, blockMap, Arrays.asList(oakTrunk, oakBranch, greenLeaf), 1.5f);
     }
 }

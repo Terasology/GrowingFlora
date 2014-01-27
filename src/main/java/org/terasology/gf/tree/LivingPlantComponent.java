@@ -15,13 +15,11 @@
  */
 package org.terasology.gf.tree;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
+import org.terasology.entitySystem.Component;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public interface TreeDefinition {
-    void updateTree(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef);
+public class LivingPlantComponent implements Component {
+    public String type;
 }
