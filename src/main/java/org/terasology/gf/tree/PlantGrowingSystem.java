@@ -35,6 +35,7 @@ import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.block.BlockComponent;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class PlantGrowingSystem implements UpdateSubscriberSystem {
     public void update(float delta) {
         long currentTime = time.getGameTimeInMs();
         if (lastCheckTime + CHECK_INTERVAL < currentTime) {
-            for (EntityRef treeRef : entityManager.getEntitiesWith(LivingPlantComponent.class)) {
+            for (EntityRef treeRef : entityManager.getEntitiesWith(LivingPlantComponent.class, BlockComponent.class)) {
                 LivingPlantComponent plant = treeRef.getComponent(LivingPlantComponent.class);
                 if (plant != null) {
                     PlantDefinition plantDefinition = plantRegistry.getPlantDefinition(plant.type);
