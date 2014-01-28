@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.gf.tree;
+package org.terasology.gf;
 
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.registry.Share;
 
 import java.util.HashMap;
@@ -28,15 +29,15 @@ import java.util.Map;
 @RegisterSystem
 @Share(value = PlantRegistry.class)
 public class PlantRegistryImpl extends BaseComponentSystem implements PlantRegistry {
-    private Map<String, PlantDefinition> trees = new HashMap<>();
+    private Map<String, PlantGrowthDefinition> plants = new HashMap<>();
 
     @Override
-    public void addTreeType(String treeId, PlantDefinition plantDefinition) {
-        trees.put(treeId, plantDefinition);
+    public void addPlantType(String plantId, PlantGrowthDefinition plantGrowthDefinition) {
+        plants.put(plantId, plantGrowthDefinition);
     }
 
     @Override
-    public PlantDefinition getPlantDefinition(String plantId) {
-        return trees.get(plantId);
+    public PlantGrowthDefinition getPlantGrowthDefinition(String plantId) {
+        return plants.get(plantId);
     }
 }

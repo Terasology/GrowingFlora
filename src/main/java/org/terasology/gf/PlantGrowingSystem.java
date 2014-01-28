@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.gf.tree;
+package org.terasology.gf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -33,17 +33,21 @@ import org.terasology.world.block.BlockComponent;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class GeneratedSaplingInitializeSystem implements UpdateSubscriberSystem {
-    private static final Logger logger = LoggerFactory.getLogger(GeneratedSaplingInitializeSystem.class);
-    private static final long CHECK_INTERVAL = 100;
-    private long lastCheck;
-
+public class PlantGrowingSystem implements UpdateSubscriberSystem {
+    private static final Logger logger = LoggerFactory.getLogger(PlantGrowingSystem.class);
+    private static final int CHECK_INTERVAL = 1000;
     @In
-    private PlantRegistry plantRegistry;
+    private WorldProvider worldProvider;
     @In
     private EntityManager entityManager;
     @In
+    private BlockEntityRegistry blockEntityRegistry;
+    @In
     private Time time;
+    @In
+    private PlantRegistry plantRegistry;
+
+    private long lastCheckTime;
 
     @Override
     public void initialise() {
@@ -56,21 +60,18 @@ public class GeneratedSaplingInitializeSystem implements UpdateSubscriberSystem 
     @Override
     public void update(float delta) {
         long currentTime = time.getGameTimeInMs();
-        if (lastCheck + CHECK_INTERVAL <= currentTime) {
-            WorldProvider worldProvider = CoreRegistry.get(WorldProvider.class);
-            BlockEntityRegistry blockEntityRegistry = CoreRegistry.get(BlockEntityRegistry.class);
-            for (EntityRef sapling : entityManager.getEntitiesWith(GeneratedSaplingComponent.class, BlockComponent.class)) {
-                GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
-                if (generatedSapling != null) {
-                    String saplingType = generatedSapling.type;
-                    PlantDefinition plantDefinition = plantRegistry.getPlantDefinition(saplingType);
-                    if (plantDefinition.initializeSapling(worldProvider, blockEntityRegistry, sapling)) {
-                        sapling.removeComponent(GeneratedSaplingComponent.class);
-                    }
+        if (lastCheckTime + CHECK_INTERVAL < currentTime) {
+            for (EntityRef treeRef : entityManager.getEntitiesWith(LivingPlantComponent.class, BlockComponent.class)) {
+                LivingPlantComponent plant = treeRef.getComponent(LivingPlantComponent.class);
+                if (plant != null) {
+                    PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plant.type);
+                    plantDefinition.updatePlant(worldProvider, blockEntityRegistry, treeRef);
+                } else {
+                    logger.error("Got an entity without a component (LivingPlantComponent) even though a list of entities that do have it was requested");
                 }
             }
 
-            lastCheck = currentTime;
+            lastCheckTime = currentTime;
         }
     }
 }

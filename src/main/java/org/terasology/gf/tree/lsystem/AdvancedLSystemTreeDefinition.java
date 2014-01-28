@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.gf.tree.LivingPlantComponent;
-import org.terasology.gf.tree.PlantDefinition;
+import org.terasology.gf.LivingPlantComponent;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
@@ -40,16 +39,12 @@ import org.terasology.world.block.entity.placement.PlaceBlocks;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class AdvancedLSystemTreeDefinition implements PlantDefinition {
+public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
 
     private static final int GROWTH_SAFE_DISTANCE = 25;
@@ -75,7 +70,6 @@ public class AdvancedLSystemTreeDefinition implements PlantDefinition {
         this.angle = angle;
     }
 
-    @Override
     public boolean initializeSapling(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
         Vector3i location = sapling.getComponent(BlockComponent.class).getPosition();
         if (!hasRoomToGrow(worldProvider, location)) {
@@ -106,7 +100,6 @@ public class AdvancedLSystemTreeDefinition implements PlantDefinition {
         return replaceTreeAndCheckForDeath(worldProvider, blockEntityRegistry, rand, location, oldAxion, nextAxion, lSystemTree);
     }
 
-    @Override
     public void updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef) {
         LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();

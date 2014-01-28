@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.gf.tree;
+package org.terasology.gf.generator;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.anotherWorld.GenerationParameters;
+import org.terasology.gf.PlantType;
+import org.terasology.world.chunks.Chunk;
+import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class LivingPlantComponent implements Component {
-    public String type;
+public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
+    public PlantType getPlantType();
+
+    public String getBiomeId();
+
+    public float getRarity();
+
+    public float getProbability();
+
+    public void plantSaplingOnGround(Chunk chunk, int x, int y, int z, GenerationParameters generationParameters);
 }

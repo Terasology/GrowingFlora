@@ -8,6 +8,10 @@
             {
                 "id" : "Core",
                 "minVersion" : "0.1.0"
+            },
+            {
+                "id" : "AnotherWorld",
+                "minVersion" : "0.1.0"
             }],
     "isServerSideOnly" : false
 }
