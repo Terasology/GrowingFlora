@@ -59,6 +59,7 @@ public class FloraDecorator implements ChunkDecorator {
     public void initializeWithSeed(String seed) {
         this.seed = seed;
         loadPlantGrowthDefinitions();
+        loadPlantSpawnDefinition();
     }
 
     private void loadPlantGrowthDefinitions() {
@@ -69,7 +70,10 @@ public class FloraDecorator implements ChunkDecorator {
         for (PlantGrowthDefinition plantGrowthDefinition : plantGrowthDefinitions) {
             plantRegistry.addPlantType(plantGrowthDefinition.getPlantId(), plantGrowthDefinition);
         }
+    }
 
+    private void loadPlantSpawnDefinition() {
+        WorldGeneratorPluginLibrary pluginLibrary = CoreRegistry.get(WorldGeneratorPluginLibrary.class);
         List<PlantSpawnDefinition> plantSpawnDefinitions = pluginLibrary.instantiateAllOfType(PlantSpawnDefinition.class);
         for (PlantSpawnDefinition plantSpawnDefinition : plantSpawnDefinitions) {
             PlantType plantType = plantSpawnDefinition.getPlantType();
