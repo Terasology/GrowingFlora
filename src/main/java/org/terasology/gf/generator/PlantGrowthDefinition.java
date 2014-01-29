@@ -28,5 +28,5 @@ public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
 
     boolean initializeSapling(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling);
 
-    void updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef);
+    void updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 }
