@@ -36,10 +36,15 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateFinished;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
+import org.terasology.world.chunks.ChunkConstants;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
-import java.util.*;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -47,7 +52,6 @@ import java.util.*;
 public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
 
-    private static final int GROWTH_SAFE_DISTANCE = 25;
     private static final float MAX_ANGLE_OFFSET = (float) Math.PI / 18f;
     private static final int GROWTH_INTERVAL = 120 * 1000;
 
@@ -158,8 +162,14 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     private boolean hasRoomToGrow(WorldProvider worldProvider, Vector3i treeLocation) {
-        return worldProvider.isBlockRelevant(treeLocation.x + GROWTH_SAFE_DISTANCE, treeLocation.y, treeLocation.z + GROWTH_SAFE_DISTANCE)
-                && worldProvider.isBlockRelevant(treeLocation.x - GROWTH_SAFE_DISTANCE, treeLocation.y, treeLocation.z - GROWTH_SAFE_DISTANCE);
+        return worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
+                && worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z)
+                && worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z)
+                && worldProvider.isBlockRelevant(treeLocation.x, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
+                && worldProvider.isBlockRelevant(treeLocation.x, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z)
+                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
+                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z)
+                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z);
     }
 
     private boolean checkForDeath(int generation, float random) {
