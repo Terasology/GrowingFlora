@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,24 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
+public class TreeBlockDefinition {
+    private boolean branchBlock;
+    private String blockUri;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
-public interface AxionElementGeneration {
-    void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter);
+    public TreeBlockDefinition(String blockUri) {
+        this(blockUri, false);
+    }
 
-    public interface AxionElementGenerationCallback {
-        void setBlock(Vector3f position, TreeBlockDefinition blockDefinition);
+    public TreeBlockDefinition(String blockUri, boolean branchBlock) {
+        this.blockUri = blockUri;
+        this.branchBlock = branchBlock;
+    }
 
-        void advance(float distance);
+    public boolean isBranchBlock() {
+        return branchBlock;
+    }
+
+    public String getBlockUri() {
+        return blockUri;
     }
 }

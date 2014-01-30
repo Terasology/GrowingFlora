@@ -23,10 +23,10 @@ import javax.vecmath.Vector3f;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class DefaultAxionElementGeneration implements AxionElementGeneration {
-    private String block;
+    private TreeBlockDefinition block;
     private float advance;
 
-    public DefaultAxionElementGeneration(String block, float advance) {
+    public DefaultAxionElementGeneration(TreeBlockDefinition block, float advance) {
         this.block = block;
         this.advance = advance;
     }

@@ -23,18 +23,18 @@ import javax.vecmath.Vector3f;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class SurroundAxionElementGeneration implements AxionElementGeneration {
-    private String baseBlock;
-    private String surroundBlock;
+    private TreeBlockDefinition baseBlock;
+    private TreeBlockDefinition surroundBlock;
     private float advance;
     private float innerRange;
     private float range;
     private int maxZ = Integer.MAX_VALUE;
 
-    public SurroundAxionElementGeneration(String baseBlock, String surroundBlock, float advance, float range) {
+    public SurroundAxionElementGeneration(TreeBlockDefinition baseBlock, TreeBlockDefinition surroundBlock, float advance, float range) {
         this(baseBlock, surroundBlock, advance, 0, range);
     }
 
-    public SurroundAxionElementGeneration(String baseBlock, String surroundBlock, float advance, float innerRange, float range) {
+    public SurroundAxionElementGeneration(TreeBlockDefinition baseBlock, TreeBlockDefinition surroundBlock, float advance, float innerRange, float range) {
         this.baseBlock = baseBlock;
         this.surroundBlock = surroundBlock;
         this.advance = advance;
