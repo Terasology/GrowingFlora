@@ -19,7 +19,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import org.terasology.anotherWorld.Biome;
 import org.terasology.anotherWorld.BiomeProvider;
-import org.terasology.anotherWorld.ChunkDecorator;
+import org.terasology.anotherWorld.FeatureGenerator;
 import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
 import org.terasology.anotherWorld.util.ChunkRandom;
@@ -27,9 +27,11 @@ import org.terasology.anotherWorld.util.PDist;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.Vector2i;
+import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.Random;
-import org.terasology.world.chunks.Chunk;
+import org.terasology.world.ChunkView;
+import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 import java.util.HashMap;
@@ -39,7 +41,7 @@ import java.util.Map;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class FloraDecorator implements ChunkDecorator {
+public class FloraFeatureGenerator implements FeatureGenerator {
     private String seed;
 
     private PDist treeTriesPerChunk;
@@ -49,7 +51,7 @@ public class FloraDecorator implements ChunkDecorator {
     private Multimap<String, PlantSpawnDefinition> treeDefinitions = LinkedHashMultimap.create();
     private Map<String, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
-    public FloraDecorator(PDist treeTriesPerChunk, PDist bushTriesPerChunk, PDist foliageTriesPerChunk) {
+    public FloraFeatureGenerator(PDist treeTriesPerChunk, PDist bushTriesPerChunk, PDist foliageTriesPerChunk) {
         this.treeTriesPerChunk = treeTriesPerChunk;
         this.bushTriesPerChunk = bushTriesPerChunk;
         this.foliageTriesPerChunk = foliageTriesPerChunk;
@@ -84,23 +86,26 @@ public class FloraDecorator implements ChunkDecorator {
     }
 
     @Override
-    public void generateInChunk(Chunk chunk, GenerationParameters generationParameters) {
-        Random random = ChunkRandom.getChunkRandom(seed, chunk.getPos(), 787234);
+    public void generateInChunk(Vector3i chunkPos, ChunkView view, GenerationParameters generationParameters) {
+        Random random = ChunkRandom.getChunkRandom(seed, chunkPos, 787234);
+
+        int chunkStartX = chunkPos.x * ChunkConstants.SIZE_X;
+        int chunkStartZ = chunkPos.z * ChunkConstants.SIZE_Z;
 
         // First, generate trees, as these are the rarest ones
         int treeTries = treeTriesPerChunk.getIntValue(random);
         for (int i = 0; i < treeTries; i++) {
-            int x = random.nextInt(chunk.getChunkSizeX());
-            int z = random.nextInt(chunk.getChunkSizeZ());
+            int x = random.nextInt(ChunkConstants.SIZE_X);
+            int z = random.nextInt(ChunkConstants.SIZE_Z);
 
-            int groundLevel = generationParameters.getLandscapeProvider().getHeight(new Vector2i(chunk.getBlockWorldPosX(x), chunk.getBlockWorldPosZ(z)));
+            int groundLevel = generationParameters.getLandscapeProvider().getHeight(new Vector2i(chunkStartX + x, chunkStartZ + z));
 
             BiomeProvider biomeProvider = generationParameters.getBiomeProvider();
-            Biome biome = biomeProvider.getBiomeAt(chunk.getBlockWorldPosX(x), groundLevel, chunk.getBlockWorldPosZ(z));
+            Biome biome = biomeProvider.getBiomeAt(chunkStartX + x, groundLevel, chunkStartZ + z);
             ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeProvider, treeDefinitionsCache, treeDefinitions);
             PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
             if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
-                treeDefinition.plantSaplingOnGround(chunk, x, groundLevel, z, generationParameters);
+                treeDefinition.generatePlant(seed, chunkPos, view, x, groundLevel, z, generationParameters);
             }
         }
 

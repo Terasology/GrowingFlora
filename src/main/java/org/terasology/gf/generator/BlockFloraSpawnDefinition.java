@@ -16,28 +16,31 @@
 package org.terasology.gf.generator;
 
 import org.terasology.anotherWorld.GenerationParameters;
-import org.terasology.anotherWorld.decorator.BlockFilter;
+import org.terasology.anotherWorld.util.Filter;
+import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
+import org.terasology.math.Vector3i;
+import org.terasology.registry.CoreRegistry;
+import org.terasology.world.ChunkView;
 import org.terasology.world.block.Block;
-import org.terasology.world.chunks.Chunk;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
+    private String plantId;
     private String biomeId;
     private float rarity;
     private float probability;
-    private Block block;
-    private BlockFilter groundFilter;
+    private Filter<Block> groundFilter;
 
-    public BlockFloraSpawnDefinition(PlantType plantType, String biomeId, float rarity, float probability, Block block, BlockFilter groundFilter) {
+    public BlockFloraSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Filter<Block> groundFilter) {
         this.plantType = plantType;
+        this.plantId = plantId;
         this.biomeId = biomeId;
         this.rarity = rarity;
         this.probability = probability;
-        this.block = block;
         this.groundFilter = groundFilter;
     }
 
@@ -62,9 +65,11 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
     }
 
     @Override
-    public void plantSaplingOnGround(Chunk chunk, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.accepts(chunk, x, y, z, generationParameters)) {
-            chunk.setBlock(x, y + 1, z, block);
+    public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
+        if (groundFilter.accepts(chunkView.getBlock(x, y, z))) {
+            PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
+            PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
+            plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y, z, generationParameters);
         }
     }
 }

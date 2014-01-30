@@ -17,7 +17,8 @@ package org.terasology.gf.generator;
 
 import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.gf.PlantType;
-import org.terasology.world.chunks.Chunk;
+import org.terasology.math.Vector3i;
+import org.terasology.world.ChunkView;
 import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 
 /**
@@ -32,5 +33,5 @@ public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
 
     public float getProbability();
 
-    public void plantSaplingOnGround(Chunk chunk, int x, int y, int z, GenerationParameters generationParameters);
+    public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunk, int x, int y, int z, GenerationParameters generationParameters);
 }

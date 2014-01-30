@@ -65,7 +65,7 @@ public class GeneratedSaplingInitializeSystem implements UpdateSubscriberSystem 
                 if (generatedSapling != null) {
                     String saplingType = generatedSapling.type;
                     PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                    if (plantDefinition.initializeSapling(worldProvider, blockEntityRegistry, sapling)) {
+                    if (plantDefinition.initializePlant(worldProvider, blockEntityRegistry, sapling)) {
                         sapling.removeComponent(GeneratedSaplingComponent.class);
                     }
                 }

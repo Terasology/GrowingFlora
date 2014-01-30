@@ -15,8 +15,11 @@
  */
 package org.terasology.gf.generator;
 
+import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.math.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
+import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 
@@ -26,7 +29,9 @@ import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
     String getPlantId();
 
-    boolean initializeSapling(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling);
+    void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters);
+
+    boolean initializePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 
     void updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 }
