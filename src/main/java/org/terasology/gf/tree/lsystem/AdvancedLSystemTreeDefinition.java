@@ -155,7 +155,11 @@ public class AdvancedLSystemTreeDefinition {
     public void updateTree(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef) {
         LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();
-        if (shouldProcessTreeGrowth(lSystemTree, time)) {
+        if (lSystemTree.lastGrowthTime == 0) {
+            // This tree was just planted
+            lSystemTree.lastGrowthTime = time;
+            treeRef.saveComponent(lSystemTree);
+        } else if (shouldProcessTreeGrowth(lSystemTree, time)) {
             Vector3i treeLocation = treeRef.getComponent(BlockComponent.class).getPosition();
             if (hasRoomToGrow(worldProvider, treeLocation)) {
 
