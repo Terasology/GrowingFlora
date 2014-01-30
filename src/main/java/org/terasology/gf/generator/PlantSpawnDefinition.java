@@ -25,13 +25,13 @@ import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
-    public PlantType getPlantType();
+    PlantType getPlantType();
 
-    public String getBiomeId();
+    String getBiomeId();
 
-    public float getRarity();
+    float getRarity();
 
-    public float getProbability();
+    float getProbability();
 
-    public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunk, int x, int y, int z, GenerationParameters generationParameters);
+    void generatePlant(String seed, Vector3i chunkPos, ChunkView chunk, int x, int y, int z, GenerationParameters generationParameters);
 }

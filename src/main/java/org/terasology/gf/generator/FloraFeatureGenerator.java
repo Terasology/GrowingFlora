@@ -58,8 +58,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
     }
 
     @Override
-    public void initializeWithSeed(String seed) {
-        this.seed = seed;
+    public void initializeWithSeed(String worldSeed) {
+        this.seed = worldSeed;
         loadPlantGrowthDefinitions();
         loadPlantSpawnDefinition();
     }
