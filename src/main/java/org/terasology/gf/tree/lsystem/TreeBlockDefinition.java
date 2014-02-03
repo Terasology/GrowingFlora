@@ -15,6 +15,9 @@
  */
 package org.terasology.gf.tree.lsystem;
 
+import org.terasology.registry.CoreRegistry;
+import org.terasology.world.block.BlockManager;
+
 public class TreeBlockDefinition {
     private boolean branchBlock;
     private String blockUri;
@@ -26,6 +29,9 @@ public class TreeBlockDefinition {
     public TreeBlockDefinition(String blockUri, boolean branchBlock) {
         this.blockUri = blockUri;
         this.branchBlock = branchBlock;
+
+        // Preload block
+        CoreRegistry.get(BlockManager.class).getBlockFamily(blockUri);
     }
 
     public boolean isBranchBlock() {
