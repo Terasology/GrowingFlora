@@ -69,7 +69,7 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
         if (groundFilter.accepts(chunkView.getBlock(x, y, z))) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
-            plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y, z, generationParameters);
+            plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y + 1, z, generationParameters);
         }
     }
 }
