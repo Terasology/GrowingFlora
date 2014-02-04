@@ -20,6 +20,7 @@ import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.anotherWorld.util.ChunkRandom;
+import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
@@ -56,26 +57,29 @@ import java.util.Map;
 public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
 
-    private static final float MAX_ANGLE_OFFSET = (float) Math.PI / 18f;
-    private static final int GROWTH_INTERVAL = 120 * 1000;
-
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
-    private List<TreeBlockDefinition> blockPriorities;
-    private float angle;
-    private int minGenerations = 30;
-    private int maxGenerations = 45;
+    private PDist branchAngle;
+    private PDist treeLongevity;
+    private int growthInterval;
     private String treeType;
     private String saplingAxion;
 
     public AdvancedLSystemTreeDefinition(String treeType, String saplingAxion, Map<Character, AxionElementReplacement> axionElementReplacements,
-                                         Map<Character, AxionElementGeneration> blockMap, List<TreeBlockDefinition> blockPriorities, float angle) {
+                                         Map<Character, AxionElementGeneration> blockMap, float angle) {
+        this(treeType, saplingAxion, new PDist(angle, (float) Math.PI / 18f), new PDist(37, 7), 120 * 1000, axionElementReplacements,
+                blockMap);
+    }
+
+    public AdvancedLSystemTreeDefinition(String treeType, String saplingAxion, PDist branchAngle, PDist treeLongevity, int growthInterval,
+                                         Map<Character, AxionElementReplacement> axionElementReplacements, Map<Character, AxionElementGeneration> blockMap) {
         this.treeType = treeType;
         this.saplingAxion = saplingAxion;
+        this.branchAngle = branchAngle;
+        this.treeLongevity = treeLongevity;
+        this.growthInterval = growthInterval;
         this.axionElementReplacements = axionElementReplacements;
         this.blockMap = blockMap;
-        this.blockPriorities = blockPriorities;
-        this.angle = angle;
     }
 
     public void generateTree(String seed, String saplingBlock, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z) {
@@ -119,7 +123,7 @@ public class AdvancedLSystemTreeDefinition {
 
         // Update time when sapling was placed
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();
-        treeComponent.lastGrowthTime = time - rand.nextInt(GROWTH_INTERVAL);
+        treeComponent.lastGrowthTime = time - rand.nextInt(growthInterval);
 
         Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxiom(treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle);
 
@@ -138,7 +142,7 @@ public class AdvancedLSystemTreeDefinition {
         Random random = ChunkRandom.getChunkRandom(seed, location, 345245);
 
         // New axion (grown)
-        int generation = 1 + random.nextInt(maxGenerations - 1);
+        int generation = 1 + random.nextInt((int) treeLongevity.getMax() - 1);
         String nextAxion = saplingAxion;
         for (int i = 0; i < generation; i++) {
             nextAxion = generateNextAxion(random, nextAxion);
@@ -146,7 +150,7 @@ public class AdvancedLSystemTreeDefinition {
 
         LSystemTreeComponent lSystemTree = new LSystemTreeComponent();
         lSystemTree.axion = nextAxion;
-        lSystemTree.branchAngle = random.nextFloat(-MAX_ANGLE_OFFSET, MAX_ANGLE_OFFSET);
+        lSystemTree.branchAngle = branchAngle.getIntValue(random);
         lSystemTree.rotationAngle = (float) Math.PI * random.nextFloat();
         lSystemTree.generation = generation;
         return lSystemTree;
@@ -214,7 +218,7 @@ public class AdvancedLSystemTreeDefinition {
 
     private boolean shouldProcessTreeGrowth(LSystemTreeComponent lSystemTree, long time) {
         logger.debug("Considering processing tree, last growth: " + lSystemTree.lastGrowthTime + ", current time: " + time);
-        return lSystemTree.lastGrowthTime + GROWTH_INTERVAL < time;
+        return lSystemTree.lastGrowthTime + growthInterval < time;
     }
 
     private boolean hasRoomToGrow(WorldProvider worldProvider, Vector3i treeLocation) {
@@ -229,11 +233,10 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     private boolean checkForDeath(int generation, float random) {
-        if (generation < minGenerations) {
+        if (generation < treeLongevity.getMin()) {
             return false;
         }
-        double deathChance = Math.pow(1f * (maxGenerations - generation) / (maxGenerations - minGenerations), 0.2);
-//        logger.debug("Death chance: " + ((1 - deathChance) * 100) + "%");
+        double deathChance = Math.pow(1f * (treeLongevity.getMax() - generation) / treeLongevity.range, 0.2);
         return (deathChance < random);
     }
 
@@ -331,7 +334,7 @@ public class AdvancedLSystemTreeDefinition {
         return result.toString();
     }
 
-    private Map<Vector3i, TreeBlockDefinition> generateTreeFromAxiom(String currentAxion, float angleOffset, float treeRotation) {
+    private Map<Vector3i, TreeBlockDefinition> generateTreeFromAxiom(String currentAxion, float angle, float treeRotation) {
         Map<Vector3i, TreeBlockDefinition> treeInMemory = Maps.newHashMap();
 
         Deque<Vector3f> stackPosition = Queues.newArrayDeque();
@@ -360,12 +363,12 @@ public class AdvancedLSystemTreeDefinition {
                     break;
                 case '&':
                     tempRotation.setIdentity();
-                    tempRotation.rotX(angle + angleOffset);
+                    tempRotation.rotX(angle);
                     rotation.mul(tempRotation);
                     break;
                 case '^':
                     tempRotation.setIdentity();
-                    tempRotation.rotX(-angle - angleOffset);
+                    tempRotation.rotX(-angle);
                     rotation.mul(tempRotation);
                     break;
                 case '+':
@@ -400,7 +403,7 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     private boolean hasBlockWithHigherPriority(TreeBlockDefinition block, TreeBlockDefinition blockAtPosition) {
-        return blockAtPosition != null && blockPriorities.indexOf(blockAtPosition) < blockPriorities.indexOf(block);
+        return blockAtPosition != null && blockAtPosition.getTreePart().getPriority() > block.getTreePart().getPriority();
     }
 
     private static List<AxionElement> parseAxions(String axionString) {

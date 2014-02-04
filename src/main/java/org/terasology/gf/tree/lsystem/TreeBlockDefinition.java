@@ -15,30 +15,31 @@
  */
 package org.terasology.gf.tree.lsystem;
 
+import org.terasology.gf.tree.PartOfTreeComponent;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.block.BlockManager;
 
 public class TreeBlockDefinition {
-    private boolean branchBlock;
     private String blockUri;
+    private PartOfTreeComponent.Part treePart;
 
-    public TreeBlockDefinition(String blockUri) {
-        this(blockUri, false);
-    }
-
-    public TreeBlockDefinition(String blockUri, boolean branchBlock) {
+    public TreeBlockDefinition(String blockUri, PartOfTreeComponent.Part treePart) {
         this.blockUri = blockUri;
-        this.branchBlock = branchBlock;
+        this.treePart = treePart;
 
         // Preload block
         CoreRegistry.get(BlockManager.class).getBlockFamily(blockUri);
     }
 
     public boolean isBranchBlock() {
-        return branchBlock;
+        return treePart == PartOfTreeComponent.Part.BRANCH;
     }
 
     public String getBlockUri() {
         return blockUri;
+    }
+
+    public PartOfTreeComponent.Part getTreePart() {
+        return treePart;
     }
 }
