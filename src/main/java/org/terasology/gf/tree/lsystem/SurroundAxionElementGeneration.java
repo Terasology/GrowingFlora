@@ -48,7 +48,7 @@ public class SurroundAxionElementGeneration implements AxionElementGeneration {
 
     @Override
     public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
-        callback.setBlock(position, baseBlock);
+        callback.setMainBlock(position, baseBlock);
         int rangeInt = (int) range;
         for (int x = -rangeInt; x <= rangeInt; x++) {
             for (int y = -rangeInt; y <= rangeInt; y++) {
@@ -59,13 +59,13 @@ public class SurroundAxionElementGeneration implements AxionElementGeneration {
                         rotation.transform(v);
                         Vector3f sideVec = new Vector3f(position);
                         sideVec.add(v);
-                        callback.setBlock(sideVec, baseBlock);
+                        callback.setAdditionalBlock(sideVec, baseBlock);
                     } else if (distance < range) {
                         Vector3f v = new Vector3f(x, y, z);
                         rotation.transform(v);
                         Vector3f sideVec = new Vector3f(position);
                         sideVec.add(v);
-                        callback.setBlock(sideVec, surroundBlock);
+                        callback.setAdditionalBlock(sideVec, surroundBlock);
                     }
                 }
             }
