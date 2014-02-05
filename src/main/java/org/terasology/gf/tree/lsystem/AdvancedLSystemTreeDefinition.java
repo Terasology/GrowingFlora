@@ -131,8 +131,8 @@ public class AdvancedLSystemTreeDefinition {
         Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(location, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
-        TreeBlockDefinition blockDefinition = treeBlocks.get(Vector3i.zero());
-        Block baseBlock = getBlock(blockManager, blockDefinition, Vector3i.zero(), treeBlocks.keySet());
+        TreeBlockDefinition blockDefinition = treeBlocks.get(location);
+        Block baseBlock = getBlock(blockManager, blockDefinition, location, treeBlocks.keySet());
 
         worldProvider.setBlock(location, baseBlock);
 
@@ -345,6 +345,7 @@ public class AdvancedLSystemTreeDefinition {
         rotation.rotY(treeRotation);
 
         Callback callback = new Callback(position, rotation);
+        callback.setBranchLocation(branchLocation);
 
         int axionIndex = 0;
         for (AxionElement axion : parseAxions(currentAxion)) {
