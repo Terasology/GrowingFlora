@@ -56,6 +56,7 @@ import java.util.Map;
  */
 public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
+    private static final long FAILED_GROWTH_INTERVAL = 1000;
 
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
@@ -114,7 +115,7 @@ public class AdvancedLSystemTreeDefinition {
         chunkView.setBlock(worldTreeLocation.x - chunkStartX, worldTreeLocation.y - chunkStartY, worldTreeLocation.z - chunkStartZ, sapling);
     }
 
-    public boolean setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
+    public Long setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
         Vector3i location = sapling.getComponent(BlockComponent.class).getPosition();
 
         LSystemTreeComponent treeComponent = createNewTreeComponent(worldProvider.getSeed(), location);
@@ -135,7 +136,7 @@ public class AdvancedLSystemTreeDefinition {
 
         checkForDeathAndSetupComponents(blockEntityRegistry, rand, location, treeComponent);
 
-        return true;
+        return (long) growthInterval;
     }
 
     private LSystemTreeComponent createNewTreeComponent(String seed, Vector3i location) {
@@ -156,14 +157,16 @@ public class AdvancedLSystemTreeDefinition {
         return lSystemTree;
     }
 
-    public void updateTree(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef) {
+    public Long updateTree(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef) {
         LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();
         if (lSystemTree.lastGrowthTime == 0) {
             // This tree was just planted
             lSystemTree.lastGrowthTime = time;
             treeRef.saveComponent(lSystemTree);
-        } else if (shouldProcessTreeGrowth(lSystemTree, time)) {
+
+            return (long) growthInterval;
+        } else {
             Vector3i treeLocation = treeRef.getComponent(BlockComponent.class).getPosition();
             if (hasRoomToGrow(worldProvider, treeLocation)) {
 
@@ -176,26 +179,25 @@ public class AdvancedLSystemTreeDefinition {
                 lSystemTree.generation++;
                 lSystemTree.lastGrowthTime = time;
 
-                replaceTreeAndCheckForDeath(worldProvider, blockEntityRegistry, rand, treeLocation, oldAxion, nextAxion, lSystemTree);
+                return replaceTreeAndCheckForDeath(worldProvider, blockEntityRegistry, rand, treeLocation, oldAxion, nextAxion, lSystemTree);
             }
+            return (long) growthInterval;
         }
     }
 
-    private boolean replaceTreeAndCheckForDeath(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Random random,
-                                                Vector3i location, String oldAxion, String nextAxion, LSystemTreeComponent treeComponent) {
+    private Long replaceTreeAndCheckForDeath(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Random random,
+                                             Vector3i location, String oldAxion, String nextAxion, LSystemTreeComponent treeComponent) {
         Map<Vector3i, TreeBlockDefinition> currentTree = generateTreeFromAxiom(oldAxion, treeComponent.branchAngle, treeComponent.rotationAngle);
         Map<Vector3i, TreeBlockDefinition> nextTree = generateTreeFromAxiom(nextAxion, treeComponent.branchAngle, treeComponent.rotationAngle);
 
         if (!updateTreeInGame(worldProvider, blockEntityRegistry, location, currentTree, nextTree)) {
-            return false;
+            return FAILED_GROWTH_INTERVAL;
         }
 
-        checkForDeathAndSetupComponents(blockEntityRegistry, random, location, treeComponent);
-
-        return true;
+        return checkForDeathAndSetupComponents(blockEntityRegistry, random, location, treeComponent);
     }
 
-    private void checkForDeathAndSetupComponents(BlockEntityRegistry blockEntityRegistry, Random random, Vector3i location, LSystemTreeComponent treeComponent) {
+    private Long checkForDeathAndSetupComponents(BlockEntityRegistry blockEntityRegistry, Random random, Vector3i location, LSystemTreeComponent treeComponent) {
         EntityRef entity = blockEntityRegistry.getBlockEntityAt(location);
         if (!checkForDeath(treeComponent.generation, random.nextFloat())) {
             if (entity.hasComponent(LSystemTreeComponent.class)) {
@@ -208,17 +210,14 @@ public class AdvancedLSystemTreeDefinition {
                 livingPlantComponent.type = treeType;
                 entity.addComponent(livingPlantComponent);
             }
+            return (long) growthInterval;
         } else {
             if (entity.hasComponent(LivingPlantComponent.class)) {
                 entity.removeComponent(LivingPlantComponent.class);
                 entity.removeComponent(LSystemTreeComponent.class);
             }
+            return null;
         }
-    }
-
-    private boolean shouldProcessTreeGrowth(LSystemTreeComponent lSystemTree, long time) {
-        logger.debug("Considering processing tree, last growth: " + lSystemTree.lastGrowthTime + ", current time: " + time);
-        return lSystemTree.lastGrowthTime + growthInterval < time;
     }
 
     private boolean hasRoomToGrow(WorldProvider worldProvider, Vector3i treeLocation) {

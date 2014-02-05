@@ -20,10 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.logic.delay.AddDelayedActionEvent;
+import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -33,9 +36,10 @@ import org.terasology.world.block.BlockComponent;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class PlantGrowingSystem implements UpdateSubscriberSystem {
+public class PlantGrowingSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(PlantGrowingSystem.class);
-    private static final int CHECK_INTERVAL = 1000;
+    public static final String UPDATE_PLANT_ACTION_ID = "GrowingFlora:updatePlant";
+
     @In
     private WorldProvider worldProvider;
     @In
@@ -47,31 +51,15 @@ public class PlantGrowingSystem implements UpdateSubscriberSystem {
     @In
     private PlantRegistry plantRegistry;
 
-    private long lastCheckTime;
-
-    @Override
-    public void initialise() {
-    }
-
-    @Override
-    public void shutdown() {
-    }
-
-    @Override
-    public void update(float delta) {
-        long currentTime = time.getGameTimeInMs();
-        if (lastCheckTime + CHECK_INTERVAL < currentTime) {
-            for (EntityRef treeRef : entityManager.getEntitiesWith(LivingPlantComponent.class, BlockComponent.class)) {
-                LivingPlantComponent plant = treeRef.getComponent(LivingPlantComponent.class);
-                if (plant != null) {
-                    PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plant.type);
-                    plantDefinition.updatePlant(worldProvider, blockEntityRegistry, treeRef);
-                } else {
-                    logger.error("Got an entity without a component (LivingPlantComponent) even though a list of entities that do have it was requested");
-                }
+    @ReceiveEvent(components = {LivingPlantComponent.class, BlockComponent.class})
+    public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant) {
+        if (event.getActionId().equals(UPDATE_PLANT_ACTION_ID)) {
+            LivingPlantComponent plantComponent = plant.getComponent(LivingPlantComponent.class);
+            PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
+            Long updateDelay = plantDefinition.updatePlant(worldProvider, blockEntityRegistry, plant);
+            if (updateDelay != null) {
+                plant.send(new AddDelayedActionEvent(UPDATE_PLANT_ACTION_ID, updateDelay));
             }
-
-            lastCheckTime = currentTime;
         }
     }
 }

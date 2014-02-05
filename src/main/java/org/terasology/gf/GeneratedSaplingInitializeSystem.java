@@ -20,58 +20,47 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.logic.delay.AddDelayedActionEvent;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
-import org.terasology.world.block.BlockComponent;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class GeneratedSaplingInitializeSystem implements UpdateSubscriberSystem {
+public class GeneratedSaplingInitializeSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(GeneratedSaplingInitializeSystem.class);
-    private static final long CHECK_INTERVAL = 100;
-    private long lastCheck;
 
     @In
     private PlantRegistry plantRegistry;
     @In
     private EntityManager entityManager;
     @In
+    private WorldProvider worldProvider;
+    @In
+    private BlockEntityRegistry blockEntityRegistry;
+    @In
     private Time time;
 
-    @Override
-    public void initialise() {
-    }
-
-    @Override
-    public void shutdown() {
-    }
-
-    @Override
-    public void update(float delta) {
-        long currentTime = time.getGameTimeInMs();
-        if (lastCheck + CHECK_INTERVAL <= currentTime) {
-            WorldProvider worldProvider = CoreRegistry.get(WorldProvider.class);
-            BlockEntityRegistry blockEntityRegistry = CoreRegistry.get(BlockEntityRegistry.class);
-            for (EntityRef sapling : entityManager.getEntitiesWith(GeneratedSaplingComponent.class, BlockComponent.class)) {
-                GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
-                if (generatedSapling != null) {
-                    String saplingType = generatedSapling.type;
-                    PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                    if (plantDefinition.initializePlant(worldProvider, blockEntityRegistry, sapling)) {
-                        sapling.removeComponent(GeneratedSaplingComponent.class);
-                    }
-                }
+    @ReceiveEvent(components = {GeneratedSaplingComponent.class})
+    public void generatedSaplingLoaded(OnActivatedComponent event, EntityRef sapling) {
+        GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
+        if (generatedSapling != null) {
+            String saplingType = generatedSapling.type;
+            PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
+            Long updateDelay = plantDefinition.initializePlant(worldProvider, blockEntityRegistry, sapling);
+            if (updateDelay == null) {
+                sapling.removeComponent(GeneratedSaplingComponent.class);
+            } else {
+                sapling.send(new AddDelayedActionEvent(PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay));
             }
-
-            lastCheck = currentTime;
         }
     }
 }
