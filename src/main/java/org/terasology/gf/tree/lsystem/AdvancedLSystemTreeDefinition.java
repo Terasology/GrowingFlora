@@ -124,7 +124,8 @@ public class AdvancedLSystemTreeDefinition {
 
         // Update time when sapling was placed
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();
-        treeComponent.lastGrowthTime = time - rand.nextInt(growthInterval);
+        int growthWait = rand.nextInt(growthInterval);
+        treeComponent.lastGrowthTime = time - growthWait;
 
         Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxiom(treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle);
 
@@ -136,7 +137,7 @@ public class AdvancedLSystemTreeDefinition {
 
         checkForDeathAndSetupComponents(blockEntityRegistry, rand, location, treeComponent);
 
-        return (long) growthInterval;
+        return (long) growthWait;
     }
 
     private LSystemTreeComponent createNewTreeComponent(String seed, Vector3i location) {
