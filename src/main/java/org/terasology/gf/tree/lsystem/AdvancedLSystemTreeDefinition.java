@@ -15,7 +15,6 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +44,10 @@ import org.terasology.world.chunks.ChunkConstants;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class AdvancedLSystemTreeDefinition {
         LSystemTreeComponent treeComponent = createNewTreeComponent(seed, worldTreeLocation);
 
         // Block locations in tree base coordinate system
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxiom(treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle);
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(worldTreeLocation, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
         int chunkStartX = chunkPos.x * ChunkConstants.SIZE_X;
         int chunkStartY = chunkPos.y * ChunkConstants.SIZE_Y;
@@ -100,13 +101,13 @@ public class AdvancedLSystemTreeDefinition {
             Vector3i blockLocation = treeBlock.getKey();
 
             // Do not set the base block - it will have to be initialized
-            if (!blockLocation.equals(Vector3i.zero())) {
+            if (!blockLocation.equals(worldTreeLocation)) {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
                 chunkView.setBlock(
-                        worldTreeLocation.x + blockLocation.x - chunkStartX,
-                        worldTreeLocation.y + blockLocation.y - chunkStartY,
-                        worldTreeLocation.z + blockLocation.z - chunkStartZ,
+                        blockLocation.x - chunkStartX,
+                        blockLocation.y - chunkStartY,
+                        blockLocation.z - chunkStartZ,
                         block);
             }
         }
@@ -127,7 +128,7 @@ public class AdvancedLSystemTreeDefinition {
         int growthWait = rand.nextInt(growthInterval);
         treeComponent.lastGrowthTime = time - growthWait;
 
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxiom(treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle);
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(location, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         TreeBlockDefinition blockDefinition = treeBlocks.get(Vector3i.zero());
@@ -188,10 +189,10 @@ public class AdvancedLSystemTreeDefinition {
 
     private Long replaceTreeAndCheckForDeath(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Random random,
                                              Vector3i location, String oldAxion, String nextAxion, LSystemTreeComponent treeComponent) {
-        Map<Vector3i, TreeBlockDefinition> currentTree = generateTreeFromAxiom(oldAxion, treeComponent.branchAngle, treeComponent.rotationAngle);
-        Map<Vector3i, TreeBlockDefinition> nextTree = generateTreeFromAxiom(nextAxion, treeComponent.branchAngle, treeComponent.rotationAngle);
+        Map<Vector3i, TreeBlockDefinition> currentTree = generateTreeFromAxion(location, oldAxion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
+        Map<Vector3i, TreeBlockDefinition> nextTree = generateTreeFromAxion(location, nextAxion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
-        if (!updateTreeInGame(worldProvider, blockEntityRegistry, location, currentTree, nextTree)) {
+        if (!updateTreeInGame(worldProvider, currentTree, nextTree)) {
             return FAILED_GROWTH_INTERVAL;
         }
 
@@ -200,23 +201,20 @@ public class AdvancedLSystemTreeDefinition {
 
     private Long checkForDeathAndSetupComponents(BlockEntityRegistry blockEntityRegistry, Random random, Vector3i location, LSystemTreeComponent treeComponent) {
         EntityRef entity = blockEntityRegistry.getBlockEntityAt(location);
+        if (entity.hasComponent(LSystemTreeComponent.class)) {
+            entity.saveComponent(treeComponent);
+        } else {
+            entity.addComponent(treeComponent);
+        }
+        if (!entity.hasComponent(LivingPlantComponent.class)) {
+            LivingPlantComponent livingPlantComponent = new LivingPlantComponent();
+            livingPlantComponent.type = treeType;
+            entity.addComponent(livingPlantComponent);
+        }
+
         if (!checkForDeath(treeComponent.generation, random.nextFloat())) {
-            if (entity.hasComponent(LSystemTreeComponent.class)) {
-                entity.saveComponent(treeComponent);
-            } else {
-                entity.addComponent(treeComponent);
-            }
-            if (!entity.hasComponent(LivingPlantComponent.class)) {
-                LivingPlantComponent livingPlantComponent = new LivingPlantComponent();
-                livingPlantComponent.type = treeType;
-                entity.addComponent(livingPlantComponent);
-            }
             return (long) growthInterval;
         } else {
-            if (entity.hasComponent(LivingPlantComponent.class)) {
-                entity.removeComponent(LivingPlantComponent.class);
-                entity.removeComponent(LSystemTreeComponent.class);
-            }
             return null;
         }
     }
@@ -258,7 +256,7 @@ public class AdvancedLSystemTreeDefinition {
         }
     }
 
-    private boolean updateTreeInGame(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i treeLocation,
+    private boolean updateTreeInGame(WorldProvider worldProvider,
                                      Map<Vector3i, TreeBlockDefinition> currentTree, Map<Vector3i, TreeBlockDefinition> nextTree) {
         Block air = BlockManager.getAir();
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
@@ -270,22 +268,21 @@ public class AdvancedLSystemTreeDefinition {
         EntityRef worldEntity = worldProvider.getWorldEntity();
 
         for (Map.Entry<Vector3i, TreeBlockDefinition> newTreeBlock : nextTree.entrySet()) {
-            Vector3i relativeLocation = newTreeBlock.getKey();
-            TreeBlockDefinition oldBlock = currentTree.remove(relativeLocation);
+            Vector3i location = newTreeBlock.getKey();
+            TreeBlockDefinition oldBlock = currentTree.remove(location);
             TreeBlockDefinition newBlock = newTreeBlock.getValue();
 
-            Vector3i blockLocation = new Vector3i(treeLocation.x + relativeLocation.x, treeLocation.y + relativeLocation.y, treeLocation.z + relativeLocation.z);
-            Block resultBlock = getBlock(blockManager, newBlock, relativeLocation, nextTree.keySet());
+            Block resultBlock = getBlock(blockManager, newBlock, location, nextTree.keySet());
 
             if (oldBlock != null && !oldBlock.equals(newBlock)) {
-                Block block = worldProvider.getBlock(blockLocation);
+                Block block = worldProvider.getBlock(location);
                 if (block.isReplacementAllowed() || oldBlock == newBlock) {
-                    blocksToReplaceExistingTreeBlocks.put(blockLocation, resultBlock);
+                    blocksToReplaceExistingTreeBlocks.put(location, resultBlock);
                     replaceCount++;
                 }
             } else if (oldBlock == null) {
-                if (worldProvider.getBlock(blockLocation).isReplacementAllowed()) {
-                    blocksToPlaceInNewPlaces.put(blockLocation, resultBlock);
+                if (worldProvider.getBlock(location).isReplacementAllowed()) {
+                    blocksToPlaceInNewPlaces.put(location, resultBlock);
                     replaceCount++;
                 }
             }
@@ -299,7 +296,7 @@ public class AdvancedLSystemTreeDefinition {
             if (!placeBlocks.isConsumed()) {
                 for (Vector3i location : currentTree.keySet()) {
                     // Remove the old block of tree
-                    blocksToReplaceExistingTreeBlocks.put(new Vector3i(treeLocation.x + location.x, treeLocation.y + location.y, treeLocation.z + location.z), air);
+                    blocksToReplaceExistingTreeBlocks.put(location, air);
                     replaceCount++;
                 }
 
@@ -334,19 +331,22 @@ public class AdvancedLSystemTreeDefinition {
         return result.toString();
     }
 
-    private Map<Vector3i, TreeBlockDefinition> generateTreeFromAxiom(String currentAxion, float angle, float treeRotation) {
-        Map<Vector3i, TreeBlockDefinition> treeInMemory = Maps.newHashMap();
+    private TreeStructure generateTreeFromAxion(Vector3i location, String currentAxion, float angle, float treeRotation) {
+        TreeStructure treeStructure = new TreeStructure();
 
         Deque<Vector3f> stackPosition = Queues.newArrayDeque();
         Deque<Matrix4f> stackOrientation = Queues.newArrayDeque();
+        Deque<BranchLocation> stackBranch = Queues.newArrayDeque();
 
-        Vector3f position = new Vector3f(0, 0, 0);
+        BranchLocation branchLocation = treeStructure.getRootBranch();
+        Vector3f position = location.toVector3f();
         Matrix4f rotation = new Matrix4f();
         rotation.setIdentity();
         rotation.rotY(treeRotation);
 
-        Callback callback = new Callback(treeInMemory, position, rotation);
+        Callback callback = new Callback(position, rotation);
 
+        int axionIndex = 0;
         for (AxionElement axion : parseAxions(currentAxion)) {
             Matrix4f tempRotation = new Matrix4f();
             tempRotation.setIdentity();
@@ -356,10 +356,16 @@ public class AdvancedLSystemTreeDefinition {
                 case '[':
                     stackOrientation.push(new Matrix4f(rotation));
                     stackPosition.push(new Vector3f(position));
+                    stackBranch.push(branchLocation);
+
+                    branchLocation = branchLocation.addBranch(axionIndex);
+                    callback.setBranchLocation(branchLocation);
                     break;
                 case ']':
                     rotation.set(stackOrientation.pop());
                     position.set(stackPosition.pop());
+                    branchLocation = stackBranch.pop();
+                    callback.setBranchLocation(branchLocation);
                     break;
                 case '&':
                     tempRotation.setIdentity();
@@ -384,26 +390,13 @@ public class AdvancedLSystemTreeDefinition {
                 default:
                     AxionElementGeneration axionElementGeneration = blockMap.get(c);
                     if (axionElementGeneration != null) {
+                        callback.setAxionIndex(axionIndex);
                         axionElementGeneration.generate(callback, position, rotation, axion.parameter);
+                        axionIndex++;
                     }
             }
         }
-        return treeInMemory;
-    }
-
-    private void setBlock(Map<Vector3i, TreeBlockDefinition> treeInMemory, Vector3f position, TreeBlockDefinition treeBlockDefinition) {
-        Vector3i blockPosition = new Vector3i(position.x + 0.5f, position.y + 0.5f, position.z + 0.5f);
-        if (blockPosition.y >= 0) {
-            final TreeBlockDefinition blockAtPosition = treeInMemory.get(blockPosition);
-            if ((blockAtPosition != null && blockAtPosition.equals(treeBlockDefinition)) || hasBlockWithHigherPriority(treeBlockDefinition, blockAtPosition)) {
-                return;
-            }
-            treeInMemory.put(blockPosition, treeBlockDefinition);
-        }
-    }
-
-    private boolean hasBlockWithHigherPriority(TreeBlockDefinition block, TreeBlockDefinition blockAtPosition) {
-        return blockAtPosition != null && blockAtPosition.getTreePart().getPriority() > block.getTreePart().getPriority();
+        return treeStructure;
     }
 
     private static List<AxionElement> parseAxions(String axionString) {
@@ -433,20 +426,232 @@ public class AdvancedLSystemTreeDefinition {
         return result;
     }
 
+    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef treeRef) {
+        LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
+        if (lSystemTree == null) {
+            return false;
+        }
+
+        Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
+
+        Map<Vector3i, TreeBlockDefinition> treeBlockMap = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle).gatherBlockDefinitions();
+        return treeBlockMap.containsKey(new Vector3i(block.x - location.x, block.y - location.y, block.z - location.z));
+    }
+
+    public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef treeRef) {
+        // Is it a tree at all
+        LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
+        if (lSystemTree == null) {
+            return null;
+        }
+
+        Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
+
+        Vector3i locationInTreeCoordinates = new Vector3i(block.x - location.x, block.y - location.y, block.z - location.z);
+
+        // Does this tree have a block defined at that coordinate
+        TreeStructure treeStructure = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+
+        Map<Vector3i, TreeBlockDefinition> treeBlockMap = treeStructure.gatherBlockDefinitions();
+        TreeBlockDefinition expectedBlockDefinition = treeBlockMap.get(locationInTreeCoordinates);
+        if (expectedBlockDefinition == null) {
+            return null;
+        }
+
+        // Is this block in world of the type it is supposed to be
+        Block blockInWorld = worldProvider.getBlock(block);
+        BlockUri familyUri = blockInWorld.getBlockFamily().getURI();
+        BlockUri expectedFamilyUri = new BlockUri(expectedBlockDefinition.getBlockUri()).getFamilyUri();
+        if (!familyUri.equals(expectedFamilyUri)) {
+            return null;
+        }
+
+        return treeStructure.getBlocksConnectedTo(worldProvider, block);
+    }
+
+    private final class TreeStructure {
+        private BranchLocation rootBranch = new BranchLocation(0);
+        private Map<Vector3i, TreeBlockDefinition> blockDefinitionsCache;
+
+        public BranchLocation getRootBranch() {
+            return rootBranch;
+        }
+
+        public Map<Vector3i, TreeBlockDefinition> gatherBlockDefinitions() {
+            if (blockDefinitionsCache != null) {
+                return blockDefinitionsCache;
+            }
+            Map<Vector3i, TreeBlockDefinition> result = new HashMap<>();
+            rootBranch.fillBlockDefinitions(result);
+            blockDefinitionsCache = result;
+            return result;
+        }
+
+        public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, Vector3i block) {
+            PositionOfBlock pob = rootBranch.getPositionOfBlock(block);
+            if (pob == null) {
+                return Collections.emptySet();
+            }
+            Map<Vector3i, TreeBlockDefinition> blockDefinitionsBeforeTrim = gatherBlockDefinitions();
+
+            pob.branchLocation.trimEverythingAfter(pob.axionIndex);
+            blockDefinitionsCache = null;
+            Map<Vector3i, TreeBlockDefinition> blockDefinitionsAfterTrim = gatherBlockDefinitions();
+
+            Map<Vector3i, TreeBlockDefinition> connected = new HashMap<>(blockDefinitionsBeforeTrim);
+            for (Vector3i location : blockDefinitionsAfterTrim.keySet()) {
+                connected.remove(location);
+            }
+
+            Iterator<Map.Entry<Vector3i, TreeBlockDefinition>> blockIterator = connected.entrySet().iterator();
+            while (blockIterator.hasNext()) {
+                Map.Entry<Vector3i, TreeBlockDefinition> blockAtLocation = blockIterator.next();
+
+                Block blockInWorld = worldProvider.getBlock(blockAtLocation.getKey());
+                BlockUri familyUri = blockInWorld.getBlockFamily().getURI();
+                BlockUri expectedFamilyUri = new BlockUri(blockAtLocation.getValue().getBlockUri()).getFamilyUri();
+                if (!familyUri.equals(expectedFamilyUri)) {
+                    blockIterator.remove();
+                }
+            }
+
+            return connected.keySet();
+        }
+    }
+
+    private final class BranchLocation {
+        private int startIndex;
+        private Map<Vector3i, Integer> mainBlocks = new HashMap<>();
+        private Map<Integer, Map<Vector3i, TreeBlockDefinition>> indexBlocks = new HashMap<>();
+
+        private List<BranchLocation> branches = new LinkedList<>();
+
+        private BranchLocation(int startIndex) {
+            this.startIndex = startIndex;
+        }
+
+        public BranchLocation addBranch(int startIndex) {
+            BranchLocation result = new BranchLocation(startIndex);
+            branches.add(result);
+            return result;
+        }
+
+        public void setMainBlock(int index, Vector3i vector) {
+            if (mainBlocks.get(vector) == null) {
+                mainBlocks.put(vector, index);
+            }
+        }
+
+        public void addTreeBlock(int index, Vector3i vector, TreeBlockDefinition blockDefinition) {
+            Map<Vector3i, TreeBlockDefinition> blockAtPositions = indexBlocks.get(index);
+            if (blockAtPositions == null) {
+                blockAtPositions = new HashMap<>();
+                indexBlocks.put(index, blockAtPositions);
+            }
+            putDefinitionIfMoreImportant(vector, blockDefinition, blockAtPositions);
+        }
+
+        public int getStartIndex() {
+            return startIndex;
+        }
+
+        public void trimEverythingAfter(int index) {
+            Iterator<Map.Entry<Integer, Map<Vector3i, TreeBlockDefinition>>> axiomElements = indexBlocks.entrySet().iterator();
+            while (axiomElements.hasNext()) {
+                Map.Entry<Integer, Map<Vector3i, TreeBlockDefinition>> axiomElement = axiomElements.next();
+                if (axiomElement.getKey() > index) {
+                    axiomElements.remove();
+                }
+            }
+
+            Iterator<BranchLocation> branchesIterator = branches.iterator();
+            while (branchesIterator.hasNext()) {
+                BranchLocation branch = branchesIterator.next();
+                if (branch.getStartIndex() > index) {
+                    branchesIterator.remove();
+                }
+            }
+        }
+
+        private void putDefinitionIfMoreImportant(Vector3i vector, TreeBlockDefinition blockDefinition, Map<Vector3i, TreeBlockDefinition> blockAtPositions) {
+            TreeBlockDefinition oldDefinition = blockAtPositions.get(vector);
+            if (oldDefinition == null || oldDefinition.getTreePart().getPriority() < blockDefinition.getTreePart().getPriority()) {
+                blockAtPositions.put(vector, blockDefinition);
+            }
+        }
+
+        public void fillBlockDefinitions(Map<Vector3i, TreeBlockDefinition> result) {
+            for (Map<Vector3i, TreeBlockDefinition> blockDefinitions : indexBlocks.values()) {
+                for (Map.Entry<Vector3i, TreeBlockDefinition> blockDefinition : blockDefinitions.entrySet()) {
+                    putDefinitionIfMoreImportant(blockDefinition.getKey(), blockDefinition.getValue(), result);
+                }
+            }
+
+            for (BranchLocation branch : branches) {
+                branch.fillBlockDefinitions(result);
+            }
+        }
+
+        public PositionOfBlock getPositionOfBlock(Vector3i block) {
+            Integer result = mainBlocks.get(block);
+            if (result != null) {
+                return new PositionOfBlock(result, this);
+            }
+
+            for (BranchLocation branch : branches) {
+                PositionOfBlock pob = branch.getPositionOfBlock(block);
+                if (pob != null) {
+                    return pob;
+                }
+            }
+            return null;
+        }
+    }
+
+    private final class PositionOfBlock {
+        private BranchLocation branchLocation;
+        private int axionIndex;
+
+        private PositionOfBlock(int axionIndex, BranchLocation branchLocation) {
+            this.axionIndex = axionIndex;
+            this.branchLocation = branchLocation;
+        }
+    }
+
     private final class Callback implements AxionElementGeneration.AxionElementGenerationCallback {
-        private Map<Vector3i, TreeBlockDefinition> treeInMemory;
+        private BranchLocation branchLocation;
+        private int axionIndex;
         private Vector3f position;
         private Matrix4f rotation;
 
-        private Callback(Map<Vector3i, TreeBlockDefinition> treeInMemory, Vector3f position, Matrix4f rotation) {
-            this.treeInMemory = treeInMemory;
+        private Callback(Vector3f position, Matrix4f rotation) {
             this.position = position;
             this.rotation = rotation;
         }
 
+        public void setBranchLocation(BranchLocation branchLocation) {
+            this.branchLocation = branchLocation;
+        }
+
+        public void setAxionIndex(int axionIndex) {
+            this.axionIndex = axionIndex;
+        }
+
         @Override
-        public void setBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
-            AdvancedLSystemTreeDefinition.this.setBlock(treeInMemory, blockPosition, blockDefinition);
+        public void setMainBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f);
+            if (integerPosition.y >= 0) {
+                branchLocation.setMainBlock(axionIndex, integerPosition);
+                branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
+            }
+        }
+
+        @Override
+        public void setAdditionalBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f);
+            if (integerPosition.y >= 0) {
+                branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
+            }
         }
 
         @Override

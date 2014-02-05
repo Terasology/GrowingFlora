@@ -17,16 +17,18 @@ package org.terasology.gf.tree.lsystem;
 
 import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
 import org.terasology.math.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
 
+import java.util.Collection;
+
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class LSystemBasedTreeGrowthDefinition implements PlantGrowthDefinition {
+public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlantGrowthDefinition {
     protected abstract AdvancedLSystemTreeDefinition getTreeDefinition();
 
     protected abstract String getGeneratedBlock();
@@ -44,5 +46,15 @@ public abstract class LSystemBasedTreeGrowthDefinition implements PlantGrowthDef
     @Override
     public final Long updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().updateTree(worldProvider, blockEntityRegistry, plant);
+    }
+
+    @Override
+    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+        return getTreeDefinition().isBlockOwnedByPlant(worldProvider, blockEntityRegistry, block, plant);
+    }
+
+    @Override
+    public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+        return getTreeDefinition().getBlocksConnectedTo(worldProvider, blockEntityRegistry, block, plant);
     }
 }

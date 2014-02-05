@@ -25,7 +25,9 @@ public interface AxionElementGeneration {
     void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter);
 
     public interface AxionElementGenerationCallback {
-        void setBlock(Vector3f position, TreeBlockDefinition blockDefinition);
+        void setMainBlock(Vector3f position, TreeBlockDefinition blockDefinition);
+
+        void setAdditionalBlock(Vector3f position, TreeBlockDefinition blockDefinition);
 
         void advance(float distance);
     }
