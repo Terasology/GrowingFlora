@@ -15,9 +15,11 @@
  */
 package org.terasology.gf.tree.lsystem;
 
+import org.terasology.utilities.random.Random;
+
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public interface AxionElementReplacement {
-    String getReplacement(float random, String currentAxion);
+    String getReplacement(Random random, String currentAxion);
 }

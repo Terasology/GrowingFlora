@@ -16,6 +16,8 @@
 package org.terasology.gf.tree.lsystem;
 
 
+import org.terasology.utilities.random.Random;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,10 +52,11 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
     }
 
     @Override
-    public String getReplacement(float random, String currentAxiom) {
+    public String getReplacement(Random random, String currentAxiom) {
         for (int i = 0, size = probabilities.size(); i < size - 1; i++) {
-            if (probabilities.get(i) > random && probabilities.get(i + 1) <= random) {
-                return replacements.get(i + 1).generateReplacement(currentAxiom);
+            float randomValue = random.nextFloat();
+            if (probabilities.get(i) > randomValue && probabilities.get(i + 1) <= randomValue) {
+                return replacements.get(i + 1).generateReplacement(random, currentAxiom);
             }
         }
         return defaultReplacement;
@@ -67,12 +70,12 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
         }
 
         @Override
-        public String generateReplacement(String currentAxiom) {
+        public String generateReplacement(Random rnd, String currentAxiom) {
             return result;
         }
     }
 
     public interface ReplacementGenerator {
-        String generateReplacement(String currentAxion);
+        String generateReplacement(Random rnd, String currentAxion);
     }
 }
