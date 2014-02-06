@@ -18,6 +18,8 @@ package org.terasology.gf.tree;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -28,7 +30,6 @@ import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.gf.tree.lsystem.LSystemTreeComponent;
 import org.terasology.logic.health.BeforeDestroyEvent;
 import org.terasology.logic.health.DestroyEvent;
-import org.terasology.logic.health.EngineDamageTypes;
 import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.PickupBuilder;
 import org.terasology.logic.inventory.SlotBasedInventoryManager;
@@ -57,6 +58,9 @@ public class TreeDestructionSystem extends BaseComponentSystem {
     private BlockEntityRegistry blockEntityRegistry;
     @In
     private SlotBasedInventoryManager inventoryManager;
+    @In
+    private PrefabManager prefabManager;
+
     private boolean processingDestruction;
 
     // There is some bug in Engine, which makes it impossible to do that
@@ -102,10 +106,11 @@ public class TreeDestructionSystem extends BaseComponentSystem {
             try {
                 InventoryComponent inventory = new InventoryComponent(20);
                 tempInventoryEntity.addComponent(inventory);
+                Prefab damagePrefab = prefabManager.getPrefab("GrowingFlora:TreeCutDamage");
+
                 for (Vector3i vector3i : blocksConnectedTo) {
                     blockEntityRegistry.getEntityAt(vector3i).send(
-                            new DestroyEvent(tempInventoryEntity, EntityRef.NULL,
-                                    EngineDamageTypes.DIRECT.get(), true));
+                            new DestroyEvent(tempInventoryEntity, EntityRef.NULL, damagePrefab));
                 }
 
                 PickupBuilder pickupBuilder = new PickupBuilder();

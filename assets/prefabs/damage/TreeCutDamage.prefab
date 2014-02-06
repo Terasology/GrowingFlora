@@ -1,0 +1,7 @@
+{
+    "parent" : "engine:physicalDamage",
+    "blockDamageModifier" : {
+        "skipPerBlockEffects" : true,
+        "directPickup": true
+    }
+}
