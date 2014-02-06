@@ -88,7 +88,6 @@ public class AdvancedLSystemTreeDefinition {
     public void generateTree(String seed, String saplingBlock, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z) {
         Vector3i locationInChunk = new Vector3i(x, y, z);
         LSystemTreeComponent treeComponent = createNewTreeComponent(seed, chunkView.toWorldPos(locationInChunk));
-        logger.warn("Generating seed: " + seed + " " + chunkView.toWorldPos(locationInChunk) + ": " + treeComponent.axion);
 
         // Block locations in tree base coordinate system
         Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(locationInChunk, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
@@ -114,7 +113,6 @@ public class AdvancedLSystemTreeDefinition {
         Vector3i location = sapling.getComponent(BlockComponent.class).getPosition();
 
         LSystemTreeComponent treeComponent = createNewTreeComponent(worldProvider.getSeed(), location);
-        logger.warn("Setting up seed: " + worldProvider.getSeed() + " " + location + ": " + treeComponent.axion);
 
         FastRandom rand = new FastRandom();
 
@@ -459,8 +457,6 @@ public class AdvancedLSystemTreeDefinition {
         if (!familyUri.equals(expectedFamilyUri)) {
             return null;
         }
-
-        logger.warn("Dropping seed: " + worldProvider.getSeed() + " " + location + ": " + lSystemTree.axion);
 
         return treeStructure.getBlocksConnectedTo(worldProvider, block);
     }
