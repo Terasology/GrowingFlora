@@ -439,13 +439,13 @@ public class AdvancedLSystemTreeDefinition {
             return null;
         }
 
-        Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
+        Vector3i treeRootLocation = treeRef.getComponent(BlockComponent.class).getPosition();
 
         // Does this tree have a block defined at that coordinate
-        TreeStructure treeStructure = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+        TreeStructure treeStructure = generateTreeFromAxion(treeRootLocation, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
         Map<Vector3i, TreeBlockDefinition> treeBlockMap = treeStructure.gatherBlockDefinitions();
-        TreeBlockDefinition expectedBlockDefinition = treeBlockMap.get(location);
+        TreeBlockDefinition expectedBlockDefinition = treeBlockMap.get(block);
         if (expectedBlockDefinition == null) {
             return null;
         }
