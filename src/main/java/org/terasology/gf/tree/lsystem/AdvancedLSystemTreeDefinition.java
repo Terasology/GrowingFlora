@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -85,35 +86,27 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     public void generateTree(String seed, String saplingBlock, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z) {
-        Vector3i worldTreeLocation = chunkView.toWorldPos(new Vector3i(x, y, z));
-        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, worldTreeLocation);
+        Vector3i locationInChunk = new Vector3i(x, y, z);
+        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, chunkView.toWorldPos(locationInChunk));
 
         // Block locations in tree base coordinate system
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(worldTreeLocation, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
-
-        int chunkStartX = chunkPos.x * ChunkConstants.SIZE_X;
-        int chunkStartY = chunkPos.y * ChunkConstants.SIZE_Y;
-        int chunkStartZ = chunkPos.z * ChunkConstants.SIZE_Z;
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(locationInChunk, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
         for (Map.Entry<Vector3i, TreeBlockDefinition> treeBlock : treeBlocks.entrySet()) {
             Vector3i blockLocation = treeBlock.getKey();
 
-            // Do not set the base block - it will have to be initialized
-            if (!blockLocation.equals(worldTreeLocation)) {
+            // Do not set the base block - it will have to be initialized from the sapling
+            if (!blockLocation.equals(locationInChunk)) {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
-                chunkView.setBlock(
-                        blockLocation.x - chunkStartX,
-                        blockLocation.y - chunkStartY,
-                        blockLocation.z - chunkStartZ,
-                        block);
+                chunkView.setBlock(blockLocation, block);
             }
         }
 
         Block sapling = blockManager.getBlock(saplingBlock);
-        chunkView.setBlock(worldTreeLocation.x - chunkStartX, worldTreeLocation.y - chunkStartY, worldTreeLocation.z - chunkStartZ, sapling);
+        chunkView.setBlock(locationInChunk, sapling);
     }
 
     public Long setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
@@ -448,13 +441,11 @@ public class AdvancedLSystemTreeDefinition {
 
         Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
 
-        Vector3i locationInTreeCoordinates = new Vector3i(block.x - location.x, block.y - location.y, block.z - location.z);
-
         // Does this tree have a block defined at that coordinate
         TreeStructure treeStructure = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
 
         Map<Vector3i, TreeBlockDefinition> treeBlockMap = treeStructure.gatherBlockDefinitions();
-        TreeBlockDefinition expectedBlockDefinition = treeBlockMap.get(locationInTreeCoordinates);
+        TreeBlockDefinition expectedBlockDefinition = treeBlockMap.get(location);
         if (expectedBlockDefinition == null) {
             return null;
         }
@@ -482,7 +473,7 @@ public class AdvancedLSystemTreeDefinition {
             if (blockDefinitionsCache != null) {
                 return blockDefinitionsCache;
             }
-            Map<Vector3i, TreeBlockDefinition> result = new HashMap<>();
+            Map<Vector3i, TreeBlockDefinition> result = new LinkedHashMap<>();
             rootBranch.fillBlockDefinitions(result);
             blockDefinitionsCache = result;
             return result;
@@ -499,7 +490,7 @@ public class AdvancedLSystemTreeDefinition {
             blockDefinitionsCache = null;
             Map<Vector3i, TreeBlockDefinition> blockDefinitionsAfterTrim = gatherBlockDefinitions();
 
-            Map<Vector3i, TreeBlockDefinition> connected = new HashMap<>(blockDefinitionsBeforeTrim);
+            Map<Vector3i, TreeBlockDefinition> connected = new LinkedHashMap<>(blockDefinitionsBeforeTrim);
             for (Vector3i location : blockDefinitionsAfterTrim.keySet()) {
                 connected.remove(location);
             }
@@ -522,8 +513,8 @@ public class AdvancedLSystemTreeDefinition {
 
     private final class BranchLocation {
         private int startIndex;
-        private Map<Vector3i, Integer> mainBlocks = new HashMap<>();
-        private Map<Integer, Map<Vector3i, TreeBlockDefinition>> indexBlocks = new HashMap<>();
+        private Map<Vector3i, Integer> mainBlocks = new LinkedHashMap<>();
+        private Map<Integer, Map<Vector3i, TreeBlockDefinition>> indexBlocks = new LinkedHashMap<>();
 
         private List<BranchLocation> branches = new LinkedList<>();
 
@@ -546,7 +537,7 @@ public class AdvancedLSystemTreeDefinition {
         public void addTreeBlock(int index, Vector3i vector, TreeBlockDefinition blockDefinition) {
             Map<Vector3i, TreeBlockDefinition> blockAtPositions = indexBlocks.get(index);
             if (blockAtPositions == null) {
-                blockAtPositions = new HashMap<>();
+                blockAtPositions = new LinkedHashMap<>();
                 indexBlocks.put(index, blockAtPositions);
             }
             putDefinitionIfMoreImportant(vector, blockDefinition, blockAtPositions);

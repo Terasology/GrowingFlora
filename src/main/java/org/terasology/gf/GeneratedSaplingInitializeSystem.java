@@ -25,6 +25,8 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.AddDelayedActionEvent;
+import org.terasology.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -49,19 +51,25 @@ public class GeneratedSaplingInitializeSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = {GeneratedSaplingComponent.class, BlockComponent.class})
     public void generatedSaplingLoaded(OnActivatedComponent event, EntityRef sapling) {
+        sapling.send(new AddDelayedActionEvent("PlantPack:initializePlant", 0));
+    }
+
+    @ReceiveEvent(components = {GeneratedSaplingComponent.class, BlockComponent.class})
+    public void delayedInitialization(DelayedActionTriggeredEvent event, EntityRef sapling) {
         if (!processingEvent) {
             processingEvent = true;
             try {
                 GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
-                if (generatedSapling != null) {
-                    String saplingType = generatedSapling.type;
-                    PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                    Long updateDelay = plantDefinition.initializePlant(worldProvider, blockEntityRegistry, sapling);
-                    if (updateDelay == null) {
-                        sapling.removeComponent(GeneratedSaplingComponent.class);
-                    } else {
-                        sapling.send(new AddDelayedActionEvent(PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay));
-                    }
+                Vector3i blockLocation = sapling.getComponent(BlockComponent.class).getPosition();
+                String saplingType = generatedSapling.type;
+                PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
+                Long updateDelay = plantDefinition.initializePlant(worldProvider, blockEntityRegistry, sapling);
+                EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(blockLocation);
+                if (blockEntity.hasComponent(GeneratedSaplingComponent.class)) {
+                    blockEntity.removeComponent(GeneratedSaplingComponent.class);
+                }
+                if (updateDelay != null) {
+                    blockEntity.send(new AddDelayedActionEvent(PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay));
                 }
             } finally {
                 processingEvent = false;
