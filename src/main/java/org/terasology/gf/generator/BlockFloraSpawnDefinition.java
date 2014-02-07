@@ -45,6 +45,11 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
     }
 
     @Override
+    public String getPlantId() {
+        return plantId;
+    }
+
+    @Override
     public String getBiomeId() {
         return biomeId;
     }

@@ -267,12 +267,9 @@ public class AdvancedLSystemTreeDefinition {
 
             Block resultBlock = getBlock(blockManager, newBlock, location, nextTree.keySet());
 
-            if (oldBlock != null && !oldBlock.equals(newBlock)) {
-                Block block = worldProvider.getBlock(location);
-                if (block.isReplacementAllowed() || oldBlock == newBlock) {
-                    blocksToReplaceExistingTreeBlocks.put(location, resultBlock);
-                    replaceCount++;
-                }
+            if (oldBlock != null && !oldBlock.getBlockUri().equals(newBlock.getBlockUri())) {
+                blocksToReplaceExistingTreeBlocks.put(location, resultBlock);
+                replaceCount++;
             } else if (oldBlock == null) {
                 if (worldProvider.getBlock(location).isReplacementAllowed()) {
                     blocksToPlaceInNewPlaces.put(location, resultBlock);
@@ -486,15 +483,7 @@ public class AdvancedLSystemTreeDefinition {
             }
             Map<Vector3i, TreeBlockDefinition> blockDefinitionsBeforeTrim = gatherBlockDefinitions();
 
-            pob.branchLocation.trimEverythingAfter(pob.axionIndex);
-            blockDefinitionsCache = null;
-            Map<Vector3i, TreeBlockDefinition> blockDefinitionsAfterTrim = gatherBlockDefinitions();
-
             Map<Vector3i, TreeBlockDefinition> connected = new LinkedHashMap<>(blockDefinitionsBeforeTrim);
-            for (Vector3i location : blockDefinitionsAfterTrim.keySet()) {
-                connected.remove(location);
-            }
-
             Iterator<Map.Entry<Vector3i, TreeBlockDefinition>> blockIterator = connected.entrySet().iterator();
             while (blockIterator.hasNext()) {
                 Map.Entry<Vector3i, TreeBlockDefinition> blockAtLocation = blockIterator.next();
@@ -505,6 +494,14 @@ public class AdvancedLSystemTreeDefinition {
                 if (!familyUri.equals(expectedFamilyUri)) {
                     blockIterator.remove();
                 }
+            }
+
+            pob.branchLocation.trimEverythingAfter(pob.axionIndex);
+            blockDefinitionsCache = null;
+            Map<Vector3i, TreeBlockDefinition> blockDefinitionsAfterTrim = gatherBlockDefinitions();
+
+            for (Vector3i location : blockDefinitionsAfterTrim.keySet()) {
+                connected.remove(location);
             }
 
             return connected.keySet();
@@ -627,6 +624,14 @@ public class AdvancedLSystemTreeDefinition {
 
         public void setAxionIndex(int axionIndex) {
             this.axionIndex = axionIndex;
+        }
+
+        private void setPosition(Vector3f position) {
+            this.position = position;
+        }
+
+        private void setRotation(Matrix4f rotation) {
+            this.rotation = rotation;
         }
 
         @Override

@@ -33,5 +33,7 @@ public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
 
     float getProbability();
 
+    String getPlantId();
+
     void generatePlant(String seed, Vector3i chunkPos, ChunkView chunk, int x, int y, int z, GenerationParameters generationParameters);
 }

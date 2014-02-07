@@ -15,8 +15,9 @@
  */
 package org.terasology.gf.generator;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
 import org.terasology.anotherWorld.Biome;
 import org.terasology.anotherWorld.BiomeProvider;
 import org.terasology.anotherWorld.FeatureGenerator;
@@ -34,6 +35,7 @@ import org.terasology.world.ChunkView;
 import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +50,13 @@ public class FloraFeatureGenerator implements FeatureGenerator {
     private PDist bushTriesPerChunk;
     private PDist foliageTriesPerChunk;
 
-    private Multimap<String, PlantSpawnDefinition> treeDefinitions = LinkedHashMultimap.create();
+    private Multimap<String, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
+            new Comparator<PlantSpawnDefinition>() {
+                @Override
+                public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
+                    return o1.getPlantId().compareTo(o2.getPlantId());
+                }
+            });
     private Map<String, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator(PDist treeTriesPerChunk, PDist bushTriesPerChunk, PDist foliageTriesPerChunk) {
