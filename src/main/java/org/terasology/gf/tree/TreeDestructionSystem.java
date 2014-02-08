@@ -31,8 +31,8 @@ import org.terasology.gf.tree.lsystem.LSystemTreeComponent;
 import org.terasology.logic.health.BeforeDestroyEvent;
 import org.terasology.logic.health.DestroyEvent;
 import org.terasology.logic.inventory.InventoryComponent;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.PickupBuilder;
-import org.terasology.logic.inventory.SlotBasedInventoryManager;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
@@ -57,7 +57,7 @@ public class TreeDestructionSystem extends BaseComponentSystem {
     @In
     private BlockEntityRegistry blockEntityRegistry;
     @In
-    private SlotBasedInventoryManager inventoryManager;
+    private InventoryManager inventoryManager;
     @In
     private PrefabManager prefabManager;
 
