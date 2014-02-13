@@ -15,8 +15,8 @@
  */
 package org.terasology.gf.generator;
 
+import com.google.common.base.Predicate;
 import org.terasology.anotherWorld.GenerationParameters;
-import org.terasology.anotherWorld.util.Filter;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.Vector3i;
@@ -33,9 +33,9 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
     private String biomeId;
     private float rarity;
     private float probability;
-    private Filter<Block> groundFilter;
+    private Predicate<Block> groundFilter;
 
-    public BlockFloraSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Filter<Block> groundFilter) {
+    public BlockFloraSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Predicate<Block> groundFilter) {
         this.plantType = plantType;
         this.plantId = plantId;
         this.biomeId = biomeId;
@@ -71,7 +71,7 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
 
     @Override
     public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.accepts(chunkView.getBlock(x, y, z))) {
+        if (groundFilter.apply(chunkView.getBlock(x, y, z))) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
             plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y + 1, z, generationParameters);
