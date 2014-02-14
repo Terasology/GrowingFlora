@@ -152,6 +152,25 @@ public class AdvancedLSystemTreeDefinition {
         return lSystemTree;
     }
 
+    public Long setupPlantedSapling(EntityRef treeRef) {
+        Random random = new FastRandom();
+        long time = CoreRegistry.get(Time.class).getGameTimeInMs();
+
+        // New axion (grown)
+        int generation = 1;
+
+        LSystemTreeComponent lSystemTree = new LSystemTreeComponent();
+        lSystemTree.axion = saplingAxion;
+        lSystemTree.branchAngle = branchAngle.getIntValue(random);
+        lSystemTree.rotationAngle = (float) Math.PI * random.nextFloat();
+        lSystemTree.generation = generation;
+        // This tree was just planted
+        lSystemTree.lastGrowthTime = time;
+        treeRef.addComponent(lSystemTree);
+
+        return (long) growthInterval;
+    }
+
     public Long updateTree(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef treeRef) {
         LSystemTreeComponent lSystemTree = treeRef.getComponent(LSystemTreeComponent.class);
         long time = CoreRegistry.get(Time.class).getGameTimeInMs();
