@@ -18,6 +18,7 @@ import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
+import org.terasology.world.chunks.ChunkConstants;
 
 import java.util.List;
 
@@ -47,15 +48,16 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        if (shouldSpawn(generationParameters, x, y, z)) {
+        if (shouldSpawn(generationParameters, chunkPos, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
             chunkView.setBlock(x, y, z, lastBlock);
         }
     }
 
-    private boolean shouldSpawn(GenerationParameters generationParameters, int x, int y, int z) {
-        return spawnCondition == null || spawnCondition.apply(new GenerationLocalParameters(generationParameters, new Vector3i(x, y, z)));
+    private boolean shouldSpawn(GenerationParameters generationParameters, Vector3i chunkPos, int x, int y, int z) {
+        return spawnCondition == null || spawnCondition.apply(new GenerationLocalParameters(generationParameters,
+                new Vector3i(chunkPos.x * ChunkConstants.SIZE_X + x, y, chunkPos.z * ChunkConstants.SIZE_Z + z)));
     }
 
     @Override
