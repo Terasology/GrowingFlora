@@ -23,6 +23,7 @@ import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.ChunkView;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockManager;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -71,7 +72,7 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
 
     @Override
     public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.apply(chunkView.getBlock(x, y, z))) {
+        if (groundFilter.apply(chunkView.getBlock(x, y, z)) && chunkView.getBlock(x, y + z, z) == BlockManager.getAir()) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
             plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y + 1, z, generationParameters);
