@@ -1,10 +1,16 @@
 package org.terasology.gf.crop;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.GenerationParameters;
+import org.terasology.anotherWorld.LocalParameters;
+import org.terasology.anotherWorld.WorldLocalParameters;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
+import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
@@ -22,11 +28,16 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
     private String plantId;
     private List<BlockUri> plantStages;
     private long growthInterval;
+    private Predicate<LocalParameters> spawnCondition;
+    private Function<LocalParameters, Float> growthChance;
 
-    public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval) {
+    public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
+                                Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
         this.growthInterval = growthInterval;
+        this.spawnCondition = spawnCondition;
+        this.growthChance = growthChance;
     }
 
     @Override
@@ -36,9 +47,11 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        BlockManager blockManager = CoreRegistry.get(BlockManager.class);
-        Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
-        chunkView.setBlock(x, y, z, lastBlock);
+        if (spawnCondition == null || spawnCondition.apply(new GenerationLocalParameters(generationParameters, new Vector3i(x, y, z)))) {
+            BlockManager blockManager = CoreRegistry.get(BlockManager.class);
+            Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
+            chunkView.setBlock(x, y, z, lastBlock);
+        }
     }
 
     @Override
@@ -56,16 +69,30 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
-        int previousIndex = plantStages.indexOf(block.getBlock().getURI());
-        int nextIndex = previousIndex + 1;
-        BlockUri nextStage = plantStages.get(nextIndex);
-        worldProvider.setBlock(position, blockManager.getBlock(nextStage));
 
-        if (nextIndex < plantStages.size() - 1) {
-            return growthInterval;
-        } else {
-            // Entered the last phase
-            return null;
+        if (shouldGrow(worldProvider, position)) {
+            int previousIndex = plantStages.indexOf(block.getBlock().getURI());
+            int nextIndex = previousIndex + 1;
+            BlockUri nextStage = plantStages.get(nextIndex);
+            worldProvider.setBlock(position, blockManager.getBlock(nextStage));
+
+            if (nextIndex < plantStages.size() - 1) {
+                return growthInterval;
+            } else {
+                // Entered the last phase
+                return null;
+            }
         }
+        return growthInterval;
+    }
+
+    private boolean shouldGrow(WorldProvider worldProvider, Vector3i position) {
+        if (growthChance == null) {
+            return true;
+        }
+
+        float growthChance = this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
+        FastRandom rnd = new FastRandom();
+        return rnd.nextFloat() < growthChance;
     }
 }
