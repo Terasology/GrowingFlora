@@ -1,4 +1,4 @@
-package org.terasology.gf.crop;
+package org.terasology.gf.grass;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
