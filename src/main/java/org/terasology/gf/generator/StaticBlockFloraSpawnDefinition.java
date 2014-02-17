@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class StaticBlockFloraSpawnDefinition implements PlantSpawnDefinition {
+public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
     private String biomeId;
     private float rarity;
