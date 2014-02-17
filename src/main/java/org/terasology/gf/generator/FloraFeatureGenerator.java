@@ -191,7 +191,7 @@ public class FloraFeatureGenerator implements FeatureGenerator {
             biomeToAdd = biomeProvider.getBiomeById(biomeToAdd.getBiomeParent());
         }
         result.initialize();
-        treeDefinitionsCache.put(biome.getBiomeId(), result);
+        cache.put(biome.getBiomeId(), result);
         return result;
     }
 }

@@ -72,7 +72,7 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
 
     @Override
     public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.apply(chunkView.getBlock(x, y, z)) && chunkView.getBlock(x, y + z, z) == BlockManager.getAir()) {
+        if (groundFilter.apply(chunkView.getBlock(x, y, z)) && chunkView.getBlock(x, y + 1, z) == BlockManager.getAir()) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
             plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y + 1, z, generationParameters);
