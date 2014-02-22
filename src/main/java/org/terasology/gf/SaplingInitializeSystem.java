@@ -27,6 +27,7 @@ import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.AddDelayedActionEvent;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.math.Vector3i;
+import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -81,6 +82,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     public void delayedInitialization(DelayedActionTriggeredEvent event, EntityRef sapling) {
         if (event.getActionId().equals(INITIALIZE_PLANT_ACTION)) {
             if (!processingEvent) {
+                PerformanceMonitor.startActivity("GrowingFlora - Initializing sapling");
                 processingEvent = true;
                 try {
                     GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
@@ -97,6 +99,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                     }
                 } finally {
                     processingEvent = false;
+                    PerformanceMonitor.endActivity();
                 }
             }
         }

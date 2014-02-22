@@ -27,6 +27,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.AddDelayedActionEvent;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -54,11 +55,16 @@ public class PlantGrowingSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {LivingPlantComponent.class, BlockComponent.class})
     public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant) {
         if (event.getActionId().equals(UPDATE_PLANT_ACTION_ID)) {
-            LivingPlantComponent plantComponent = plant.getComponent(LivingPlantComponent.class);
-            PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
-            Long updateDelay = plantDefinition.updatePlant(worldProvider, blockEntityRegistry, plant);
-            if (updateDelay != null) {
-                plant.send(new AddDelayedActionEvent(UPDATE_PLANT_ACTION_ID, updateDelay));
+            PerformanceMonitor.startActivity("GrowingFlora - Updating plant");
+            try {
+                LivingPlantComponent plantComponent = plant.getComponent(LivingPlantComponent.class);
+                PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
+                Long updateDelay = plantDefinition.updatePlant(worldProvider, blockEntityRegistry, plant);
+                if (updateDelay != null) {
+                    plant.send(new AddDelayedActionEvent(UPDATE_PLANT_ACTION_ID, updateDelay));
+                }
+            } finally {
+                PerformanceMonitor.endActivity();
             }
         }
     }
