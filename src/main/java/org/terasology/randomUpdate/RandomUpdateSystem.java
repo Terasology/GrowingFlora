@@ -15,6 +15,8 @@
  */
 package org.terasology.randomUpdate;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -24,6 +26,9 @@ import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
+import org.terasology.world.WorldProvider;
+import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.chunks.event.BeforeChunkUnload;
 import org.terasology.world.chunks.event.OnChunkLoaded;
@@ -47,6 +52,8 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
     private Time time;
     @In
     private BlockEntityRegistry blockEntityRegistry;
+    @In
+    private WorldProvider worldProvider;
 
     @ReceiveEvent
     public void addChunk(OnChunkLoaded chunkLoaded, EntityRef worldEntity) {
@@ -65,6 +72,7 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
             lastUpdate = currentTime;
 
             FastRandom rand = new FastRandom();
+            Multimap<Block, Vector3i> nonEntityUpdates = HashMultimap.create();
 
             for (Vector3i loadedChunk : loadedChunks) {
                 for (int i = 0; i < updateCountPerChunk; i++) {
@@ -72,13 +80,24 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
                     int chunkY = rand.nextInt(ChunkConstants.SIZE_Y);
                     int chunkZ = rand.nextInt(ChunkConstants.SIZE_Z);
 
-                    EntityRef entity = blockEntityRegistry.getBlockEntityAt(
-                            new Vector3i(
-                                    loadedChunk.x * ChunkConstants.SIZE_X + chunkX,
-                                    loadedChunk.y * ChunkConstants.SIZE_Y + chunkY,
-                                    loadedChunk.z * ChunkConstants.SIZE_Z + chunkZ));
-                    entity.send(RandomUpdateEvent.singleton());
+                    final Vector3i blockPosition = new Vector3i(
+                            loadedChunk.x * ChunkConstants.SIZE_X + chunkX,
+                            loadedChunk.y * ChunkConstants.SIZE_Y + chunkY,
+                            loadedChunk.z * ChunkConstants.SIZE_Z + chunkZ);
+                    EntityRef entity = blockEntityRegistry.getExistingBlockEntityAt(blockPosition);
+                    if (entity.exists()) {
+                        entity.send(RandomUpdateEvent.singleton());
+                    } else {
+                        final Block block = worldProvider.getBlock(blockPosition);
+                        if (block != BlockManager.getAir()) {
+                            nonEntityUpdates.put(block, blockPosition);
+                        }
+                    }
                 }
+            }
+
+            for (Block block : nonEntityUpdates.keySet()) {
+                block.getEntity().send(new RandomUpdateBlockTypeEvent(nonEntityUpdates.get(block)));
             }
         }
     }
