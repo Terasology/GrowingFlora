@@ -19,7 +19,6 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.In;
@@ -35,14 +34,14 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-@RegisterSystem
+//@RegisterSystem
 public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     private Set<Vector3i> loadedChunks = new HashSet<>();
 
     private long lastUpdate;
     private int updateInterval = 100;
 
-    private int updateCountPerChunk = 10;
+    private int updateCountPerChunk = 3;
 
     @In
     private Time time;
@@ -62,7 +61,7 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
     @Override
     public void update(float delta) {
         long currentTime = time.getGameTimeInMs();
-        if (lastUpdate + updateInterval >= currentTime) {
+        if (lastUpdate + updateInterval <= currentTime) {
             lastUpdate = currentTime;
 
             FastRandom rand = new FastRandom();

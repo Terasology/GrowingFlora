@@ -18,6 +18,7 @@ package org.terasology.gf.grass;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.math.Vector3i;
 import org.terasology.randomUpdate.RandomUpdateEvent;
 import org.terasology.registry.In;
@@ -33,6 +34,7 @@ import java.util.Map;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
+@RegisterSystem
 public class SpreadGrassSystem extends BaseComponentSystem {
     @In
     private WorldProvider worldProvider;
@@ -51,24 +53,31 @@ public class SpreadGrassSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void spreadGrass(RandomUpdateEvent randomUpdated, EntityRef entity, BlockComponent block) {
         if (block.getBlock().isGrass()) {
-            Vector3i pos = block.getPosition();
-            Map<Vector3i, Block> blocks = new HashMap<>();
-            for (int y = -1; y <= 1; y++) {
-                for (int x = -1; x <= 1; x++) {
-                    for (int z = -1; z <= 1; z++) {
-                        if (x != 0 || y != 0 || z != 0) {
-                            Vector3i blockPosition = new Vector3i(pos.x + x, pos.y + y, pos.z + z);
-                            Block blockAtPosition = worldProvider.getBlock(blockPosition);
-                            if (blockAtPosition == dirt && worldProvider.getSunlight(blockPosition) > 0) {
+            checkForGrassSpreadAround(block);
+        }
+    }
+
+    private void checkForGrassSpreadAround(BlockComponent block) {
+        Vector3i pos = block.getPosition();
+        Map<Vector3i, Block> blocks = new HashMap<>();
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                if (x != 0 || z != 0) {
+                    for (int y = 1; y >= -1; y--) {
+                        Vector3i blockPosition = new Vector3i(pos.x + x, pos.y + y, pos.z + z);
+                        Block blockAtPosition = worldProvider.getBlock(blockPosition);
+                        if (blockAtPosition != BlockManager.getAir()) {
+                            if (blockAtPosition == dirt) {
                                 blocks.put(blockPosition, grass);
                             }
+                            break;
                         }
                     }
                 }
             }
-            if (blocks.size() > 0) {
-                worldProvider.getWorldEntity().send(new PlaceBlocks(blocks));
-            }
+        }
+        if (blocks.size() > 0) {
+            worldProvider.getWorldEntity().send(new PlaceBlocks(blocks));
         }
     }
 }
