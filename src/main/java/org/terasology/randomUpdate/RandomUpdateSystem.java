@@ -76,14 +76,10 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
 
             for (Vector3i loadedChunk : loadedChunks) {
                 for (int i = 0; i < updateCountPerChunk; i++) {
-                    int chunkX = rand.nextInt(ChunkConstants.SIZE_X);
-                    int chunkY = rand.nextInt(ChunkConstants.SIZE_Y);
-                    int chunkZ = rand.nextInt(ChunkConstants.SIZE_Z);
-
                     final Vector3i blockPosition = new Vector3i(
-                            loadedChunk.x * ChunkConstants.SIZE_X + chunkX,
-                            loadedChunk.y * ChunkConstants.SIZE_Y + chunkY,
-                            loadedChunk.z * ChunkConstants.SIZE_Z + chunkZ);
+                            loadedChunk.x * ChunkConstants.SIZE_X + rand.nextInt(ChunkConstants.SIZE_X),
+                            loadedChunk.y * ChunkConstants.SIZE_Y + rand.nextInt(ChunkConstants.SIZE_Y),
+                            loadedChunk.z * ChunkConstants.SIZE_Z + rand.nextInt(ChunkConstants.SIZE_Z));
                     EntityRef entity = blockEntityRegistry.getExistingBlockEntityAt(blockPosition);
                     if (entity.exists()) {
                         entity.send(RandomUpdateEvent.singleton());
