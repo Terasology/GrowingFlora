@@ -71,8 +71,8 @@ public class SpreadGrassSystem extends BaseComponentSystem {
                     if (blockAtPosition != BlockManager.getAir()) {
                         if (blockAtPosition == dirt && blockAboveIsAir(blockPosition)) {
                             blocks.put(blockPosition, grass);
+                            break;
                         }
-                        break;
                     }
                 }
             }
