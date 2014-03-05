@@ -21,8 +21,10 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.math.Vector3i;
+import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
@@ -39,12 +41,12 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-//@RegisterSystem
+@RegisterSystem
 public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     private Set<Vector3i> loadedChunks = new HashSet<>();
 
     private long lastUpdate;
-    private int updateInterval = 100;
+    private int updateInterval = 20;
 
     private int updateCountPerChunk = 3;
 
@@ -71,29 +73,34 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
         if (lastUpdate + updateInterval <= currentTime) {
             lastUpdate = currentTime;
 
-            FastRandom rand = new FastRandom();
-            Multimap<Block, Vector3i> nonEntityUpdates = HashMultimap.create();
+            PerformanceMonitor.startActivity("Random Update System");
+            try {
+                FastRandom rand = new FastRandom();
+                Multimap<Block, Vector3i> nonEntityUpdates = HashMultimap.create();
 
-            for (Vector3i loadedChunk : loadedChunks) {
-                for (int i = 0; i < updateCountPerChunk; i++) {
-                    final Vector3i blockPosition = new Vector3i(
-                            loadedChunk.x * ChunkConstants.SIZE_X + rand.nextInt(ChunkConstants.SIZE_X),
-                            loadedChunk.y * ChunkConstants.SIZE_Y + rand.nextInt(ChunkConstants.SIZE_Y),
-                            loadedChunk.z * ChunkConstants.SIZE_Z + rand.nextInt(ChunkConstants.SIZE_Z));
-                    EntityRef entity = blockEntityRegistry.getExistingBlockEntityAt(blockPosition);
-                    if (entity.exists()) {
-                        entity.send(RandomUpdateEvent.singleton());
-                    } else {
-                        final Block block = worldProvider.getBlock(blockPosition);
-                        if (block != BlockManager.getAir()) {
-                            nonEntityUpdates.put(block, blockPosition);
+                for (Vector3i loadedChunk : loadedChunks) {
+                    for (int i = 0; i < updateCountPerChunk; i++) {
+                        final Vector3i blockPosition = new Vector3i(
+                                loadedChunk.x * ChunkConstants.SIZE_X + rand.nextInt(ChunkConstants.SIZE_X),
+                                loadedChunk.y * ChunkConstants.SIZE_Y + rand.nextInt(ChunkConstants.SIZE_Y),
+                                loadedChunk.z * ChunkConstants.SIZE_Z + rand.nextInt(ChunkConstants.SIZE_Z));
+                        EntityRef entity = blockEntityRegistry.getExistingBlockEntityAt(blockPosition);
+                        if (entity.exists()) {
+                            entity.send(RandomUpdateEvent.singleton());
+                        } else {
+                            final Block block = worldProvider.getBlock(blockPosition);
+                            if (block != BlockManager.getAir()) {
+                                nonEntityUpdates.put(block, blockPosition);
+                            }
                         }
                     }
                 }
-            }
 
-            for (Block block : nonEntityUpdates.keySet()) {
-                block.getEntity().send(new RandomUpdateBlockTypeEvent(nonEntityUpdates.get(block)));
+                for (Block block : nonEntityUpdates.keySet()) {
+                    block.getEntity().send(new RandomUpdateBlockTypeEvent(nonEntityUpdates.get(block)));
+                }
+            } finally {
+                PerformanceMonitor.endActivity();
             }
         }
     }
