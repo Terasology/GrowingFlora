@@ -97,8 +97,12 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
             return true;
         }
 
-        float growthChance = this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
+        float growthChance = getGrowthChance(worldProvider, position);
         FastRandom rnd = new FastRandom();
         return rnd.nextFloat() < growthChance;
+    }
+
+    protected float getGrowthChance(WorldProvider worldProvider, Vector3i position) {
+        return this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
     }
 }
