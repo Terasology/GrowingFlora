@@ -76,7 +76,7 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
 
-        if (shouldGrow(worldProvider, position)) {
+        if (shouldGrow(plant, worldProvider, position)) {
             int previousIndex = plantStages.indexOf(block.getBlock().getURI());
             int nextIndex = previousIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
@@ -92,17 +92,21 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         return growthInterval;
     }
 
-    private boolean shouldGrow(WorldProvider worldProvider, Vector3i position) {
+    private boolean shouldGrow(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
         if (growthChance == null) {
             return true;
         }
 
-        float growthChance = getGrowthChance(worldProvider, position);
-        FastRandom rnd = new FastRandom();
-        return rnd.nextFloat() < growthChance;
+        return shouldGrowByChance(plant, worldProvider, position);
     }
 
-    protected float getGrowthChance(WorldProvider worldProvider, Vector3i position) {
-        return this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
+    private boolean shouldGrowByChance(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
+        float growthChance = this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
+        GetGrowthChance event = new GetGrowthChance(growthChance);
+        plant.send(event);
+        if (event.isConsumed()) {
+            return false;
+        }
+        return new FastRandom().nextFloat() < event.calculateTotal();
     }
 }
