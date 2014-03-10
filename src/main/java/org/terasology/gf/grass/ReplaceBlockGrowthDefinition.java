@@ -26,15 +26,15 @@ import java.util.List;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class CropGrowthDefinition implements PlantGrowthDefinition {
+public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     private String plantId;
     private List<BlockUri> plantStages;
     private List<Long> growthIntervals;
     private Predicate<LocalParameters> spawnCondition;
     private Function<LocalParameters, Float> growthChance;
 
-    public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
-                                Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
+                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
         growthIntervals = new ArrayList<>();
@@ -46,8 +46,8 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         this.growthChance = growthChance;
     }
 
-    public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
-                                Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
+                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
         growthIntervals = new ArrayList<>();
@@ -102,9 +102,11 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         if (shouldGrow(plant, worldProvider, position)) {
             int nextIndex = currentIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
-            replaceBlock(worldProvider, blockManager, plant, position, nextStage);
+            final boolean last = nextIndex < plantStages.size() - 1;
 
-            if (nextIndex < plantStages.size() - 1) {
+            replaceBlock(worldProvider, blockManager, plant, position, nextStage, last);
+
+            if (last) {
                 return growthIntervals.get(nextIndex);
             } else {
                 // Entered the last phase
@@ -114,7 +116,7 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         return growthIntervals.get(currentIndex);
     }
 
-    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage) {
+    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage, boolean isLast) {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
