@@ -20,6 +20,7 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
 import org.terasology.world.chunks.ChunkConstants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,15 +29,31 @@ import java.util.List;
 public class CropGrowthDefinition implements PlantGrowthDefinition {
     private String plantId;
     private List<BlockUri> plantStages;
-    private long growthInterval;
+    private List<Long> growthIntervals;
     private Predicate<LocalParameters> spawnCondition;
     private Function<LocalParameters, Float> growthChance;
+
+    public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
+                                Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+        this.plantId = plantId;
+        this.plantStages = plantStages;
+        growthIntervals = new ArrayList<>();
+        for (int i = 0; i < plantStages.size() - 2; i++) {
+            growthIntervals.add(growthInterval);
+        }
+        growthIntervals.add(penultimateGrowthInterval);
+        this.spawnCondition = spawnCondition;
+        this.growthChance = growthChance;
+    }
 
     public CropGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
                                 Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
-        this.growthInterval = growthInterval;
+        growthIntervals = new ArrayList<>();
+        for (int i = 0; i < plantStages.size() - 1; i++) {
+            growthIntervals.add(growthInterval);
+        }
         this.spawnCondition = spawnCondition;
         this.growthChance = growthChance;
     }
@@ -67,7 +84,11 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public Long initializePlantedPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
-        return growthInterval;
+        if (growthIntervals.size() > 0) {
+            return growthIntervals.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -76,20 +97,25 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
 
+        int currentIndex = plantStages.indexOf(block.getBlock().getURI());
+
         if (shouldGrow(plant, worldProvider, position)) {
-            int previousIndex = plantStages.indexOf(block.getBlock().getURI());
-            int nextIndex = previousIndex + 1;
+            int nextIndex = currentIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
-            worldProvider.setBlock(position, blockManager.getBlock(nextStage));
+            replaceBlock(worldProvider, blockManager, plant, position, nextStage);
 
             if (nextIndex < plantStages.size() - 1) {
-                return growthInterval;
+                return growthIntervals.get(nextIndex);
             } else {
                 // Entered the last phase
                 return null;
             }
         }
-        return growthInterval;
+        return growthIntervals.get(currentIndex);
+    }
+
+    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage) {
+        worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
     private boolean shouldGrow(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
@@ -104,5 +130,4 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
         }
         return new FastRandom().nextFloat() < event.calculateTotal();
     }
-
 }

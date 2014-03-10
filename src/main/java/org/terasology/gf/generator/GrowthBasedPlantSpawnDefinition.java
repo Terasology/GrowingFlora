@@ -28,7 +28,7 @@ import org.terasology.world.block.BlockManager;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition {
+public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
     private String plantId;
     private String biomeId;
@@ -36,7 +36,7 @@ public abstract class BlockFloraSpawnDefinition implements PlantSpawnDefinition 
     private float probability;
     private Predicate<Block> groundFilter;
 
-    public BlockFloraSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Predicate<Block> groundFilter) {
+    public GrowthBasedPlantSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Predicate<Block> groundFilter) {
         this.plantType = plantType;
         this.plantId = plantId;
         this.biomeId = biomeId;
