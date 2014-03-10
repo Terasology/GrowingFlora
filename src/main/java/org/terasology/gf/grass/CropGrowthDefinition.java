@@ -93,20 +93,16 @@ public class CropGrowthDefinition implements PlantGrowthDefinition {
     }
 
     private boolean shouldGrow(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
-        if (growthChance == null) {
-            return true;
+        float chance = 1f;
+        if (growthChance != null) {
+            chance = growthChance.apply(new WorldLocalParameters(worldProvider, position));
         }
-
-        return shouldGrowByChance(plant, worldProvider, position);
-    }
-
-    private boolean shouldGrowByChance(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
-        float growthChance = this.growthChance.apply(new WorldLocalParameters(worldProvider, position));
-        GetGrowthChance event = new GetGrowthChance(growthChance);
+        GetGrowthChance event = new GetGrowthChance(chance);
         plant.send(event);
         if (event.isConsumed()) {
             return false;
         }
         return new FastRandom().nextFloat() < event.calculateTotal();
     }
+
 }
