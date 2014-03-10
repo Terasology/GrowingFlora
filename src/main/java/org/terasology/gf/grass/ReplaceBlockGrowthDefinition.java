@@ -102,11 +102,11 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         if (shouldGrow(plant, worldProvider, position)) {
             int nextIndex = currentIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
-            final boolean last = nextIndex < plantStages.size() - 1;
+            final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
 
-            replaceBlock(worldProvider, blockManager, plant, position, nextStage, last);
+            replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
 
-            if (last) {
+            if (hasMoreStages) {
                 return growthIntervals.get(nextIndex);
             } else {
                 // Entered the last phase
