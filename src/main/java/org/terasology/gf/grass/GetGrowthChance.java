@@ -15,58 +15,13 @@
  */
 package org.terasology.gf.grass;
 
-import gnu.trove.iterator.TFloatIterator;
-import gnu.trove.list.TFloatList;
-import gnu.trove.list.array.TFloatArrayList;
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
-import org.terasology.math.TeraMath;
+import org.terasology.entitySystem.event.AbstractConsumableValueModifiableEvent;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class GetGrowthChance extends AbstractConsumableEvent {
-    private float baseChance;
-
-    private TFloatList multipliers = new TFloatArrayList();
-    private TFloatList modifiers = new TFloatArrayList();
-
+public class GetGrowthChance extends AbstractConsumableValueModifiableEvent {
     public GetGrowthChance(float baseChance) {
-        this.baseChance = baseChance;
-    }
-
-    public float getBaseChance() {
-        return baseChance;
-    }
-
-    public void multiply(float amount) {
-        this.multipliers.add(amount);
-    }
-
-    public void add(float amount) {
-        modifiers.add(amount);
-    }
-
-    public void subtract(float amount) {
-        modifiers.add(-amount);
-    }
-
-    public float calculateTotal() {
-        // For now, add all modifiers and multiply by all multipliers. Negative modifiers cap to zero, but negative
-        // multipliers remain (so damage can be flipped to healing)
-
-        float total = baseChance;
-        TFloatIterator modifierIter = modifiers.iterator();
-        while (modifierIter.hasNext()) {
-            total += modifierIter.next();
-        }
-        total = Math.max(0, total);
-        if (total == 0) {
-            return 0;
-        }
-        TFloatIterator multiplierIter = multipliers.iterator();
-        while (multiplierIter.hasNext()) {
-            total *= multiplierIter.next();
-        }
-        return (float) TeraMath.clamp(total);
+        super(baseChance);
     }
 }

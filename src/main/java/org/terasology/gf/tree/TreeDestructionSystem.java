@@ -113,7 +113,7 @@ public class TreeDestructionSystem extends BaseComponentSystem {
                             new DestroyEvent(tempInventoryEntity, EntityRef.NULL, damagePrefab));
                 }
 
-                PickupBuilder pickupBuilder = new PickupBuilder();
+                PickupBuilder pickupBuilder = new PickupBuilder(entityManager);
                 for (int i = 0; i < 20; i++) {
                     EntityRef item = inventoryManager.getItemInSlot(tempInventoryEntity, i);
                     if (item.exists()) {

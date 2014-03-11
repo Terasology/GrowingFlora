@@ -8,6 +8,7 @@ import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.anotherWorld.WorldLocalParameters;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
@@ -130,6 +131,6 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         if (event.isConsumed()) {
             return false;
         }
-        return new FastRandom().nextFloat() < event.calculateTotal();
+        return new FastRandom().nextFloat() < TeraMath.clamp(event.getResultValue());
     }
 }
