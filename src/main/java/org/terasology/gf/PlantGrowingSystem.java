@@ -25,7 +25,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
-import org.terasology.logic.delay.AddDelayedActionEvent;
+import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
@@ -51,6 +51,8 @@ public class PlantGrowingSystem extends BaseComponentSystem {
     private Time time;
     @In
     private PlantRegistry plantRegistry;
+    @In
+    private DelayManager delayManager;
 
     @ReceiveEvent(components = {LivingPlantComponent.class, BlockComponent.class})
     public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant) {
@@ -61,7 +63,7 @@ public class PlantGrowingSystem extends BaseComponentSystem {
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
                 Long updateDelay = plantDefinition.updatePlant(worldProvider, blockEntityRegistry, plant);
                 if (updateDelay != null) {
-                    plant.send(new AddDelayedActionEvent(UPDATE_PLANT_ACTION_ID, updateDelay));
+                    delayManager.addDelayedAction(plant, UPDATE_PLANT_ACTION_ID, updateDelay);
                 }
             } finally {
                 PerformanceMonitor.endActivity();

@@ -24,7 +24,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
-import org.terasology.logic.delay.AddDelayedActionEvent;
+import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.math.Vector3i;
 import org.terasology.monitoring.PerformanceMonitor;
@@ -47,13 +47,15 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     private WorldProvider worldProvider;
     @In
     private BlockEntityRegistry blockEntityRegistry;
+    @In
+    private DelayManager delayManager;
 
     // To avoid stack overflow
     private boolean processingEvent;
 
     @ReceiveEvent(components = {GeneratedSaplingComponent.class, BlockComponent.class})
     public void generatedSaplingLoaded(OnAddedComponent event, EntityRef sapling) {
-        sapling.send(new AddDelayedActionEvent(INITIALIZE_PLANT_ACTION, 0));
+        delayManager.addDelayedAction(sapling, INITIALIZE_PLANT_ACTION, 0);
     }
 
     @ReceiveEvent(components = {PlantedSaplingComponent.class, LivingPlantComponent.class, BlockComponent.class})
@@ -70,7 +72,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                     blockEntity.removeComponent(PlantedSaplingComponent.class);
                 }
                 if (updateDelay != null) {
-                    blockEntity.send(new AddDelayedActionEvent(PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay));
+                    delayManager.addDelayedAction(blockEntity, PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay);
                 }
             } finally {
                 processingEvent = false;
@@ -95,7 +97,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                         blockEntity.removeComponent(GeneratedSaplingComponent.class);
                     }
                     if (updateDelay != null) {
-                        blockEntity.send(new AddDelayedActionEvent(PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay));
+                        delayManager.addDelayedAction(blockEntity, PlantGrowingSystem.UPDATE_PLANT_ACTION_ID, updateDelay);
                     }
                 } finally {
                     processingEvent = false;
