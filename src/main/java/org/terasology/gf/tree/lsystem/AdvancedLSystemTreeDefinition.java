@@ -58,7 +58,7 @@ import java.util.Map;
  */
 public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
-    private static final long FAILED_GROWTH_INTERVAL = 1000;
+    private static final long FAILED_GROWTH_INTERVAL = 10000;
 
     private Map<Character, AxionElementGeneration> blockMap;
     private Map<Character, AxionElementReplacement> axionElementReplacements;
