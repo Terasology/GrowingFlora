@@ -6,10 +6,6 @@
     "description" : "Module providing mechanisms for growing plants (trees, bushes, crops)",
     "dependencies" : [
             {
-                "id" : "Core",
-                "minVersion" : "0.1.0"
-            },
-            {
                 "id" : "AnotherWorld",
                 "minVersion" : "0.1.0"
             }],
