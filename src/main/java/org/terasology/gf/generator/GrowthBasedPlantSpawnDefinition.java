@@ -16,14 +16,14 @@
 package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
-import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.math.Vector3i;
+import org.terasology.math.TeraMath;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.world.ChunkView;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.chunks.CoreChunk;
+import org.terasology.world.generation.Region;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -71,11 +71,13 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.apply(chunkView.getBlock(x, y, z)) && chunkView.getBlock(x, y + 1, z) == BlockManager.getAir()) {
+    public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region region) {
+        //todo: Handle states where y+1 is out of bounds of the chunk
+        if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
+                && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
-            plantGrowthDefinition.generatePlant(seed, chunkPos, chunkView, x, y + 1, z, generationParameters);
+            plantGrowthDefinition.generatePlant(seed, chunk, x, y + 1, z, region);
         }
     }
 }

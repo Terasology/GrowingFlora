@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,24 +15,16 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.gf.PlantType;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
+import org.terasology.math.Region3i;
+import org.terasology.world.generation.Border3D;
+import org.terasology.world.generation.facets.base.BaseFieldFacet3D;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * Stores a random seed for a tree to be planted
  */
-public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
-    PlantType getPlantType();
+public class FloraFacet extends BaseFieldFacet3D {
 
-    String getBiomeId();
-
-    float getRarity();
-
-    float getProbability();
-
-    String getPlantId();
-
-    void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion);
+    public FloraFacet(Region3i targetRegion, Border3D border) {
+        super(targetRegion, border);
+    }
 }

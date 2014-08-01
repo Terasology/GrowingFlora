@@ -25,12 +25,12 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
+import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
@@ -40,6 +40,7 @@ import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateFinishe
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.CoreChunk;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
@@ -85,9 +86,9 @@ public class AdvancedLSystemTreeDefinition {
         this.blockMap = blockMap;
     }
 
-    public void generateTree(String seed, String saplingBlock, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z) {
-        Vector3i locationInChunk = new Vector3i(x, y, z);
-        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, chunkView.toWorldPos(locationInChunk));
+    public void generateTree(long seed, String saplingBlock, CoreChunk chunk, int x, int y, int z) {
+        Vector3i locationInChunk = TeraMath.calcChunkPos(x, y, z);
+        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, chunk.chunkToWorldPosition(locationInChunk));
 
         // Block locations in tree base coordinate system
         Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(locationInChunk, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
@@ -101,18 +102,18 @@ public class AdvancedLSystemTreeDefinition {
             if (!blockLocation.equals(locationInChunk)) {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
-                chunkView.setBlock(blockLocation, block);
+                chunk.setBlock(blockLocation, block);
             }
         }
 
         Block sapling = blockManager.getBlock(saplingBlock);
-        chunkView.setBlock(locationInChunk, sapling);
+        chunk.setBlock(locationInChunk, sapling);
     }
 
     public Long setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
         Vector3i location = sapling.getComponent(BlockComponent.class).getPosition();
 
-        LSystemTreeComponent treeComponent = createNewTreeComponent(worldProvider.getSeed(), location);
+        LSystemTreeComponent treeComponent = createNewTreeComponent(worldProvider.getSeed().hashCode(), location);
 
         FastRandom rand = new FastRandom();
 
@@ -134,7 +135,7 @@ public class AdvancedLSystemTreeDefinition {
         return (long) growthWait;
     }
 
-    private LSystemTreeComponent createNewTreeComponent(String seed, Vector3i location) {
+    private LSystemTreeComponent createNewTreeComponent(long seed, Vector3i location) {
         Random random = ChunkRandom.getChunkRandom(seed, location, 345245);
 
         // New axion (grown)
@@ -538,8 +539,8 @@ public class AdvancedLSystemTreeDefinition {
             this.startIndex = startIndex;
         }
 
-        public BranchLocation addBranch(int startIndex) {
-            BranchLocation result = new BranchLocation(startIndex);
+        public BranchLocation addBranch(int branchStartIndex) {
+            BranchLocation result = new BranchLocation(branchStartIndex);
             branches.add(result);
             return result;
         }

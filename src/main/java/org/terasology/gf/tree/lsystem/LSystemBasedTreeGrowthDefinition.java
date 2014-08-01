@@ -15,13 +15,13 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
 import org.terasology.math.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.chunks.CoreChunk;
+import org.terasology.world.generation.Region;
 
 import java.util.Collection;
 
@@ -34,8 +34,8 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     protected abstract String getGeneratedBlock();
 
     @Override
-    public final void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters) {
-        getTreeDefinition().generateTree(seed, getGeneratedBlock(), chunkPos, chunkView, x, y, z);
+    public final void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
+        getTreeDefinition().generateTree(seed, getGeneratedBlock(), chunk, x, y, z);
     }
 
     @Override

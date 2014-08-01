@@ -15,12 +15,11 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.ChunkView;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.chunks.CoreChunk;
+import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 
 /**
@@ -29,7 +28,7 @@ import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
     String getPlantId();
 
-    void generatePlant(String seed, Vector3i chunkPos, ChunkView chunkView, int x, int y, int z, GenerationParameters generationParameters);
+    void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion);
 
     /**
      * Returns how long to next update (if any). If null is returned, it's considered that the sapling was not initialized.

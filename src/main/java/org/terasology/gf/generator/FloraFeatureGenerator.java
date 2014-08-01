@@ -19,20 +19,19 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import org.terasology.anotherWorld.Biome;
-import org.terasology.anotherWorld.BiomeProvider;
+import org.terasology.anotherWorld.BiomeRegistry;
 import org.terasology.anotherWorld.FeatureGenerator;
-import org.terasology.anotherWorld.GenerationParameters;
+import org.terasology.anotherWorld.generation.BiomeFacet;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
-import org.terasology.anotherWorld.util.ChunkRandom;
 import org.terasology.anotherWorld.util.PDist;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.math.Vector2i;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
+import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
-import org.terasology.world.ChunkView;
-import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.CoreChunk;
+import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 import java.util.Comparator;
@@ -44,8 +43,6 @@ import java.util.Map;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class FloraFeatureGenerator implements FeatureGenerator {
-    private String seed;
-
     private PDist treeTriesPerChunk;
     private PDist bushTriesPerChunk;
     private PDist foliageTriesPerChunk;
@@ -81,13 +78,9 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         this.treeTriesPerChunk = treeTriesPerChunk;
         this.bushTriesPerChunk = bushTriesPerChunk;
         this.foliageTriesPerChunk = foliageTriesPerChunk;
-    }
-
-    @Override
-    public void initializeWithSeed(String worldSeed) {
-        this.seed = worldSeed;
         loadPlantGrowthDefinitions();
         loadPlantSpawnDefinition();
+
     }
 
     private void loadPlantGrowthDefinitions() {
@@ -115,67 +108,58 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         }
     }
 
+
     @Override
-    public void generateInChunk(Vector3i chunkPos, ChunkView view, GenerationParameters generationParameters) {
-        Random random = ChunkRandom.getChunkRandom(seed, chunkPos, 787234);
+    public void generateChunk(CoreChunk chunk, Region chunkRegion) {
+        FloraFacet floraFacet = chunkRegion.getFacet(FloraFacet.class);
+        BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
+        BiomeRegistry biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
 
-        int chunkStartX = chunkPos.x * ChunkConstants.SIZE_X;
-        int chunkStartZ = chunkPos.z * ChunkConstants.SIZE_Z;
+        for (Vector3i position : chunk.getRegion()) {
+            float floraValue = floraFacet.getWorld(position);
 
-        // First, generate trees, as these are the rarest ones
-        int treeTries = treeTriesPerChunk.getIntValue(random);
-        for (int i = 0; i < treeTries; i++) {
-            int x = random.nextInt(ChunkConstants.SIZE_X);
-            int z = random.nextInt(ChunkConstants.SIZE_Z);
-
-            int groundLevel = generationParameters.getLandscapeProvider().getHeight(new Vector2i(chunkStartX + x, chunkStartZ + z));
-
-            BiomeProvider biomeProvider = generationParameters.getBiomeProvider();
-            Biome biome = biomeProvider.getBiomeAt(chunkStartX + x, groundLevel, chunkStartZ + z);
-            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeProvider, treeDefinitionsCache, treeDefinitions);
-            PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
-            if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
-                treeDefinition.generatePlant(seed, chunkPos, view, x, groundLevel, z, generationParameters);
+            if (floraValue == 0) {
+                // there is nothing to do here
+                continue;
             }
-        }
 
-        // Second, generate bushes, as these are a bit more common
-        int bushTries = bushTriesPerChunk.getIntValue(random);
-        for (int i = 0; i < bushTries; i++) {
-            int x = random.nextInt(ChunkConstants.SIZE_X);
-            int z = random.nextInt(ChunkConstants.SIZE_Z);
+            Random random = new FastRandom((long) floraValue);
+            Biome biome = biomeFacet.getWorld(position.x, position.z);
 
-            int groundLevel = generationParameters.getLandscapeProvider().getHeight(new Vector2i(chunkStartX + x, chunkStartZ + z));
-
-            BiomeProvider biomeProvider = generationParameters.getBiomeProvider();
-            Biome biome = biomeProvider.getBiomeAt(chunkStartX + x, groundLevel, chunkStartZ + z);
-            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeProvider, bushDefinitionsCache, bushDefinitions);
-            PlantSpawnDefinition bushDefinition = definitionsForBiome.randomizeObject(random);
-            if (bushDefinition != null && random.nextFloat() < bushDefinition.getProbability()) {
-                bushDefinition.generatePlant(seed, chunkPos, view, x, groundLevel, z, generationParameters);
+            // First, generate trees, as these are the rarest ones
+            float treeTries = treeTriesPerChunk.getIntValue(random) / 256f;
+            if (random.nextFloat() < treeTries) {
+                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, treeDefinitionsCache, treeDefinitions);
+                PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
+                if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
+                    treeDefinition.generatePlant(random.nextLong(), chunk, position.x, position.y, position.z, chunkRegion);
+                }
             }
-        }
 
-        // Third, generate grass and flowers, as these are the most common
-        int foliageTries = foliageTriesPerChunk.getIntValue(random);
-        for (int i = 0; i < foliageTries; i++) {
-            int x = random.nextInt(ChunkConstants.SIZE_X);
-            int z = random.nextInt(ChunkConstants.SIZE_Z);
+            // Second, generate bushes, as these are a bit more common
+            float bushTries = bushTriesPerChunk.getIntValue(random) / 256f;
+            if (random.nextFloat() < bushTries) {
+                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, bushDefinitionsCache, bushDefinitions);
+                PlantSpawnDefinition bushDefinition = definitionsForBiome.randomizeObject(random);
+                if (bushDefinition != null && random.nextFloat() < bushDefinition.getProbability()) {
+                    bushDefinition.generatePlant(random.nextLong(), chunk, position.x, position.y, position.z, chunkRegion);
+                }
+            }
 
-            int groundLevel = generationParameters.getLandscapeProvider().getHeight(new Vector2i(chunkStartX + x, chunkStartZ + z));
-
-            BiomeProvider biomeProvider = generationParameters.getBiomeProvider();
-            Biome biome = biomeProvider.getBiomeAt(chunkStartX + x, groundLevel, chunkStartZ + z);
-            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeProvider, foliageDefinitionsCache, foliageDefinitions);
-            PlantSpawnDefinition foliageDefinition = definitionsForBiome.randomizeObject(random);
-            if (foliageDefinition != null && random.nextFloat() < foliageDefinition.getProbability()) {
-                foliageDefinition.generatePlant(seed, chunkPos, view, x, groundLevel, z, generationParameters);
+            // Third, generate grass and flowers, as these are the most common
+            float foliageTries = foliageTriesPerChunk.getIntValue(random) / 256f;
+            if (random.nextFloat() < foliageTries) {
+                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, foliageDefinitionsCache, foliageDefinitions);
+                PlantSpawnDefinition foliageDefinition = definitionsForBiome.randomizeObject(random);
+                if (foliageDefinition != null && random.nextFloat() < foliageDefinition.getProbability()) {
+                    foliageDefinition.generatePlant(random.nextLong(), chunk, position.x, position.y, position.z, chunkRegion);
+                }
             }
         }
     }
 
     private ChanceRandomizer<PlantSpawnDefinition> getDefinitionsForBiome(
-            Biome biome, BiomeProvider biomeProvider,
+            Biome biome, BiomeRegistry biomeRegistry,
             Map<String, ChanceRandomizer<PlantSpawnDefinition>> cache, Multimap<String, PlantSpawnDefinition> definitions) {
         ChanceRandomizer<PlantSpawnDefinition> result = cache.get(biome.getBiomeId());
         if (result != null) {
@@ -188,7 +172,7 @@ public class FloraFeatureGenerator implements FeatureGenerator {
             for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getBiomeId())) {
                 result.addChance(floraDefinition.getRarity(), floraDefinition);
             }
-            biomeToAdd = biomeProvider.getBiomeById(biomeToAdd.getBiomeParent());
+            biomeToAdd = biomeRegistry.getBiomeById(biomeToAdd.getBiomeParent());
         }
         result.initialize();
         cache.put(biome.getBiomeId(), result);

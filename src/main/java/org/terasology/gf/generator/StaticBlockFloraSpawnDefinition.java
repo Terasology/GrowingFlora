@@ -17,17 +17,17 @@ package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
 import org.terasology.anotherWorld.GenerationLocalParameters;
-import org.terasology.anotherWorld.GenerationParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.gf.PlantType;
+import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
-import org.terasology.world.ChunkView;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
-import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.CoreChunk;
+import org.terasology.world.generation.Region;
 
 import java.util.List;
 
@@ -82,17 +82,19 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public void generatePlant(String seed, Vector3i chunkPos, ChunkView chunk, int x, int y, int z, GenerationParameters generationParameters) {
-        if (groundFilter.apply(chunk.getBlock(x, y, z)) && chunk.getBlock(x, y + 1, z) == BlockManager.getAir()
-                && shouldSpawn(chunkPos, x, y, z, generationParameters)) {
+    public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
+        //todo: Handle states where y+1 is out of bounds of the chunk
+        if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
+                && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()
+                && shouldSpawn(x, y, z, chunkRegion)) {
             BlockUri block = possibleBlocks.get(new FastRandom().nextInt(possibleBlocks.size()));
             Block blockToPlace = CoreRegistry.get(BlockManager.class).getBlockFamily(block).getArchetypeBlock();
-            chunk.setBlock(x, y + 1, z, blockToPlace);
+            chunk.setBlock(TeraMath.calcBlockPos(x, y + 1, z), blockToPlace);
         }
     }
 
-    private boolean shouldSpawn(Vector3i chunkPos, int x, int y, int z, GenerationParameters generationParameters) {
-        return (spawnCondition == null || spawnCondition.apply(new GenerationLocalParameters(generationParameters,
-                new Vector3i(chunkPos.x * ChunkConstants.SIZE_X + x, y, chunkPos.z * ChunkConstants.SIZE_Z + z))));
+    private boolean shouldSpawn(int x, int y, int z, Region chunkRegion) {
+        return (spawnCondition == null || spawnCondition.apply(new GenerationLocalParameters(chunkRegion,
+                new Vector3i(x, y, z))));
     }
 }
