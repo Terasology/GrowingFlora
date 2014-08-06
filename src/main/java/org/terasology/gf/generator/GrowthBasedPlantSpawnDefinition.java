@@ -18,10 +18,8 @@ package org.terasology.gf.generator;
 import com.google.common.base.Predicate;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.math.TeraMath;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 
@@ -72,12 +70,16 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
 
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region region) {
-        //todo: Handle states where y+1 is out of bounds of the chunk
-        if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
-                && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()) {
-            PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
+        // removed the ground filter here, we need a facet to contain this data
+        // because we need to know what the ground is made up of outside the chunk boundary
+        // to determine if a tree should be planted there
+        // todo: add facet to hold surface composition data
+        // todo: Handle states where y+1 is out of bounds of the chunk
+        //if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
+        //        && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()) {
+        PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
             plantGrowthDefinition.generatePlant(seed, chunk, x, y + 1, z, region);
-        }
+        //}
     }
 }

@@ -34,8 +34,8 @@ import org.terasology.world.generation.facets.SurfaceHeightFacet;
  */
 @Produces(FloraFacet.class)
 @Requires({@Facet(SeaLevelFacet.class),
-        @Facet(SurfaceHeightFacet.class),
-        @Facet(value = DensityFacet.class, border = @FacetBorder(top = 1))})
+        @Facet(value = SurfaceHeightFacet.class, border = @FacetBorder(sides = 5)),
+        @Facet(value = DensityFacet.class, border = @FacetBorder(top = 1, sides = 5))})
 public class FloraProvider implements FacetProvider {
 
     private NoiseTable noiseTable;
@@ -67,7 +67,7 @@ public class FloraProvider implements FacetProvider {
                 // if the block on the surface is dense enough
                 if (density.getWorld(x, height, z) >= 0
                         && density.getWorld(x, height + 1, z) < 0) {
-                    facet.setWorld(x, height, z, noiseTable.noise(x, z));
+                    facet.setWorld(x, height, z, noiseTable.noise(x, z) / 256f);
                 }
             }
         }

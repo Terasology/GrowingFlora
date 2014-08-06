@@ -87,11 +87,11 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     public void generateTree(long seed, String saplingBlock, CoreChunk chunk, int x, int y, int z) {
-        Vector3i locationInChunk = TeraMath.calcChunkPos(x, y, z);
-        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, chunk.chunkToWorldPosition(locationInChunk));
+        Vector3i worldPos = new Vector3i(x, y, z);
+        LSystemTreeComponent treeComponent = createNewTreeComponent(seed, worldPos);
 
-        // Block locations in tree base coordinate system
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(locationInChunk, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
+        // Block locations in world coordinates
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(worldPos, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
@@ -99,15 +99,19 @@ public class AdvancedLSystemTreeDefinition {
             Vector3i blockLocation = treeBlock.getKey();
 
             // Do not set the base block - it will have to be initialized from the sapling
-            if (!blockLocation.equals(locationInChunk)) {
+            if (!blockLocation.equals(worldPos)) {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
-                chunk.setBlock(blockLocation, block);
+                if (chunk.getRegion().encompasses(blockLocation)) {
+                    chunk.setBlock(TeraMath.calcBlockPos(blockLocation), block);
+                }
             }
         }
 
-        Block sapling = blockManager.getBlock(saplingBlock);
-        chunk.setBlock(locationInChunk, sapling);
+        if (chunk.getRegion().encompasses(worldPos)) {
+            Block sapling = blockManager.getBlock(saplingBlock);
+            chunk.setBlock(TeraMath.calcBlockPos(worldPos), sapling);
+        }
     }
 
     public Long setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {

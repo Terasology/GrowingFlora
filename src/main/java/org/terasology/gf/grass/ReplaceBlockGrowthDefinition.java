@@ -65,10 +65,10 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
-        if (shouldSpawn(chunkRegion, x, y, z)) {
+        if (chunk.getRegion().encompasses(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
-            chunk.setBlock(x, y, z, lastBlock);
+            chunk.setBlock(TeraMath.calcBlockPos(x, y, z), lastBlock);
         }
     }
 
