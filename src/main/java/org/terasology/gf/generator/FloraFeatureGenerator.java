@@ -76,6 +76,10 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
     }
 
+    @Override
+    public void initialize() {
+    }
+
     private void loadPlantGrowthDefinitions() {
         PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
 
