@@ -50,7 +50,7 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
     public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
         float length = Float.parseFloat(axionParameter);
 
-        for (float pos = 0; pos < length; pos += advance) {
+        for (float pos = advance; pos < length; pos += advance) {
             callback.setMainBlock(position, baseBlock);
             int rangeInt = (int) range;
             for (int x = -rangeInt; x <= rangeInt; x++) {
