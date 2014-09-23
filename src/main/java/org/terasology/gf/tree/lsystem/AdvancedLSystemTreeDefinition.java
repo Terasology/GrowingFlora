@@ -23,6 +23,7 @@ import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
+import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.TeraMath;
@@ -39,7 +40,6 @@ import org.terasology.world.block.BlockUri;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateFinished;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
-import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.chunks.CoreChunk;
 
 import javax.vecmath.Matrix4f;
@@ -187,33 +187,26 @@ public class AdvancedLSystemTreeDefinition {
             return (long) growthInterval;
         } else {
             Vector3i treeLocation = treeRef.getComponent(BlockComponent.class).getPosition();
-            if (hasRoomToGrow(worldProvider, treeLocation)) {
-
+            TreeStructure oldTreeStructure = generateTreeFromAxion(treeLocation, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+            if (isWholeTreeSpaceLoaded(worldProvider, oldTreeStructure)) {
                 FastRandom rand = new FastRandom();
 
-                String oldAxion = lSystemTree.axion;
-                String nextAxion = generateNextAxion(rand, oldAxion);
+                String nextAxion = generateNextAxion(rand, lSystemTree.axion);
+                TreeStructure newTreeStructure = generateTreeFromAxion(treeLocation, nextAxion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
+                if (isWholeTreeSpaceLoaded(worldProvider, newTreeStructure)) {
+                    lSystemTree.axion = nextAxion;
+                    lSystemTree.generation++;
+                    lSystemTree.lastGrowthTime = time;
 
-                lSystemTree.axion = nextAxion;
-                lSystemTree.generation++;
-                lSystemTree.lastGrowthTime = time;
+                    if (!updateTreeInGame(worldProvider, oldTreeStructure.gatherBlockDefinitions(), newTreeStructure.gatherBlockDefinitions())) {
+                        return FAILED_GROWTH_INTERVAL;
+                    }
 
-                return replaceTreeAndCheckForDeath(worldProvider, blockEntityRegistry, rand, treeLocation, oldAxion, nextAxion, lSystemTree);
+                    return checkForDeathAndSetupComponents(blockEntityRegistry, rand, treeLocation, lSystemTree);
+                }
             }
             return (long) growthInterval;
         }
-    }
-
-    private Long replaceTreeAndCheckForDeath(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Random random,
-                                             Vector3i location, String oldAxion, String nextAxion, LSystemTreeComponent treeComponent) {
-        Map<Vector3i, TreeBlockDefinition> currentTree = generateTreeFromAxion(location, oldAxion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
-        Map<Vector3i, TreeBlockDefinition> nextTree = generateTreeFromAxion(location, nextAxion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
-
-        if (!updateTreeInGame(worldProvider, currentTree, nextTree)) {
-            return FAILED_GROWTH_INTERVAL;
-        }
-
-        return checkForDeathAndSetupComponents(blockEntityRegistry, random, location, treeComponent);
     }
 
     private Long checkForDeathAndSetupComponents(BlockEntityRegistry blockEntityRegistry, Random random, Vector3i location, LSystemTreeComponent treeComponent) {
@@ -236,15 +229,8 @@ public class AdvancedLSystemTreeDefinition {
         }
     }
 
-    private boolean hasRoomToGrow(WorldProvider worldProvider, Vector3i treeLocation) {
-        return worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
-                && worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z)
-                && worldProvider.isBlockRelevant(treeLocation.x + ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z)
-                && worldProvider.isBlockRelevant(treeLocation.x, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
-                && worldProvider.isBlockRelevant(treeLocation.x, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z)
-                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z + ChunkConstants.SIZE_Z)
-                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z)
-                && worldProvider.isBlockRelevant(treeLocation.x - ChunkConstants.SIZE_X, treeLocation.y, treeLocation.z - ChunkConstants.SIZE_Z);
+    private boolean isWholeTreeSpaceLoaded(WorldProvider worldProvider, TreeStructure treeStructure) {
+        return worldProvider.isRegionRelevant(treeStructure.getTreeRegion());
     }
 
     private boolean checkForDeath(int generation, float random) {
@@ -529,6 +515,20 @@ public class AdvancedLSystemTreeDefinition {
             }
 
             return connected.keySet();
+        }
+
+        public Region3i getTreeRegion() {
+            int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
+            for (Vector3i block : gatherBlockDefinitions().keySet()) {
+                minX = Math.min(minX, block.x);
+                minY = Math.min(minY, block.y);
+                minZ = Math.min(minZ, block.z);
+                maxX = Math.max(maxX, block.x);
+                maxY = Math.max(maxY, block.y);
+                maxZ = Math.max(maxZ, block.z);
+            }
+            return Region3i.createFromMinMax(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
         }
     }
 
