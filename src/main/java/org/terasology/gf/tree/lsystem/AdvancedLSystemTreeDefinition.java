@@ -333,7 +333,7 @@ public class AdvancedLSystemTreeDefinition {
         for (AxionElement axion : parseAxions(currentAxion)) {
             final AxionElementReplacement axionElementReplacement = axionElementReplacements.get(axion.key);
             if (axionElementReplacement != null) {
-                result.append(axionElementReplacement.getReplacement(rand, currentAxion));
+                result.append(axionElementReplacement.getReplacement(rand, axion.parameter, currentAxion));
             } else {
                 result.append(axion.key);
                 if (axion.parameter != null) {

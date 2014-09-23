@@ -28,7 +28,7 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
     private float probabilitySum;
     private String defaultReplacement;
     private List<Float> probabilities = new ArrayList<>();
-    private List<ReplacementGenerator> replacements = new ArrayList<>();
+    private List<AxionElementReplacement> replacements = new ArrayList<>();
 
     public SimpleAxionElementReplacement(String defaultReplacement) {
         this.defaultReplacement = defaultReplacement;
@@ -41,7 +41,7 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
         addReplacement(probability, new StaticReplacementGenerator(replacement));
     }
 
-    public void addReplacement(float probability, ReplacementGenerator replacement) {
+    public void addReplacement(float probability, AxionElementReplacement replacement) {
         if (probabilitySum + probability > 1f) {
             throw new IllegalArgumentException("Sum of probabilities exceeds 1");
         }
@@ -52,17 +52,17 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
     }
 
     @Override
-    public String getReplacement(Random random, String currentAxiom) {
+    public String getReplacement(Random random, String parameter, String currentAxiom) {
         for (int i = 0, size = probabilities.size(); i < size - 1; i++) {
             float randomValue = random.nextFloat();
             if (probabilities.get(i) > randomValue && probabilities.get(i + 1) <= randomValue) {
-                return replacements.get(i + 1).generateReplacement(random, currentAxiom);
+                return replacements.get(i + 1).getReplacement(random, parameter, currentAxiom);
             }
         }
         return defaultReplacement;
     }
 
-    private final class StaticReplacementGenerator implements ReplacementGenerator {
+    private final class StaticReplacementGenerator implements AxionElementReplacement {
         private String result;
 
         private StaticReplacementGenerator(String result) {
@@ -70,12 +70,8 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
         }
 
         @Override
-        public String generateReplacement(Random rnd, String currentAxiom) {
+        public String getReplacement(Random random, String parameter, String currentAxion) {
             return result;
         }
-    }
-
-    public interface ReplacementGenerator {
-        String generateReplacement(Random rnd, String currentAxion);
     }
 }
