@@ -18,8 +18,7 @@ package org.terasology.gf.generator;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
-import org.terasology.anotherWorld.Biome;
-import org.terasology.anotherWorld.BiomeRegistry;
+import org.terasology.anotherWorld.AnotherWorldBiome;
 import org.terasology.anotherWorld.FeatureGenerator;
 import org.terasology.anotherWorld.generation.BiomeFacet;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
@@ -29,6 +28,7 @@ import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
+import org.terasology.world.biomes.BiomeRegistry;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
@@ -116,7 +116,7 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         BiomeRegistry biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
 
         for (Vector3i position : floraFacet.getWorldRegion()) {
-            Biome biome = biomeFacet.getWorld(position.x, position.z);
+            AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
 
             // First, generate trees, as these are the rarest ones
             if (treeFacet.getWorld(position) > 0) {
@@ -154,23 +154,23 @@ public class FloraFeatureGenerator implements FeatureGenerator {
     }
 
     private ChanceRandomizer<PlantSpawnDefinition> getDefinitionsForBiome(
-            Biome biome, BiomeRegistry biomeRegistry,
+            AnotherWorldBiome biome, BiomeRegistry biomeRegistry,
             Map<String, ChanceRandomizer<PlantSpawnDefinition>> cache, Multimap<String, PlantSpawnDefinition> definitions) {
-        ChanceRandomizer<PlantSpawnDefinition> result = cache.get(biome.getBiomeId());
+        ChanceRandomizer<PlantSpawnDefinition> result = cache.get(biome.getId());
         if (result != null) {
             return result;
         }
 
         result = new ChanceRandomizer<>(100);
-        Biome biomeToAdd = biome;
+        AnotherWorldBiome biomeToAdd = biome;
         while (biomeToAdd != null) {
-            for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getBiomeId())) {
+            for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getId())) {
                 result.addChance(floraDefinition.getRarity(), floraDefinition);
             }
-            biomeToAdd = biomeRegistry.getBiomeById(biomeToAdd.getBiomeParent());
+            biomeToAdd = biomeRegistry.getBiomeById(biomeToAdd.getBiomeParent(), AnotherWorldBiome.class);
         }
         result.initialize();
-        cache.put(biome.getBiomeId(), result);
+        cache.put(biome.getId(), result);
         return result;
     }
 }
