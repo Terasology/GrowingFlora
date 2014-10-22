@@ -69,7 +69,7 @@ public class SpreadGrassSystem extends BaseComponentSystem {
                 if (worldProvider.isBlockRelevant(blockPosition)) {
                     Block blockAtPosition = worldProvider.getBlock(blockPosition);
                     if (blockAtPosition != BlockManager.getAir()) {
-                        if (blockAtPosition == dirt && blockAboveIsAir(blockPosition)) {
+                        if (blockAtPosition == dirt && blockAboveIsLoadedAndAir(blockPosition)) {
                             blocks.put(blockPosition, grass);
                             break;
                         }
@@ -83,7 +83,9 @@ public class SpreadGrassSystem extends BaseComponentSystem {
         }
     }
 
-    private boolean blockAboveIsAir(Vector3i blockPosition) {
-        return worldProvider.getBlock(new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z)) == BlockManager.getAir();
+    private boolean blockAboveIsLoadedAndAir(Vector3i blockPosition) {
+        Vector3i blockAbove = new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z);
+        return worldProvider.isBlockRelevant(blockAbove) &&
+            worldProvider.getBlock(blockAbove) == BlockManager.getAir();
     }
 }
