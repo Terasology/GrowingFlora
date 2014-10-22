@@ -33,10 +33,7 @@ import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -108,47 +105,69 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
     @Override
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
-        FloraFacet floraFacet = chunkRegion.getFacet(FloraFacet.class);
         TreeFacet treeFacet = chunkRegion.getFacet(TreeFacet.class);
         BushFacet bushFacet = chunkRegion.getFacet(BushFacet.class);
         FoliageFacet foliageFacet = chunkRegion.getFacet(FoliageFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
         BiomeRegistry biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
 
-        for (Vector3i position : floraFacet.getWorldRegion()) {
+        Set<Vector3i> usedPositions = new HashSet<>();
+
+        // First, generate trees, as these are the rarest ones
+        for (Map.Entry<Vector3i, Float> positionEntry : treeFacet.getFlaggedPositions().entrySet()) {
+            Vector3i position = positionEntry.getKey();
+            float value = positionEntry.getValue();
+
             AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
 
-            // First, generate trees, as these are the rarest ones
-            if (treeFacet.getWorld(position) > 0) {
-                long seed = Float.floatToRawIntBits(treeFacet.getWorld(position));
-                Random random = new FastRandom(seed);
-                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, treeDefinitionsCache, treeDefinitions);
-                PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
-                if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
-                    treeDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
-                }
+            long seed = Float.floatToRawIntBits(value);
+            Random random = new FastRandom(seed);
+            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, treeDefinitionsCache, treeDefinitions);
+            PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
+            if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
+                treeDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
             }
 
-            // Second, generate bushes, as these are a bit more common
-            if (bushFacet.getWorld(position) > 0) {
-                long seed = Float.floatToRawIntBits(bushFacet.getWorld(position));
+            usedPositions.add(position);
+        }
+
+        // Second, generate bushes, as these are a bit more common
+        for (Map.Entry<Vector3i, Float> positionEntry : bushFacet.getFlaggedPositions().entrySet()) {
+            Vector3i position = positionEntry.getKey();
+            if (!usedPositions.contains(position)) {
+                float value = positionEntry.getValue();
+
+                AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
+
+                long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
                 ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, bushDefinitionsCache, bushDefinitions);
                 PlantSpawnDefinition bushDefinition = definitionsForBiome.randomizeObject(random);
                 if (bushDefinition != null && random.nextFloat() < bushDefinition.getProbability()) {
                     bushDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
                 }
-            }
 
-            // Third, generate grass and flowers, as these are the most common
-            if (foliageFacet.getWorld(position) > 0) {
-                long seed = Float.floatToRawIntBits(foliageFacet.getWorld(position));
+                usedPositions.add(position);
+            }
+        }
+
+        // Third, generate grass and flowers, as these are the most common
+        for (Map.Entry<Vector3i, Float> positionEntry : foliageFacet.getFlaggedPositions().entrySet()) {
+            Vector3i position = positionEntry.getKey();
+            if (!usedPositions.contains(position)) {
+                float value = positionEntry.getValue();
+
+                AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
+
+                long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
                 ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, foliageDefinitionsCache, foliageDefinitions);
                 PlantSpawnDefinition foliageDefinition = definitionsForBiome.randomizeObject(random);
                 if (foliageDefinition != null && random.nextFloat() < foliageDefinition.getProbability()) {
                     foliageDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
                 }
+
+                usedPositions.add(position);
             }
         }
     }

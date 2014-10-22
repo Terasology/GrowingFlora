@@ -16,14 +16,27 @@
 package org.terasology.gf.generator;
 
 import org.terasology.math.Region3i;
+import org.terasology.math.Vector3i;
 import org.terasology.world.generation.Border3D;
+import org.terasology.world.generation.facets.base.BaseFacet3D;
+
+import java.util.*;
 
 /**
- * Stores a random seed for a tree to be planted
+ * Created by Marcin on 2014-10-21.
  */
-public class FloraFacet extends SparseFloatFacet3D {
+public class SparseFloatFacet3D extends BaseFacet3D {
+    private Map<Vector3i, Float> positions = new HashMap<>();
 
-    public FloraFacet(Region3i targetRegion, Border3D border) {
+    public SparseFloatFacet3D(Region3i targetRegion, Border3D border) {
         super(targetRegion, border);
+    }
+
+    public void setFlag(Vector3i position, float value) {
+        positions.put(position, value);
+    }
+
+    public Map<Vector3i, Float> getFlaggedPositions() {
+        return Collections.unmodifiableMap(positions);
     }
 }

@@ -17,12 +17,11 @@ package org.terasology.gf.generator;
 
 import org.terasology.math.Region3i;
 import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.BaseFieldFacet3D;
 
 /**
  * Stores a random seed for a tree to be planted
  */
-public class BushFacet extends BaseFieldFacet3D {
+public class BushFacet extends SparseFloatFacet3D {
 
     public BushFacet(Region3i targetRegion, Border3D border) {
         super(targetRegion, border);

@@ -23,6 +23,8 @@ import org.terasology.world.generation.GeneratingRegion;
 import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
 
+import java.util.Map;
+
 /**
  * Determines that ground that flora can be placed on
  */
@@ -46,11 +48,12 @@ public class BushProvider implements FacetProvider {
         BushFacet facet = new BushFacet(region.getRegion(), region.getBorderForFacet(BushFacet.class));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
 
-        for (Vector3i pos : facet.getWorldRegion()) {
-            float floraValue = floraFacet.getWorld(pos);
-            // ensure that there can be foliage here
-            if (floraValue > 0 && noise.noise(pos.x, pos.y, pos.z) / 256f < amount) {
-                facet.setWorld(pos, floraValue);
+        for (Map.Entry<Vector3i, Float> positionValue : floraFacet.getFlaggedPositions().entrySet()) {
+            Vector3i pos = positionValue.getKey();
+            float value = positionValue.getValue();
+
+            if (noise.noise(pos.x, pos.y, pos.z) / 256f < amount) {
+                facet.setFlag(pos, value);
             }
         }
 

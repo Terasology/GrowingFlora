@@ -18,6 +18,7 @@ package org.terasology.gf.generator;
 import org.terasology.math.Rect2i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector2i;
+import org.terasology.math.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;
 import org.terasology.world.generation.FacetBorder;
@@ -67,7 +68,7 @@ public class FloraProvider implements FacetProvider {
                 // if the block on the surface is dense enough
                 if (density.getWorld(x, height, z) >= 0
                         && density.getWorld(x, height + 1, z) < 0) {
-                    facet.setWorld(x, height, z, noiseTable.noise(x, z) / 256f);
+                    facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
                 }
             }
         }
