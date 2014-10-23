@@ -83,7 +83,6 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
 
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
-        //todo: Handle states where y+1 is out of bounds of the chunk
         if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
                 && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()
                 && shouldSpawn(x, y, z, chunkRegion)) {
