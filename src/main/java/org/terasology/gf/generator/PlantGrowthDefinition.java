@@ -15,6 +15,7 @@
  */
 package org.terasology.gf.generator;
 
+import org.terasology.anotherWorld.environment.EnvironmentSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -53,10 +54,11 @@ public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
     /**
      * Returns how long to next update (if any). If null is returned, it's considered this plant requires no more updates.
      *
+     *
      * @param worldProvider
-     * @param blockEntityRegistry
-     * @param plant
-     * @return
+     * @param environmentSystem
+     *@param blockEntityRegistry
+     * @param plant   @return
      */
-    Long updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
+    Long updatePlant(WorldProvider worldProvider, EnvironmentSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 }

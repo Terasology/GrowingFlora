@@ -4,7 +4,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
-import org.terasology.anotherWorld.WorldLocalParameters;
+import org.terasology.anotherWorld.EnvironmentLocalParameters;
+import org.terasology.anotherWorld.environment.EnvironmentSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.math.TeraMath;
@@ -92,14 +93,14 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long updatePlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long updatePlant(WorldProvider worldProvider, EnvironmentSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
 
         int currentIndex = plantStages.indexOf(block.getBlock().getURI());
 
-        if (shouldGrow(plant, worldProvider, position)) {
+        if (shouldGrow(plant, environmentSystem, position)) {
             int nextIndex = currentIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
             final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
@@ -120,10 +121,10 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
-    private boolean shouldGrow(EntityRef plant, WorldProvider worldProvider, Vector3i position) {
+    private boolean shouldGrow(EntityRef plant, EnvironmentSystem environmentSystem, Vector3i position) {
         float chance = 1f;
         if (growthChance != null) {
-            chance = growthChance.apply(new WorldLocalParameters(worldProvider, position));
+            chance = growthChance.apply(new EnvironmentLocalParameters(environmentSystem, position));
         }
         GetGrowthChance event = new GetGrowthChance(chance);
         plant.send(event);
