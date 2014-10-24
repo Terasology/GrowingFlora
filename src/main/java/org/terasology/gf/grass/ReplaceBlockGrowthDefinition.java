@@ -5,7 +5,7 @@ import com.google.common.base.Predicate;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.anotherWorld.EnvironmentLocalParameters;
-import org.terasology.anotherWorld.environment.EnvironmentSystem;
+import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.math.TeraMath;
@@ -93,7 +93,7 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long updatePlant(WorldProvider worldProvider, EnvironmentSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
@@ -121,7 +121,7 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
-    private boolean shouldGrow(EntityRef plant, EnvironmentSystem environmentSystem, Vector3i position) {
+    private boolean shouldGrow(EntityRef plant, ClimateConditionsSystem environmentSystem, Vector3i position) {
         float chance = 1f;
         if (growthChance != null) {
             chance = growthChance.apply(new EnvironmentLocalParameters(environmentSystem, position));

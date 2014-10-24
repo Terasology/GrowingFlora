@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.anotherWorld.environment.EnvironmentSystem;
+import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -60,5 +60,5 @@ public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
      *@param blockEntityRegistry
      * @param plant   @return
      */
-    Long updatePlant(WorldProvider worldProvider, EnvironmentSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
+    Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 }

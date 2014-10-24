@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.anotherWorld.environment.EnvironmentSystem;
+import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
 import org.terasology.math.Vector3i;
@@ -50,7 +50,7 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     }
 
     @Override
-    public final Long updatePlant(WorldProvider worldProvider, EnvironmentSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public final Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().updateTree(worldProvider, blockEntityRegistry, plant);
     }
 

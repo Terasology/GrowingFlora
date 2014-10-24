@@ -17,7 +17,7 @@ package org.terasology.gf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.anotherWorld.environment.EnvironmentSystem;
+import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -55,7 +55,7 @@ public class PlantGrowingSystem extends BaseComponentSystem {
     @In
     private DelayManager delayManager;
     @In
-    private EnvironmentSystem environmentSystem;
+    private ClimateConditionsSystem environmentSystem;
 
     @ReceiveEvent(components = {LivingPlantComponent.class, BlockComponent.class})
     public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant) {
