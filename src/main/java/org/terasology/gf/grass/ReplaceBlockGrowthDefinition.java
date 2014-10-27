@@ -30,8 +30,10 @@ import java.util.List;
 public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     private String plantId;
     private List<BlockUri> plantStages;
+    private BlockUri deadPlantBlock;
     private List<Long> growthIntervals;
     private Predicate<LocalParameters> spawnCondition;
+    private Predicate<LocalParameters> deathCondition;
     private Function<LocalParameters, Float> growthChance;
 
     public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
@@ -57,6 +59,11 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         }
         this.spawnCondition = spawnCondition;
         this.growthChance = growthChance;
+    }
+
+    public void setDeathCondition(Predicate<LocalParameters> deathCondition, BlockUri deadPlantBlock) {
+        this.deathCondition = deathCondition;
+        this.deadPlantBlock = deadPlantBlock;
     }
 
     @Override
@@ -93,32 +100,56 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
 
-        int currentIndex = plantStages.indexOf(block.getBlock().getURI());
+        if (shouldDie(environmentSystem, position)) {
+            replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
+            
+            return null;
+        } else {
+            int currentIndex = plantStages.indexOf(block.getBlock().getURI());
 
-        if (shouldGrow(plant, environmentSystem, position)) {
-            int nextIndex = currentIndex + 1;
-            BlockUri nextStage = plantStages.get(nextIndex);
-            final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
+            if (shouldGrow(plant, environmentSystem, position)) {
+                int nextIndex = currentIndex + 1;
+                BlockUri nextStage = plantStages.get(nextIndex);
+                final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
 
-            replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
+                replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
 
-            if (hasMoreStages) {
-                return growthIntervals.get(nextIndex);
-            } else {
-                // Entered the last phase
-                return null;
+                if (hasMoreStages) {
+                    return growthIntervals.get(nextIndex);
+                } else {
+                    // Entered the last phase
+                    return null;
+                }
             }
+            return growthIntervals.get(currentIndex);
         }
-        return growthIntervals.get(currentIndex);
+    }
+
+    @Override
+    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+        BlockManager blockManager = CoreRegistry.get(BlockManager.class);
+        BlockComponent block = plant.getComponent(BlockComponent.class);
+        Vector3i position = block.getPosition();
+
+        if (shouldDie(environmentSystem, position)) {
+            replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
+            
+            return true;
+        }
+        return false;
     }
 
     protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage, boolean isLast) {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
+    }
+
+    private boolean shouldDie(ClimateConditionsSystem environmentSystem, Vector3i position) {
+        return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem, position));
     }
 
     private boolean shouldGrow(EntityRef plant, ClimateConditionsSystem environmentSystem, Vector3i position) {

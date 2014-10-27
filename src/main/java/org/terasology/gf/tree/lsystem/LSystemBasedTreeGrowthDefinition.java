@@ -50,8 +50,14 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     }
 
     @Override
-    public final Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public final Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().updateTree(worldProvider, blockEntityRegistry, plant);
+    }
+
+    @Override
+    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+        // Do nothing on random update
+        return false;
     }
 
     @Override

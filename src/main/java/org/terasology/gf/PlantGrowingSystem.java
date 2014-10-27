@@ -29,6 +29,7 @@ import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.randomUpdate.RandomUpdateEvent;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
@@ -57,20 +58,34 @@ public class PlantGrowingSystem extends BaseComponentSystem {
     @In
     private ClimateConditionsSystem environmentSystem;
 
-    @ReceiveEvent(components = {LivingPlantComponent.class, BlockComponent.class})
-    public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant) {
+    @ReceiveEvent
+    public void updatePlant(DelayedActionTriggeredEvent event, EntityRef plant, LivingPlantComponent plantComponent, BlockComponent blockComponent) {
         if (event.getActionId().equals(UPDATE_PLANT_ACTION_ID)) {
             PerformanceMonitor.startActivity("GrowingFlora - Updating plant");
             try {
-                LivingPlantComponent plantComponent = plant.getComponent(LivingPlantComponent.class);
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
-                Long updateDelay = plantDefinition.updatePlant(worldProvider, environmentSystem, blockEntityRegistry, plant);
+                Long updateDelay = plantDefinition.requestedUpdatePlant(worldProvider, environmentSystem, blockEntityRegistry, plant);
                 if (updateDelay != null) {
                     delayManager.addDelayedAction(plant, UPDATE_PLANT_ACTION_ID, updateDelay);
                 }
             } finally {
                 PerformanceMonitor.endActivity();
             }
+        }
+    }
+
+    @ReceiveEvent
+    public void randomPlantUpdate(RandomUpdateEvent event, EntityRef plant, LivingPlantComponent plantComponent, BlockComponent blockComponent) {
+        PerformanceMonitor.startActivity("GrowingFlora - Updating plant");
+        try {
+            PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
+            if (plantDefinition.randomUpdatePlant(worldProvider, environmentSystem, blockEntityRegistry, plant)) {
+                if (delayManager.hasDelayedAction(plant, UPDATE_PLANT_ACTION_ID)) {
+                    delayManager.cancelDelayedAction(plant, UPDATE_PLANT_ACTION_ID);
+                }
+            }
+        } finally {
+            PerformanceMonitor.endActivity();
         }
     }
 }

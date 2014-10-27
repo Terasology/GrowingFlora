@@ -57,8 +57,20 @@ public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
      *
      * @param worldProvider
      * @param environmentSystem
-     *@param blockEntityRegistry
+     * @param blockEntityRegistry
      * @param plant   @return
+     * @return
      */
-    Long updatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
+    Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
+
+    /**
+     * Called randomly on a plant. If true is returned - this plant will no longer receive requested updates.
+     *
+     * @param worldProvider
+     * @param environmentSystem
+     * @param blockEntityRegistry
+     * @param plant
+     * @return
+     */
+    boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 }
