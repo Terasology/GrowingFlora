@@ -1,17 +1,31 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.terasology.gf.grass;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import org.terasology.anotherWorld.EnvironmentLocalParameters;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
-import org.terasology.anotherWorld.EnvironmentLocalParameters;
 import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -21,47 +35,26 @@ import org.terasology.world.block.BlockUri;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * Created by Marcin on 2014-10-27.
  */
-public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
+public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
     private String plantId;
-    private List<BlockUri> plantStages;
-    private BlockUri deadPlantBlock;
-    private List<Long> growthIntervals;
     private Predicate<LocalParameters> spawnCondition;
+    private Function<LocalParameters, Long> growthTimeFunction;
+    private List<BlockUri> plantStages;
     private Predicate<LocalParameters> deathCondition;
-    private Function<LocalParameters, Float> growthChance;
+    private BlockUri deadPlantBlock;
 
-    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
-                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+    public AdvancedStagesGrowthDefinition(String plantId, Predicate<LocalParameters> spawnCondition,
+                                          Function<LocalParameters, Long> growthTimeFunction, List<BlockUri> plantStages,
+                                          Predicate<LocalParameters> deathCondition, BlockUri deadPlantBlock) {
         this.plantId = plantId;
-        this.plantStages = plantStages;
-        growthIntervals = new ArrayList<>();
-        for (int i = 0; i < plantStages.size() - 2; i++) {
-            growthIntervals.add(growthInterval);
-        }
-        growthIntervals.add(penultimateGrowthInterval);
         this.spawnCondition = spawnCondition;
-        this.growthChance = growthChance;
-    }
-
-    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
-                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
-        this.plantId = plantId;
+        this.growthTimeFunction = growthTimeFunction;
         this.plantStages = plantStages;
-        growthIntervals = new ArrayList<>();
-        for (int i = 0; i < plantStages.size() - 1; i++) {
-            growthIntervals.add(growthInterval);
-        }
-        this.spawnCondition = spawnCondition;
-        this.growthChance = growthChance;
-    }
-
-    public void setDeathCondition(Predicate<LocalParameters> deathCondition, BlockUri deadPlantBlock) {
         this.deathCondition = deathCondition;
         this.deadPlantBlock = deadPlantBlock;
     }
@@ -92,11 +85,9 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
-        if (growthIntervals.size() > 0) {
-            return growthIntervals.get(0);
-        } else {
-            return null;
-        }
+        BlockComponent block = plant.getComponent(BlockComponent.class);
+        Vector3i position = block.getPosition();
+        return growthTimeFunction.apply(new EnvironmentLocalParameters(environmentSystem, position));
     }
 
     @Override
@@ -112,21 +103,18 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         } else {
             int currentIndex = plantStages.indexOf(block.getBlock().getURI());
 
-            if (shouldGrow(plant, environmentSystem, position)) {
-                int nextIndex = currentIndex + 1;
-                BlockUri nextStage = plantStages.get(nextIndex);
-                final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
+            int nextIndex = currentIndex + 1;
+            BlockUri nextStage = plantStages.get(nextIndex);
+            final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
 
-                replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
+            replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
 
-                if (hasMoreStages) {
-                    return growthIntervals.get(nextIndex);
-                } else {
-                    // Entered the last phase
-                    return null;
-                }
+            if (hasMoreStages) {
+                return growthTimeFunction.apply(new EnvironmentLocalParameters(environmentSystem, position));
+            } else {
+                // Entered the last phase
+                return null;
             }
-            return growthIntervals.get(currentIndex);
         }
     }
 
@@ -150,18 +138,5 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
 
     private boolean shouldDie(ClimateConditionsSystem environmentSystem, Vector3i position) {
         return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem, position));
-    }
-
-    private boolean shouldGrow(EntityRef plant, ClimateConditionsSystem environmentSystem, Vector3i position) {
-        float chance = 1f;
-        if (growthChance != null) {
-            chance = growthChance.apply(new EnvironmentLocalParameters(environmentSystem, position));
-        }
-        GetGrowthChance event = new GetGrowthChance(chance);
-        plant.send(event);
-        if (event.isConsumed()) {
-            return false;
-        }
-        return new FastRandom().nextFloat() < TeraMath.clamp(event.getResultValue());
     }
 }

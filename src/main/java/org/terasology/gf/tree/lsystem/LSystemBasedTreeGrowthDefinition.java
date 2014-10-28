@@ -45,7 +45,7 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     }
 
     @Override
-    public Long initializePlantedPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().setupPlantedSapling(plant);
     }
 

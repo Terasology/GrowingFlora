@@ -17,6 +17,7 @@ package org.terasology.gf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -49,6 +50,8 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     private BlockEntityRegistry blockEntityRegistry;
     @In
     private DelayManager delayManager;
+    @In
+    private ClimateConditionsSystem climateConditionsSystem;
 
     // To avoid stack overflow
     private boolean processingEvent;
@@ -66,7 +69,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                 Vector3i blockLocation = sapling.getComponent(BlockComponent.class).getPosition();
                 String saplingType = livingPlant.type;
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, blockEntityRegistry, sapling);
+                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, climateConditionsSystem, blockEntityRegistry, sapling);
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(blockLocation);
                 if (blockEntity.hasComponent(PlantedSaplingComponent.class)) {
                     blockEntity.removeComponent(PlantedSaplingComponent.class);
