@@ -23,11 +23,12 @@ import javax.vecmath.Vector3f;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class SurroundLengthAxionElementGeneration implements AxionElementGeneration {
-    private TreeBlockDefinition baseBlock;
-    private TreeBlockDefinition surroundBlock;
-    private float advance;
-    private float innerRange;
-    private float range;
+    private final TreeBlockDefinition baseBlock;
+    private final TreeBlockDefinition surroundBlock;
+    private final float advance;
+    private final float innerRangeSquare;
+    private final float range;
+    private final float rangeSquare;
     private int maxZ = Integer.MAX_VALUE;
 
     public SurroundLengthAxionElementGeneration(TreeBlockDefinition baseBlock, TreeBlockDefinition surroundBlock, float advance, float range) {
@@ -38,8 +39,9 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
         this.baseBlock = baseBlock;
         this.surroundBlock = surroundBlock;
         this.advance = advance;
-        this.innerRange = innerRange;
+        this.innerRangeSquare = innerRange * innerRange;
         this.range = range;
+        this.rangeSquare = range * range;
     }
 
     public void setMaxZ(int maxZ) {
@@ -56,14 +58,14 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
             for (int x = -rangeInt; x <= rangeInt; x++) {
                 for (int y = -rangeInt; y <= rangeInt; y++) {
                     for (int z = -rangeInt; z <= Math.min(rangeInt, maxZ); z++) {
-                        double distance = Math.sqrt(x * x + y * y + z * z);
-                        if (distance < innerRange) {
+                        double distanceSquare = x * x + y * y + z * z;
+                        if (distanceSquare < innerRangeSquare) {
                             Vector3f v = new Vector3f(x, y, z);
                             rotation.transform(v);
                             Vector3f sideVec = new Vector3f(position);
                             sideVec.add(v);
                             callback.setAdditionalBlock(sideVec, baseBlock);
-                        } else if (distance < range) {
+                        } else if (distanceSquare < rangeSquare) {
                             Vector3f v = new Vector3f(x, y, z);
                             rotation.transform(v);
                             Vector3f sideVec = new Vector3f(position);
