@@ -50,6 +50,8 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
 
     @Override
     public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
+        Vector3f workVector = new Vector3f();
+
         float length = Float.parseFloat(axionParameter);
 
         for (float pos = advance; pos < length; pos += advance) {
@@ -60,17 +62,15 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
                     for (int z = -rangeInt; z <= Math.min(rangeInt, maxZ); z++) {
                         double distanceSquare = x * x + y * y + z * z;
                         if (distanceSquare < innerRangeSquare) {
-                            Vector3f v = new Vector3f(x, y, z);
-                            rotation.transform(v);
-                            Vector3f sideVec = new Vector3f(position);
-                            sideVec.add(v);
-                            callback.setAdditionalBlock(sideVec, baseBlock);
+                            workVector.set(x, y, z);
+                            rotation.transform(workVector);
+                            workVector.add(position);
+                            callback.setAdditionalBlock(workVector, baseBlock);
                         } else if (distanceSquare < rangeSquare) {
-                            Vector3f v = new Vector3f(x, y, z);
-                            rotation.transform(v);
-                            Vector3f sideVec = new Vector3f(position);
-                            sideVec.add(v);
-                            callback.setAdditionalBlock(sideVec, surroundBlock);
+                            workVector.set(x, y, z);
+                            rotation.transform(workVector);
+                            workVector.add(position);
+                            callback.setAdditionalBlock(workVector, surroundBlock);
                         }
                     }
                 }
