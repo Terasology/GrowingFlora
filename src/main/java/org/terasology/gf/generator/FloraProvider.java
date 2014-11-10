@@ -53,22 +53,22 @@ public class FloraProvider implements FacetProvider {
         DensityFacet density = region.getRegionFacet(DensityFacet.class);
         SeaLevelFacet seaLevel = region.getRegionFacet(SeaLevelFacet.class);
 
-        Rect2i worldRegion2D = Rect2i.createFromMinAndMax(facet.getWorldRegion().minX(),
-                facet.getWorldRegion().minZ(),
-                facet.getWorldRegion().maxX(),
-                facet.getWorldRegion().maxZ());
+        int minX = facet.getWorldRegion().minX();
+        int minZ = facet.getWorldRegion().minZ();
+        int maxX = facet.getWorldRegion().maxX();
+        int maxZ = facet.getWorldRegion().maxZ();
 
-        for (Vector2i pos : worldRegion2D) {
-            int x = pos.getX();
-            int z = pos.getY();
-            int height = TeraMath.floorToInt(surface.getWorld(x, z));
-            // if the surface is in range, and if we are above sea level
-            if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel.getSeaLevel()) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                int height = TeraMath.floorToInt(surface.getWorld(x, z));
+                // if the surface is in range, and if we are above sea level
+                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel.getSeaLevel()) {
 
-                // if the block on the surface is dense enough
-                if (density.getWorld(x, height, z) >= 0
-                        && density.getWorld(x, height + 1, z) < 0) {
-                    facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
+                    // if the block on the surface is dense enough
+                    if (density.getWorld(x, height, z) >= 0
+                            && density.getWorld(x, height + 1, z) < 0) {
+                        facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
+                    }
                 }
             }
         }
