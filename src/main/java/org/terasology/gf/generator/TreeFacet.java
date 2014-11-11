@@ -15,13 +15,14 @@
  */
 package org.terasology.gf.generator;
 
+import org.terasology.anotherWorld.SparseObjectFacet3D;
 import org.terasology.math.Region3i;
 import org.terasology.world.generation.Border3D;
 
 /**
  * Stores a random seed for a tree to be planted
  */
-public class TreeFacet extends SparseFloatFacet3D {
+public class TreeFacet extends SparseObjectFacet3D<Float> {
 
     public TreeFacet(Region3i targetRegion, Border3D border) {
         super(targetRegion, border);
