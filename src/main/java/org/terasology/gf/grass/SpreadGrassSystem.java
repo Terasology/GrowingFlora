@@ -85,7 +85,7 @@ public class SpreadGrassSystem extends BaseComponentSystem {
 
     private boolean blockAboveIsLoadedAndAir(Vector3i blockPosition) {
         Vector3i blockAbove = new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z);
-        return worldProvider.isBlockRelevant(blockAbove) &&
-            worldProvider.getBlock(blockAbove) == BlockManager.getAir();
+        return worldProvider.isBlockRelevant(blockAbove)
+                && worldProvider.getBlock(blockAbove) == BlockManager.getAir();
     }
 }

@@ -39,8 +39,8 @@ import org.terasology.world.block.BlockComponent;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SaplingInitializeSystem extends BaseComponentSystem {
-    private static final Logger logger = LoggerFactory.getLogger(SaplingInitializeSystem.class);
     public static final String INITIALIZE_PLANT_ACTION = "PlantPack:initializePlant";
+    private static final Logger logger = LoggerFactory.getLogger(SaplingInitializeSystem.class);
 
     @In
     private PlantRegistry plantRegistry;

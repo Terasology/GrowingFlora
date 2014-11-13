@@ -17,7 +17,11 @@ package org.terasology.gf.generator;
 
 import org.terasology.math.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
-import org.terasology.world.generation.*;
+import org.terasology.world.generation.Facet;
+import org.terasology.world.generation.FacetProvider;
+import org.terasology.world.generation.GeneratingRegion;
+import org.terasology.world.generation.Produces;
+import org.terasology.world.generation.Requires;
 
 import java.util.Map;
 

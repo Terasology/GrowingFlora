@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,19 +46,18 @@ public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
      *
      * @param worldProvider
      * @param environmentSystem
-     *@param blockEntityRegistry
-     * @param plant   @return
+     * @param blockEntityRegistry
+     * @param plant               @return
      */
     Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);
 
     /**
      * Returns how long to next update (if any). If null is returned, it's considered this plant requires no more updates.
      *
-     *
      * @param worldProvider
      * @param environmentSystem
      * @param blockEntityRegistry
-     * @param plant   @return
+     * @param plant               @return
      * @return
      */
     Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant);

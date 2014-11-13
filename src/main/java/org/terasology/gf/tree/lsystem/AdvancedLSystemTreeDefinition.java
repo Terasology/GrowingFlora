@@ -1,11 +1,11 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,7 +91,8 @@ public class AdvancedLSystemTreeDefinition {
         LSystemTreeComponent treeComponent = createNewTreeComponent(seed, worldPos);
 
         // Block locations in world coordinates
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(worldPos, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(worldPos, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle)
+                .gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
 
@@ -126,7 +127,8 @@ public class AdvancedLSystemTreeDefinition {
         int growthWait = rand.nextInt(growthInterval);
         treeComponent.lastGrowthTime = time - growthWait;
 
-        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(location, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle).gatherBlockDefinitions();
+        Map<Vector3i, TreeBlockDefinition> treeBlocks = generateTreeFromAxion(location, treeComponent.axion, treeComponent.branchAngle, treeComponent.rotationAngle)
+                .gatherBlockDefinitions();
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         TreeBlockDefinition blockDefinition = treeBlocks.get(location);
@@ -435,7 +437,8 @@ public class AdvancedLSystemTreeDefinition {
 
         Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
 
-        Map<Vector3i, TreeBlockDefinition> treeBlockMap = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle).gatherBlockDefinitions();
+        Map<Vector3i, TreeBlockDefinition> treeBlockMap = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle)
+                .gatherBlockDefinitions();
         return treeBlockMap.containsKey(new Vector3i(block.x - location.x, block.y - location.y, block.z - location.z));
     }
 
@@ -518,8 +521,13 @@ public class AdvancedLSystemTreeDefinition {
         }
 
         public Region3i getTreeRegion() {
-            int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
-            int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int minZ = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            int maxY = Integer.MIN_VALUE;
+            int maxZ = Integer.MIN_VALUE;
+
             for (Vector3i block : gatherBlockDefinitions().keySet()) {
                 minX = Math.min(minX, block.x);
                 minY = Math.min(minY, block.y);

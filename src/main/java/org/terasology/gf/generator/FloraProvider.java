@@ -15,9 +15,7 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.math.Rect2i;
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector2i;
 import org.terasology.math.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;

@@ -35,7 +35,7 @@ public interface ConnectedPlantGrowthDefinition extends PlantGrowthDefinition {
      * @param plant
      * @return
      */
-    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
+    boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
 
     /**
      * Returns a collection of locations that are dependand on existance of this block in this plant.
@@ -47,5 +47,5 @@ public interface ConnectedPlantGrowthDefinition extends PlantGrowthDefinition {
      * @param plant
      * @return
      */
-    public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
+    Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
 }
