@@ -64,12 +64,12 @@ public class TreeDestructionSystem extends BaseComponentSystem {
     private boolean processingDestruction;
 
     // There is some bug in Engine, which makes it impossible to do that
-    @ReceiveEvent(components = {PartOfTreeComponent.class, BlockComponent.class})
-    public void onTreePartDestroyed(BeforeDestroyEvent beforeDestroyEvent, EntityRef treePart) {
+    @ReceiveEvent
+    public void onTreePartDestroyed(BeforeDestroyEvent beforeDestroyEvent, EntityRef treePart,
+                                    PartOfTreeComponent partOfTreeComponent, BlockComponent component) {
         if (!processingDestruction) {
             processingDestruction = true;
             try {
-                BlockComponent component = treePart.getComponent(BlockComponent.class);
                 Vector3i position = component.getPosition();
 
                 for (EntityRef testedTree : entityManager.getEntitiesWith(LSystemTreeComponent.class)) {

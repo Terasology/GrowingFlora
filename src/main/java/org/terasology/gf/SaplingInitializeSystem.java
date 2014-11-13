@@ -56,17 +56,20 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     // To avoid stack overflow
     private boolean processingEvent;
 
-    @ReceiveEvent(components = {GeneratedSaplingComponent.class, BlockComponent.class})
-    public void generatedSaplingLoaded(OnAddedComponent event, EntityRef sapling) {
+    @ReceiveEvent
+    public void generatedSaplingLoaded(OnAddedComponent event, EntityRef sapling,
+                                       GeneratedSaplingComponent generatedSaplingComponent, BlockComponent blockComponent) {
         delayManager.addDelayedAction(sapling, INITIALIZE_PLANT_ACTION, 0);
     }
 
-    @ReceiveEvent(components = {PlantedSaplingComponent.class, LivingPlantComponent.class, BlockComponent.class})
-    public void plantedSapling(OnAddedComponent event, EntityRef sapling, LivingPlantComponent livingPlant) {
+    @ReceiveEvent
+    public void plantedSapling(OnAddedComponent event, EntityRef sapling, LivingPlantComponent livingPlant,
+                               PlantedSaplingComponent plantedSaplingComponent, LivingPlantComponent livingPlantComponent,
+                               BlockComponent blockComponent) {
         if (!processingEvent) {
             processingEvent = true;
             try {
-                Vector3i blockLocation = sapling.getComponent(BlockComponent.class).getPosition();
+                Vector3i blockLocation = blockComponent.getPosition();
                 String saplingType = livingPlant.type;
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
                 Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, climateConditionsSystem, blockEntityRegistry, sapling);
@@ -83,15 +86,15 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
         }
     }
 
-    @ReceiveEvent(components = {GeneratedSaplingComponent.class, BlockComponent.class})
-    public void delayedInitialization(DelayedActionTriggeredEvent event, EntityRef sapling) {
+    @ReceiveEvent
+    public void delayedInitialization(DelayedActionTriggeredEvent event, EntityRef sapling,
+                                      GeneratedSaplingComponent generatedSapling, BlockComponent blockComponent) {
         if (event.getActionId().equals(INITIALIZE_PLANT_ACTION)) {
             if (!processingEvent) {
                 PerformanceMonitor.startActivity("GrowingFlora - Initializing sapling");
                 processingEvent = true;
                 try {
-                    GeneratedSaplingComponent generatedSapling = sapling.getComponent(GeneratedSaplingComponent.class);
-                    Vector3i blockLocation = sapling.getComponent(BlockComponent.class).getPosition();
+                    Vector3i blockLocation = blockComponent.getPosition();
                     String saplingType = generatedSapling.type;
                     PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
                     Long updateDelay = plantDefinition.initializeGeneratedPlant(worldProvider, blockEntityRegistry, sapling);
