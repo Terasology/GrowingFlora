@@ -32,12 +32,17 @@ import org.terasology.world.generation.facets.SurfaceHeightFacet;
  * Determines that ground that flora can be placed on
  */
 @Produces(FloraFacet.class)
-@Requires({@Facet(SeaLevelFacet.class),
+@Requires({
         @Facet(value = SurfaceHeightFacet.class, border = @FacetBorder(sides = 5)),
         @Facet(value = DensityFacet.class, border = @FacetBorder(top = 1, sides = 5))})
 public class FloraProvider implements FacetProvider {
 
     private NoiseTable noiseTable;
+    private int seaLevel;
+
+    public FloraProvider(int seaLevel) {
+        this.seaLevel = seaLevel;
+    }
 
     @Override
     public void setSeed(long seed) {
@@ -49,7 +54,6 @@ public class FloraProvider implements FacetProvider {
         FloraFacet facet = new FloraFacet(region.getRegion(), region.getBorderForFacet(FloraFacet.class));
         SurfaceHeightFacet surface = region.getRegionFacet(SurfaceHeightFacet.class);
         DensityFacet density = region.getRegionFacet(DensityFacet.class);
-        SeaLevelFacet seaLevel = region.getRegionFacet(SeaLevelFacet.class);
 
         int minX = facet.getWorldRegion().minX();
         int minZ = facet.getWorldRegion().minZ();
@@ -60,7 +64,7 @@ public class FloraProvider implements FacetProvider {
             for (int z = minZ; z <= maxZ; z++) {
                 int height = TeraMath.floorToInt(surface.getWorld(x, z));
                 // if the surface is in range, and if we are above sea level
-                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel.getSeaLevel()) {
+                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
 
                     // if the block on the surface is dense enough
                     if (density.getWorld(x, height, z) >= 0
