@@ -15,9 +15,8 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
+import org.terasology.math.geom.Matrix4f;
+import org.terasology.math.geom.Vector3f;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

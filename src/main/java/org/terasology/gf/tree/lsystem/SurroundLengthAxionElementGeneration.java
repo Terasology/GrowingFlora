@@ -15,9 +15,9 @@
  */
 package org.terasology.gf.tree.lsystem;
 
+import org.terasology.math.geom.Matrix4f;
+import org.terasology.math.geom.Vector3f;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -63,12 +63,12 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
                         double distanceSquare = x * x + y * y + z * z;
                         if (distanceSquare < innerRangeSquare) {
                             workVector.set(x, y, z);
-                            rotation.transform(workVector);
+                            rotation.transformVector(workVector);
                             workVector.add(position);
                             callback.setAdditionalBlock(workVector, baseBlock);
                         } else if (distanceSquare < rangeSquare) {
                             workVector.set(x, y, z);
-                            rotation.transform(workVector);
+                            rotation.transformVector(workVector);
                             workVector.add(position);
                             callback.setAdditionalBlock(workVector, surroundBlock);
                         }

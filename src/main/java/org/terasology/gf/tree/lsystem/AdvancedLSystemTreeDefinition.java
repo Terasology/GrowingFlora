@@ -16,6 +16,7 @@
 package org.terasology.gf.tree.lsystem;
 
 import com.google.common.collect.Queues;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.anotherWorld.util.ChunkRandom;
@@ -28,6 +29,10 @@ import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.TeraMath;
 import org.terasology.math.Vector3i;
+import org.terasology.math.geom.BaseVector3f;
+import org.terasology.math.geom.Matrix4f;
+import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
@@ -42,8 +47,6 @@ import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStartin
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.chunks.CoreChunk;
 
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Vector3f;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -342,9 +345,7 @@ public class AdvancedLSystemTreeDefinition {
 
         BranchLocation branchLocation = treeStructure.getRootBranch();
         Vector3f position = location.toVector3f();
-        Matrix4f rotation = new Matrix4f();
-        rotation.setIdentity();
-        rotation.rotY(treeRotation);
+        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0), treeRotation), BaseVector3f.ZERO, 1.0f);
 
         Callback callback = new Callback(position, rotation);
         callback.setBranchLocation(branchLocation);
@@ -371,23 +372,21 @@ public class AdvancedLSystemTreeDefinition {
                     callback.setBranchLocation(branchLocation);
                     break;
                 case '&':
-                    tempRotation.setIdentity();
-                    tempRotation.rotX(angle);
+                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(1, 0, 0), angle), BaseVector3f.ZERO, 1.0f);
                     rotation.mul(tempRotation);
                     break;
                 case '^':
-                    tempRotation.setIdentity();
-                    tempRotation.rotX(-angle);
+                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(1, 0, 0), -angle), BaseVector3f.ZERO, 1.0f);
                     rotation.mul(tempRotation);
                     break;
                 case '+':
-                    tempRotation.setIdentity();
-                    tempRotation.rotY((float) Math.toRadians(Integer.parseInt(axion.parameter)));
+                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0),
+                            (float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
                     rotation.mul(tempRotation);
                     break;
                 case '-':
-                    tempRotation.setIdentity();
-                    tempRotation.rotY(-(float) Math.toRadians(Integer.parseInt(axion.parameter)));
+                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0),
+                            -(float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
                     rotation.mul(tempRotation);
                     break;
                 default:
@@ -686,7 +685,7 @@ public class AdvancedLSystemTreeDefinition {
         @Override
         public void advance(float distance) {
             Vector3f dir = new Vector3f(0, distance, 0);
-            rotation.transform(dir);
+            rotation.transformVector(dir);
             position.add(dir);
         }
     }
