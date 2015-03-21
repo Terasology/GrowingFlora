@@ -24,7 +24,7 @@ import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;

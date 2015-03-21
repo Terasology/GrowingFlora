@@ -16,7 +16,7 @@
 package org.terasology.gf.generator;
 
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;
 import org.terasology.world.generation.FacetBorder;
@@ -25,7 +25,6 @@ import org.terasology.world.generation.GeneratingRegion;
 import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
 import org.terasology.world.generation.facets.DensityFacet;
-import org.terasology.world.generation.facets.SeaLevelFacet;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 /**

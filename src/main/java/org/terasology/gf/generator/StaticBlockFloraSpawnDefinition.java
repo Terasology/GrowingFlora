@@ -20,7 +20,7 @@ import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.gf.PlantType;
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.block.Block;

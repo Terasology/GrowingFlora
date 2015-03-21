@@ -27,7 +27,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;

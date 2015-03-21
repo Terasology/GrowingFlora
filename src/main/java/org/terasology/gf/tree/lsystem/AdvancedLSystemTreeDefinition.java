@@ -16,7 +16,6 @@
 package org.terasology.gf.tree.lsystem;
 
 import com.google.common.collect.Queues;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.anotherWorld.util.ChunkRandom;
@@ -28,11 +27,11 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.TeraMath;
-import org.terasology.math.Vector3i;
 import org.terasology.math.geom.BaseVector3f;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;

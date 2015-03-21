@@ -16,7 +16,7 @@
 package org.terasology.randomUpdate;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 
 import java.util.Collection;
 

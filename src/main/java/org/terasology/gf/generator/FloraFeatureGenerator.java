@@ -24,7 +24,7 @@ import org.terasology.anotherWorld.generation.BiomeFacet;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.math.Vector3i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
