@@ -68,7 +68,7 @@ public class SpreadGrassSystem extends BaseComponentSystem {
                 Vector3i blockPosition = new Vector3i(pos.x + position[0], pos.y + y, pos.z + position[1]);
                 if (worldProvider.isBlockRelevant(blockPosition)) {
                     Block blockAtPosition = worldProvider.getBlock(blockPosition);
-                    if (blockAtPosition != BlockManager.getAir()) {
+                    if (blockAtPosition.isPenetrable()) {
                         if (blockAtPosition == dirt && blockAboveIsLoadedAndAir(blockPosition)) {
                             blocks.put(blockPosition, grass);
                             break;
@@ -86,6 +86,6 @@ public class SpreadGrassSystem extends BaseComponentSystem {
     private boolean blockAboveIsLoadedAndAir(Vector3i blockPosition) {
         Vector3i blockAbove = new Vector3i(blockPosition.x, blockPosition.y + 1, blockPosition.z);
         return worldProvider.isBlockRelevant(blockAbove)
-                && worldProvider.getBlock(blockAbove) == BlockManager.getAir();
+                && worldProvider.getBlock(blockAbove).isPenetrable();
     }
 }

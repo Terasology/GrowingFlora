@@ -1,13 +1,18 @@
 {
     "id" : "GrowingFlora",
-    "version" : "0.1.0",
+    "version" : "0.1.1-SNAPSHOT",
     "author" : "Marcin Sciesinski <marcins78@gmail.com>",
     "displayName" : "GrowingFlora",
     "description" : "Module providing mechanisms for growing plants (trees, bushes, crops)",
     "dependencies" : [
             {
+                "id" : "Core",
+                "minVersion" : "0.54.0"
+            },
+            {
                 "id" : "AnotherWorld",
-                "minVersion" : "0.1.0"
+                "minVersion" : "0.1.0",
+                "maxVersion" : "0.3.0"
             }],
     "isServerSideOnly" : false
 }

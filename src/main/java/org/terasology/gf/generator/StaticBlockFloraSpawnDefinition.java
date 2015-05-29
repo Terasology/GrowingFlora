@@ -84,7 +84,7 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
         if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
-                && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)) == BlockManager.getAir()
+                && groundFilter.apply(chunk.getBlock(TeraMath.calcBlockPos(x, y, z))) && chunk.getBlock(TeraMath.calcBlockPos(x, y + 1, z)).isPenetrable()
                 && shouldSpawn(x, y, z, chunkRegion)) {
             BlockUri block = possibleBlocks.get(new FastRandom().nextInt(possibleBlocks.size()));
             Block blockToPlace = CoreRegistry.get(BlockManager.class).getBlockFamily(block).getArchetypeBlock();

@@ -57,6 +57,9 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
     @In
     private WorldProvider worldProvider;
 
+    @In
+    private BlockManager blockManager;
+
     @ReceiveEvent
     public void addChunk(OnChunkLoaded chunkLoaded, EntityRef worldEntity) {
         loadedChunks.add(chunkLoaded.getChunkPos());
@@ -89,7 +92,7 @@ public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSub
                             entity.send(RandomUpdateEvent.singleton());
                         } else {
                             final Block block = worldProvider.getBlock(blockPosition);
-                            if (block != BlockManager.getAir()) {
+                            if (block.isPenetrable()) {
                                 nonEntityUpdates.put(block, blockPosition);
                             }
                         }

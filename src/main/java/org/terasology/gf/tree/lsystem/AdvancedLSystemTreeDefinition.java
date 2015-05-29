@@ -32,6 +32,7 @@ import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
@@ -257,7 +258,7 @@ public class AdvancedLSystemTreeDefinition {
                     connections += SideBitFlag.getSide(connectSide);
                 }
             }
-            return blockManager.getBlock(new BlockUri(blockFamilyUri, String.valueOf(connections)));
+            return blockManager.getBlock(new BlockUri(blockFamilyUri, new Name(String.valueOf(connections))));
         } else {
             return blockManager.getBlock(blockFamilyUri);
         }
@@ -265,8 +266,8 @@ public class AdvancedLSystemTreeDefinition {
 
     private boolean updateTreeInGame(WorldProvider worldProvider,
                                      Map<Vector3i, TreeBlockDefinition> currentTree, Map<Vector3i, TreeBlockDefinition> nextTree) {
-        Block air = BlockManager.getAir();
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
+        Block air = blockManager.getBlock(BlockManager.AIR_ID);
 
         int replaceCount = 0;
         Map<Vector3i, Block> blocksToReplaceExistingTreeBlocks = new HashMap<>();
