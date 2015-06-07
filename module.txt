@@ -11,8 +11,7 @@
             },
             {
                 "id" : "AnotherWorld",
-                "minVersion" : "0.1.0",
-                "maxVersion" : "0.3.0"
+                "minVersion" : "0.2.0"
             }],
     "isServerSideOnly" : false
 }
