@@ -17,12 +17,14 @@ package org.terasology.gf.grass;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+
 import org.terasology.anotherWorld.EnvironmentLocalParameters;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.math.ChunkMath;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
@@ -91,7 +93,7 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         if (chunk.getRegion().encompasses(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
-            chunk.setBlock(TeraMath.calcBlockPos(x, y, z), lastBlock);
+            chunk.setBlock(ChunkMath.calcBlockPos(x, y, z), lastBlock);
         }
     }
 

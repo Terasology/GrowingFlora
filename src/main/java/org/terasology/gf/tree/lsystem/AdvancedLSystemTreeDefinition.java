@@ -23,10 +23,10 @@ import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
+import org.terasology.math.ChunkMath;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector3f;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
@@ -107,14 +107,14 @@ public class AdvancedLSystemTreeDefinition {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
                 if (chunk.getRegion().encompasses(blockLocation)) {
-                    chunk.setBlock(TeraMath.calcBlockPos(blockLocation), block);
+                    chunk.setBlock(ChunkMath.calcBlockPos(blockLocation), block);
                 }
             }
         }
 
         if (chunk.getRegion().encompasses(worldPos)) {
             Block sapling = blockManager.getBlock(saplingBlock);
-            chunk.setBlock(TeraMath.calcBlockPos(worldPos), sapling);
+            chunk.setBlock(ChunkMath.calcBlockPos(worldPos), sapling);
         }
     }
 
