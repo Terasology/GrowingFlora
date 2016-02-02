@@ -32,7 +32,7 @@ import org.terasology.logic.health.BeforeDestroyEvent;
 import org.terasology.logic.health.DestroyEvent;
 import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.PickupBuilder;
+import org.terasology.logic.inventory.events.DropItemEvent;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
@@ -43,9 +43,6 @@ import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStartin
 
 import java.util.Collection;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class TreeDestructionSystem extends BaseComponentSystem {
     @In
@@ -113,11 +110,10 @@ public class TreeDestructionSystem extends BaseComponentSystem {
                             new DestroyEvent(tempInventoryEntity, EntityRef.NULL, damagePrefab));
                 }
 
-                PickupBuilder pickupBuilder = new PickupBuilder(entityManager, inventoryManager);
                 for (int i = 0; i < 20; i++) {
                     EntityRef item = inventoryManager.getItemInSlot(tempInventoryEntity, i);
                     if (item.exists()) {
-                        pickupBuilder.createPickupFor(item, position.toVector3f(), 60, true);
+                        item.send(new DropItemEvent(position.toVector3f()));
                     }
                 }
             } finally {
