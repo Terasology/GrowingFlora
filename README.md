@@ -7,9 +7,9 @@ GrowingFlora
 Trees
 -------
 Trees are divided into 3 main parts.
-1. Branch
-2. Leaf
-3. Trunk
+ 1. Branch
+ 2. Leaf
+ 3. Trunk
 
 Trees can have varying shapes. Shapes that currently exist can be found in assets/prefabs/shapes.
 
