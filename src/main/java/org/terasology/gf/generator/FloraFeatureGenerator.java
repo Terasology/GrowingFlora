@@ -22,13 +22,13 @@ import org.terasology.anotherWorld.AnotherWorldBiome;
 import org.terasology.anotherWorld.FeatureGenerator;
 import org.terasology.anotherWorld.generation.BiomeFacet;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
+import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
-import org.terasology.world.biomes.BiomeRegistry;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
@@ -187,11 +187,19 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
         result = new ChanceRandomizer<>(100);
         AnotherWorldBiome biomeToAdd = biome;
-        while (biomeToAdd != null) {
+        boolean parentFound = true;
+        while (parentFound) {
+            parentFound = false;
             for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getId())) {
                 result.addChance(floraDefinition.getRarity(), floraDefinition);
             }
-            biomeToAdd = biomeRegistry.getBiomeById(biomeToAdd.getBiomeParent(), AnotherWorldBiome.class);
+            for (AnotherWorldBiome biome1 : biomeRegistry.getRegisteredBiomes(AnotherWorldBiome.class)) {
+                if (biomeToAdd.getBiomeParent().equals(biome1.getId())) {
+                    biomeToAdd = biome1;
+                    parentFound = true;
+                    break;
+                }
+            }
         }
         result.initialize();
         cache.put(biome.getId(), result);
