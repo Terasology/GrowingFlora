@@ -4,10 +4,11 @@ GrowingFlora
 
 > ***If you are interested on making the assets for dynamic plants, you might want to check out [PlantPack](https://github.com/Terasology/PlantPack)***
 
-**GrowingFlora** need these modules to run properly:
+**GrowingFlora** needs these modules to run properly:
 
  1. Core | Minimum Version 1.0.0
- 2. [AnotherWorld](https://github.com/Terasology/AnotherWorld/) | Minimum Version 0.2.0
+ 2. [CoreBlocks](https://github.com/Terasology/CoreBlocks/) | Minimum Version 1.0.0
+ 3. [AnotherWorld](https://github.com/Terasology/AnotherWorld/) | Minimum Version 0.2.0
 
 World Generation
 -------
