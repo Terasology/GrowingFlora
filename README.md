@@ -4,12 +4,6 @@ GrowingFlora
 
 > ***If you are interested on making the assets for dynamic plants, you might want to check out [PlantPack](https://github.com/Terasology/PlantPack)***
 
-**GrowingFlora** needs these modules to run properly:
-
- 1. Core | Minimum Version 1.0.0
- 2. [CoreBlocks](https://github.com/Terasology/CoreBlocks/) | Minimum Version 1.0.0
- 3. [AnotherWorld](https://github.com/Terasology/AnotherWorld/) | Minimum Version 0.2.0
-
 World Generation
 -------
 **GrowingFlora** not only handles the organic growth of plants, but also the generation of it. You can find the world generation code for the plants in `src/main/java/org/terasology/gf/generator`
