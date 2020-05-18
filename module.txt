@@ -1,13 +1,14 @@
 {
-    "id" : "GrowingFlora",
-    "version" : "0.1.3-SNAPSHOT",
-    "author" : "Marcin Sciesinski <marcins78@gmail.com>",
-    "displayName" : "GrowingFlora",
-    "description" : "Module providing mechanisms for growing plants (trees, bushes, crops)",
-    "dependencies" : [
-        {"id" : "Core", "minVersion" : "3.0.0"},
-        {"id" : "CoreBlocks", "minVersion" : "1.0.0"},
-        {"id" : "AnotherWorld", "minVersion" : "0.2.0"}
+    "id": "GrowingFlora",
+    "version": "1.0.0",
+    "author": "Marcin Sciesinski <marcins78@gmail.com>",
+    "displayName": "Growing Flora",
+    "description": "Module providing mechanisms for growing plants (trees, bushes, crops)",
+    "dependencies": [
+        { "id": "AnotherWorld", "minVersion": "1.0.0" },
+        { "id": "CoreAssets", "minVersion": "2.0.1" },
+        { "id": "Inventory", "minVersion": "1.1.0" }
     ],
-    "isServerSideOnly" : false
+    "isServerSideOnly": false,
+    "isLibrary": true
 }

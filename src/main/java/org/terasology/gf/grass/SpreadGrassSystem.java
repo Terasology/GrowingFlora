@@ -48,8 +48,8 @@ public class SpreadGrassSystem extends BaseComponentSystem {
 
     @Override
     public void preBegin() {
-        dirt = blockManager.getBlock("CoreBlocks:Dirt");
-        grass = blockManager.getBlock("CoreBlocks:Grass");
+        dirt = blockManager.getBlock("CoreAssets:Dirt");
+        grass = blockManager.getBlock("CoreAssets:Grass");
     }
 
     @ReceiveEvent
