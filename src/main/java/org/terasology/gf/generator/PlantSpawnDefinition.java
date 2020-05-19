@@ -16,6 +16,7 @@
 package org.terasology.gf.generator;
 
 import org.terasology.gf.PlantType;
+import org.terasology.naming.Name;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
@@ -26,7 +27,7 @@ import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
 public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
     PlantType getPlantType();
 
-    String getBiomeId();
+    Name getBiomeId();
 
     float getRarity();
 

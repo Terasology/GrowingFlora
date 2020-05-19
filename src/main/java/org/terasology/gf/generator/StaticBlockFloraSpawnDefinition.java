@@ -22,6 +22,7 @@ import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.gf.PlantType;
 import org.terasology.math.ChunkMath;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.block.Block;
@@ -37,7 +38,7 @@ import java.util.List;
  */
 public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
-    private String biomeId;
+    private Name biomeId;
     private float rarity;
     private float probability;
     private String plantId;
@@ -48,7 +49,7 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     public StaticBlockFloraSpawnDefinition(PlantType plantType, String biomeId, float rarity, float probability, String plantId,
                                            List<BlockUri> possibleBlocks, Predicate<Block> groundFilter, Predicate<LocalParameters> spawnCondition) {
         this.plantType = plantType;
-        this.biomeId = biomeId;
+        this.biomeId = new Name(biomeId);
         this.rarity = rarity;
         this.probability = probability;
         this.plantId = plantId;
@@ -63,7 +64,7 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public String getBiomeId() {
+    public Name getBiomeId() {
         return biomeId;
     }
 

@@ -20,6 +20,7 @@ import com.google.common.base.Predicate;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.ChunkMath;
+import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.block.Block;
 import org.terasology.world.chunks.CoreChunk;
@@ -31,7 +32,7 @@ import org.terasology.world.generation.Region;
 public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
     private String plantId;
-    private String biomeId;
+    private Name biomeId;
     private float rarity;
     private float probability;
     private Predicate<Block> groundFilter;
@@ -39,7 +40,7 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     public GrowthBasedPlantSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Predicate<Block> groundFilter) {
         this.plantType = plantType;
         this.plantId = plantId;
-        this.biomeId = biomeId;
+        this.biomeId = new Name(biomeId);
         this.rarity = rarity;
         this.probability = probability;
         this.groundFilter = groundFilter;
@@ -51,7 +52,7 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public String getBiomeId() {
+    public Name getBiomeId() {
         return biomeId;
     }
 

@@ -26,6 +26,7 @@ import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
@@ -45,32 +46,32 @@ import java.util.Set;
  */
 public class FloraFeatureGenerator implements FeatureGenerator {
 
-    private Multimap<String, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
+    private Multimap<Name, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<String, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
+    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
-    private Multimap<String, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
+    private Multimap<Name, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<String, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
+    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
 
-    private Multimap<String, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
+    private Multimap<Name, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<String, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
+    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator() {
         loadPlantGrowthDefinitions();
@@ -179,7 +180,7 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
     private ChanceRandomizer<PlantSpawnDefinition> getDefinitionsForBiome(
             AnotherWorldBiome biome, BiomeRegistry biomeRegistry,
-            Map<String, ChanceRandomizer<PlantSpawnDefinition>> cache, Multimap<String, PlantSpawnDefinition> definitions) {
+            Map<Name, ChanceRandomizer<PlantSpawnDefinition>> cache, Multimap<Name, PlantSpawnDefinition> definitions) {
         ChanceRandomizer<PlantSpawnDefinition> result = cache.get(biome.getId());
         if (result != null) {
             return result;
