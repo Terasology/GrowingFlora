@@ -107,14 +107,14 @@ public class AdvancedLSystemTreeDefinition {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
                 if (chunk.getRegion().encompasses(blockLocation)) {
-                    chunk.setBlock(ChunkMath.calcBlockPos(blockLocation), block);
+                    chunk.setBlock(ChunkMath.calcRelativeBlockPos(blockLocation), block);
                 }
             }
         }
 
         if (chunk.getRegion().encompasses(worldPos)) {
             Block sapling = blockManager.getBlock(saplingBlock);
-            chunk.setBlock(ChunkMath.calcBlockPos(worldPos), sapling);
+            chunk.setBlock(ChunkMath.calcRelativeBlockPos(worldPos), sapling);
         }
     }
 

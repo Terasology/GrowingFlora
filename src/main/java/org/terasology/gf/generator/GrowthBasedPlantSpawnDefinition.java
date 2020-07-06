@@ -74,8 +74,8 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region region) {
         if (chunk.getRegion().encompasses(x, y + 1, z) && chunk.getRegion().encompasses(x, y, z)
-                && groundFilter.apply(chunk.getBlock(ChunkMath.calcBlockPos(x, y, z)))
-                && chunk.getBlock(ChunkMath.calcBlockPos(x, y + 1, z)).isPenetrable()) {
+                && groundFilter.apply(chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y, z)))
+                && chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y + 1, z)).isPenetrable()) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
             plantGrowthDefinition.generatePlant(seed, chunk, x, y + 1, z, region);

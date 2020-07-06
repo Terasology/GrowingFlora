@@ -70,7 +70,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
         if (chunk.getRegion().encompasses(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
-            chunk.setBlock(ChunkMath.calcBlockPos(x, y, z), lastBlock);
+            chunk.setBlock(ChunkMath.calcRelativeBlockPos(x, y, z), lastBlock);
         }
     }
 
