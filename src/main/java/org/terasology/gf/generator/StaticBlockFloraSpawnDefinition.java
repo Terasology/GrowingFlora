@@ -16,13 +16,12 @@
 package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
-
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.gf.PlantType;
 import org.terasology.math.ChunkMath;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.block.Block;

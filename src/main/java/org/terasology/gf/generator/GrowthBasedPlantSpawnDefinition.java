@@ -16,11 +16,10 @@
 package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
-
+import org.terasology.gestalt.naming.Name;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.ChunkMath;
-import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.block.Block;
 import org.terasology.world.chunks.CoreChunk;

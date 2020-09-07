@@ -15,8 +15,8 @@
  */
 package org.terasology.gf.generator;
 
+import org.terasology.gestalt.naming.Name;
 import org.terasology.gf.PlantType;
-import org.terasology.naming.Name;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
