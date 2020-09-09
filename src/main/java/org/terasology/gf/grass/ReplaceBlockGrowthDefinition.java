@@ -1,42 +1,28 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.grass;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-
 import org.terasology.anotherWorld.EnvironmentLocalParameters;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.climateConditions.ClimateConditionsSystem;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.math.ChunkMath;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.utilities.random.FastRandom;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.generator.PlantGrowthDefinition;
-import org.terasology.math.ChunkMath;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.utilities.random.FastRandom;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +31,18 @@ import java.util.List;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
-    private String plantId;
-    private List<BlockUri> plantStages;
+    private final String plantId;
+    private final List<BlockUri> plantStages;
+    private final List<Long> growthIntervals;
+    private final Predicate<LocalParameters> spawnCondition;
+    private final Function<LocalParameters, Float> growthChance;
     private BlockUri deadPlantBlock;
-    private List<Long> growthIntervals;
-    private Predicate<LocalParameters> spawnCondition;
     private Predicate<LocalParameters> deathCondition;
-    private Function<LocalParameters, Float> growthChance;
 
-    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval, long penultimateGrowthInterval,
-                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+    public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
+                                        long penultimateGrowthInterval,
+                                        Predicate<LocalParameters> spawnCondition,
+                                        Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
         growthIntervals = new ArrayList<>();
@@ -67,7 +55,8 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     public ReplaceBlockGrowthDefinition(String plantId, List<BlockUri> plantStages, long growthInterval,
-                                        Predicate<LocalParameters> spawnCondition, Function<LocalParameters, Float> growthChance) {
+                                        Predicate<LocalParameters> spawnCondition,
+                                        Function<LocalParameters, Float> growthChance) {
         this.plantId = plantId;
         this.plantStages = plantStages;
         growthIntervals = new ArrayList<>();
@@ -103,12 +92,14 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long initializeGeneratedPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long initializeGeneratedPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry,
+                                         EntityRef plant) {
         return null;
     }
 
     @Override
-    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem,
+                                       BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         if (growthIntervals.size() > 0) {
             return growthIntervals.get(0);
         } else {
@@ -117,7 +108,8 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem,
+                                     BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
@@ -148,7 +140,8 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem,
+                                     BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition();
@@ -161,12 +154,14 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         return false;
     }
 
-    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage, boolean isLast) {
+    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant,
+                                Vector3i position, BlockUri nextStage, boolean isLast) {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
     private boolean shouldDie(ClimateConditionsSystem environmentSystem, Vector3i position) {
-        return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem, position));
+        return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem,
+                position));
     }
 
     private boolean shouldGrow(EntityRef plant, ClimateConditionsSystem environmentSystem, Vector3i position) {

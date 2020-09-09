@@ -1,39 +1,26 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.randomUpdate;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.utilities.random.FastRandom;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.chunks.ChunkConstants;
+import org.terasology.engine.world.chunks.event.BeforeChunkUnload;
+import org.terasology.engine.world.chunks.event.OnChunkLoaded;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.registry.In;
-import org.terasology.utilities.random.FastRandom;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.chunks.ChunkConstants;
-import org.terasology.world.chunks.event.BeforeChunkUnload;
-import org.terasology.world.chunks.event.OnChunkLoaded;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,13 +30,10 @@ import java.util.Set;
  */
 @RegisterSystem
 public class RandomUpdateSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
-    private Set<Vector3i> loadedChunks = new HashSet<>();
-
+    private final Set<Vector3i> loadedChunks = new HashSet<>();
+    private final int updateInterval = 20;
+    private final int updateCountPerChunk = 3;
     private long lastUpdate;
-    private int updateInterval = 20;
-
-    private int updateCountPerChunk = 3;
-
     @In
     private Time time;
     @In

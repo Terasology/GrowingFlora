@@ -1,18 +1,5 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
 import com.google.common.collect.Multimap;
@@ -23,16 +10,16 @@ import org.terasology.anotherWorld.FeatureGenerator;
 import org.terasology.anotherWorld.generation.BiomeFacet;
 import org.terasology.anotherWorld.util.ChanceRandomizer;
 import org.terasology.biomesAPI.BiomeRegistry;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.utilities.random.FastRandom;
+import org.terasology.engine.utilities.random.Random;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generator.plugin.WorldGeneratorPluginLibrary;
 import org.terasology.gestalt.naming.Name;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.utilities.random.FastRandom;
-import org.terasology.utilities.random.Random;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,32 +33,32 @@ import java.util.Set;
  */
 public class FloraFeatureGenerator implements FeatureGenerator {
 
-    private Multimap<Name, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
+    private final Multimap<Name, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
+    private final Map<Name, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
-    private Multimap<Name, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
+    private final Multimap<Name, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
+    private final Map<Name, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
 
-    private Multimap<Name, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
+    private final Multimap<Name, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
             new Comparator<PlantSpawnDefinition>() {
                 @Override
                 public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
                     return o1.getPlantId().compareTo(o2.getPlantId());
                 }
             });
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
+    private final Map<Name, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator() {
         loadPlantGrowthDefinitions();
@@ -87,7 +74,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
 
         WorldGeneratorPluginLibrary pluginLibrary = CoreRegistry.get(WorldGeneratorPluginLibrary.class);
-        List<PlantGrowthDefinition> plantGrowthDefinitions = pluginLibrary.instantiateAllOfType(PlantGrowthDefinition.class);
+        List<PlantGrowthDefinition> plantGrowthDefinitions =
+                pluginLibrary.instantiateAllOfType(PlantGrowthDefinition.class);
         for (PlantGrowthDefinition plantGrowthDefinition : plantGrowthDefinitions) {
             plantRegistry.addPlantType(plantGrowthDefinition.getPlantId(), plantGrowthDefinition);
         }
@@ -95,7 +83,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
     private void loadPlantSpawnDefinition() {
         WorldGeneratorPluginLibrary pluginLibrary = CoreRegistry.get(WorldGeneratorPluginLibrary.class);
-        List<PlantSpawnDefinition> plantSpawnDefinitions = pluginLibrary.instantiateAllOfType(PlantSpawnDefinition.class);
+        List<PlantSpawnDefinition> plantSpawnDefinitions =
+                pluginLibrary.instantiateAllOfType(PlantSpawnDefinition.class);
         for (PlantSpawnDefinition plantSpawnDefinition : plantSpawnDefinitions) {
             PlantType plantType = plantSpawnDefinition.getPlantType();
             if (plantType == PlantType.TREE) {
@@ -128,7 +117,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
             long seed = Float.floatToRawIntBits(value);
             Random random = new FastRandom(seed);
-            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, treeDefinitionsCache, treeDefinitions);
+            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry,
+                    treeDefinitionsCache, treeDefinitions);
             PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
             if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
                 treeDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
@@ -147,7 +137,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
                 long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
-                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, bushDefinitionsCache, bushDefinitions);
+                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome,
+                        biomeRegistry, bushDefinitionsCache, bushDefinitions);
                 PlantSpawnDefinition bushDefinition = definitionsForBiome.randomizeObject(random);
                 if (bushDefinition != null && random.nextFloat() < bushDefinition.getProbability()) {
                     bushDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
@@ -167,7 +158,8 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
                 long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
-                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, foliageDefinitionsCache, foliageDefinitions);
+                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome,
+                        biomeRegistry, foliageDefinitionsCache, foliageDefinitions);
                 PlantSpawnDefinition foliageDefinition = definitionsForBiome.randomizeObject(random);
                 if (foliageDefinition != null && random.nextFloat() < foliageDefinition.getProbability()) {
                     foliageDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
