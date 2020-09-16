@@ -1,0 +1,17 @@
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
+package org.terasology.growingflora.generator;
+
+import org.terasology.anotherWorld.SparseObjectFacet3D;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.world.generation.Border3D;
+
+/**
+ * Stores a random seed for a tree to be planted
+ */
+public class TreeFacet extends SparseObjectFacet3D<Float> {
+
+    public TreeFacet(Region3i targetRegion, Border3D border) {
+        super(targetRegion, border);
+    }
+}
