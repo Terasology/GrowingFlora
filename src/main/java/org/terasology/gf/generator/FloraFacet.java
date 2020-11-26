@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.anotherWorld.SparseObjectFacet3D;
+import org.terasology.world.generation.facets.base.SparseObjectFacet3D;
 import org.terasology.math.Region3i;
 import org.terasology.world.generation.Border3D;
 

@@ -15,6 +15,7 @@
  */
 package org.terasology.gf.generator;
 
+import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;
@@ -48,12 +49,12 @@ public class FoliageProvider implements FacetProvider {
         FoliageFacet facet = new FoliageFacet(region.getRegion(), region.getBorderForFacet(FoliageFacet.class));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
 
-        for (Map.Entry<Vector3i, Float> positionValue : floraFacet.getFlaggedPositions().entrySet()) {
-            Vector3i pos = positionValue.getKey();
+        for (Map.Entry<BaseVector3i, Float> positionValue : floraFacet.getRelativeEntries().entrySet()) {
+            BaseVector3i pos = positionValue.getKey();
             float value = positionValue.getValue();
 
-            if (noise.noise(pos.x, pos.y, pos.z) / 256f < amount) {
-                facet.setFlag(pos, value);
+            if (noise.noise(pos.x(), pos.y(), pos.z()) / 256f < amount) {
+                facet.set(pos, value);
             }
         }
 

@@ -16,7 +16,6 @@
 package org.terasology.gf.generator;
 
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;
 import org.terasology.world.generation.FacetBorder;
@@ -63,12 +62,13 @@ public class FloraProvider implements FacetProvider {
             for (int z = minZ; z <= maxZ; z++) {
                 int height = TeraMath.floorToInt(surface.getWorld(x, z));
                 // if the surface is in range, and if we are above sea level
-                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
+                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x,
+                        height + 1, z) && height >= seaLevel) {
 
                     // if the block on the surface is dense enough
                     if (density.getWorld(x, height, z) >= 0
                             && density.getWorld(x, height + 1, z) < 0) {
-                        facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
+                        facet.set(x, height, z, noiseTable.noise(x, z) / 256f);
                     }
                 }
             }
