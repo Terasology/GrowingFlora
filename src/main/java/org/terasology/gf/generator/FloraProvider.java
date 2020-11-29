@@ -15,7 +15,6 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.procedural.NoiseTable;
 import org.terasology.world.generation.Facet;
@@ -24,16 +23,13 @@ import org.terasology.world.generation.FacetProvider;
 import org.terasology.world.generation.GeneratingRegion;
 import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
-import org.terasology.world.generation.facets.DensityFacet;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
+import org.terasology.world.generation.facets.SurfacesFacet;
 
 /**
  * Determines that ground that flora can be placed on
  */
 @Produces(FloraFacet.class)
-@Requires({
-        @Facet(value = SurfaceHeightFacet.class, border = @FacetBorder(sides = 5)),
-        @Facet(value = DensityFacet.class, border = @FacetBorder(top = 1, sides = 5))})
+@Requires(@Facet(value = SurfacesFacet.class, border = @FacetBorder(bottom = 1)))
 public class FloraProvider implements FacetProvider {
 
     private NoiseTable noiseTable;
@@ -51,8 +47,7 @@ public class FloraProvider implements FacetProvider {
     @Override
     public void process(GeneratingRegion region) {
         FloraFacet facet = new FloraFacet(region.getRegion(), region.getBorderForFacet(FloraFacet.class));
-        SurfaceHeightFacet surface = region.getRegionFacet(SurfaceHeightFacet.class);
-        DensityFacet density = region.getRegionFacet(DensityFacet.class);
+        SurfacesFacet surface = region.getRegionFacet(SurfacesFacet.class);
 
         int minX = facet.getWorldRegion().minX();
         int minZ = facet.getWorldRegion().minZ();
@@ -61,13 +56,9 @@ public class FloraProvider implements FacetProvider {
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                int height = TeraMath.floorToInt(surface.getWorld(x, z));
-                // if the surface is in range, and if we are above sea level
-                if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
-
-                    // if the block on the surface is dense enough
-                    if (density.getWorld(x, height, z) >= 0
-                            && density.getWorld(x, height + 1, z) < 0) {
+                for (int height  : surface.getWorldColumn(x, z)) {
+                    // if the surface is in range, and if we are above sea level
+                    if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
                         facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
                     }
                 }
