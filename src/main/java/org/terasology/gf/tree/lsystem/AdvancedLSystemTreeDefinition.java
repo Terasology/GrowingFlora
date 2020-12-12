@@ -24,6 +24,7 @@ import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
 import org.terasology.math.ChunkMath;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
@@ -271,7 +272,7 @@ public class AdvancedLSystemTreeDefinition {
 
         int replaceCount = 0;
         Map<Vector3i, Block> blocksToReplaceExistingTreeBlocks = new HashMap<>();
-        Map<Vector3i, Block> blocksToPlaceInNewPlaces = new HashMap<>();
+        Map<org.joml.Vector3i, Block> blocksToPlaceInNewPlaces = new HashMap<>();
 
         EntityRef worldEntity = worldProvider.getWorldEntity();
 
@@ -287,7 +288,7 @@ public class AdvancedLSystemTreeDefinition {
                 replaceCount++;
             } else if (oldBlock == null) {
                 if (worldProvider.getBlock(location).isReplacementAllowed()) {
-                    blocksToPlaceInNewPlaces.put(location, resultBlock);
+                    blocksToPlaceInNewPlaces.put(JomlUtil.from(location), resultBlock);
                     replaceCount++;
                 }
             }

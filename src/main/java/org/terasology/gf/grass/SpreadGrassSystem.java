@@ -19,6 +19,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.randomUpdate.RandomUpdateBlockTypeEvent;
 import org.terasology.registry.In;
@@ -62,7 +63,7 @@ public class SpreadGrassSystem extends BaseComponentSystem {
     }
 
     private void checkForGrassSpreadAround(Vector3i pos) {
-        Map<Vector3i, Block> blocks = new HashMap<>();
+        Map<org.joml.Vector3i, Block> blocks = new HashMap<>();
         for (int[] position : positions) {
             for (int y = 1; y >= -1; y--) {
                 Vector3i blockPosition = new Vector3i(pos.x + position[0], pos.y + y, pos.z + position[1]);
@@ -70,7 +71,7 @@ public class SpreadGrassSystem extends BaseComponentSystem {
                     Block blockAtPosition = worldProvider.getBlock(blockPosition);
                     if (blockAtPosition.isPenetrable()) {
                         if (blockAtPosition == dirt && blockAboveIsLoadedAndAir(blockPosition)) {
-                            blocks.put(blockPosition, grass);
+                            blocks.put(JomlUtil.from(blockPosition), grass);
                             break;
                         }
                     }
