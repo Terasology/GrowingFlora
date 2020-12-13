@@ -49,16 +49,16 @@ public class FloraProvider implements FacetProvider {
         FloraFacet facet = new FloraFacet(region.getRegion(), region.getBorderForFacet(FloraFacet.class));
         SurfacesFacet surface = region.getRegionFacet(SurfacesFacet.class);
 
-        int minX = facet.getWorldRegion().minX();
-        int minZ = facet.getWorldRegion().minZ();
-        int maxX = facet.getWorldRegion().maxX();
-        int maxZ = facet.getWorldRegion().maxZ();
+        int minX = facet.getWorldRegion().getMinX();
+        int minZ = facet.getWorldRegion().getMinZ();
+        int maxX = facet.getWorldRegion().getMaxX();
+        int maxZ = facet.getWorldRegion().getMaxZ();
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int height  : surface.getWorldColumn(x, z)) {
                     // if the surface is in range, and if we are above sea level
-                    if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
+                    if (facet.getWorldRegion().containsBlock(x, height, z) && facet.getWorldRegion().containsBlock(x, height + 1, z) && height >= seaLevel) {
                         facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
                     }
                 }
