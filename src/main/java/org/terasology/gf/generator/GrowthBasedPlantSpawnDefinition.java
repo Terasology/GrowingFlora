@@ -16,7 +16,6 @@
 package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
-
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.math.ChunkMath;
@@ -73,7 +72,7 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
 
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region region) {
-        if (chunk.getRegion().containsBlock(x, y + 1, z) && chunk.getRegion().containsBlock(x, y, z)
+        if (chunk.getRegion().contains(x, y + 1, z) && chunk.getRegion().contains(x, y, z)
                 && groundFilter.apply(chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y, z)))
                 && chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y + 1, z)).isPenetrable()) {
             PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);

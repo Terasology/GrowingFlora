@@ -17,7 +17,6 @@ package org.terasology.gf.grass;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-
 import org.terasology.anotherWorld.EnvironmentLocalParameters;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
@@ -67,7 +66,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
 
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
-        if (chunk.getRegion().containsBlock(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
+        if (chunk.getRegion().contains(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));
             chunk.setBlock(ChunkMath.calcRelativeBlockPos(x, y, z), lastBlock);
