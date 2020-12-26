@@ -58,7 +58,7 @@ public class FloraProvider implements FacetProvider {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int height  : surface.getWorldColumn(x, z)) {
                     // if the surface is in range, and if we are above sea level
-                    if (facet.getWorldRegion().encompasses(x, height, z) && facet.getWorldRegion().encompasses(x, height + 1, z) && height >= seaLevel) {
+                    if (facet.getWorldRegion().contains(x, height, z) && facet.getWorldRegion().contains(x, height + 1, z) && height >= seaLevel) {
                         facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
                     }
                 }

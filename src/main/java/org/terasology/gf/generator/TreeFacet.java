@@ -17,6 +17,7 @@ package org.terasology.gf.generator;
 
 import org.terasology.anotherWorld.SparseObjectFacet3D;
 import org.terasology.math.Region3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 
 /**
@@ -24,7 +25,7 @@ import org.terasology.world.generation.Border3D;
  */
 public class TreeFacet extends SparseObjectFacet3D<Float> {
 
-    public TreeFacet(Region3i targetRegion, Border3D border) {
+    public TreeFacet(BlockRegion targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 }
