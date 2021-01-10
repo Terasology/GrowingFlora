@@ -3,9 +3,13 @@
 package org.terasology.gf.tree.lsystem;
 
 import com.google.common.collect.Queues;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.RoundingMode;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.anotherWorld.util.ChunkRandom;
@@ -13,12 +17,8 @@ import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
-import org.terasology.math.geom.BaseVector3f;
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Quat4f;
 import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
@@ -130,8 +130,8 @@ public class AdvancedLSystemTreeDefinition {
         return (long) growthWait;
     }
 
-    private LSystemTreeComponent createNewTreeComponent(long seed, Vector3i location) {
-        Random random = ChunkRandom.getChunkRandom(seed, location, 345245);
+    private LSystemTreeComponent createNewTreeComponent(long seed, Vector3ic location) {
+        Random random = ChunkRandom.getChunkRandom(seed, new Vector3i(location), 345245);
 
         // New axion (grown)
         int generation = 1 + random.nextInt((int) treeLongevity.getMax() - 1);
@@ -331,7 +331,7 @@ public class AdvancedLSystemTreeDefinition {
 
         BranchLocation branchLocation = treeStructure.getRootBranch();
         Vector3f position = new Vector3f(location);
-        Matrix4f rotation = new Matrix4f(new Quat4f(new org.terasology.math.geom.Vector3f(0, 1, 0), treeRotation), BaseVector3f.ZERO, 1.0f);
+        Matrix4f rotation = new Matrix4f().translationRotateScale(new Vector3f(),new Quaternionf().setAngleAxis(treeRotation,0,1,0), 1.0f);
 
         Callback callback = new Callback(position, rotation);
         callback.setBranchLocation(branchLocation);
@@ -339,7 +339,7 @@ public class AdvancedLSystemTreeDefinition {
         int axionIndex = 0;
         for (AxionElement axion : parseAxions(currentAxion)) {
             Matrix4f tempRotation = new Matrix4f();
-            tempRotation.setIdentity();
+            tempRotation.identity();
 
             char c = axion.key;
             switch (c) {
@@ -358,21 +358,19 @@ public class AdvancedLSystemTreeDefinition {
                     callback.setBranchLocation(branchLocation);
                     break;
                 case '&':
-                    tempRotation = new Matrix4f(new Quat4f(new org.terasology.math.geom.Vector3f(1, 0, 0), angle), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(angle,1,0,0));
                     rotation.mul(tempRotation);
                     break;
                 case '^':
-                    tempRotation = new Matrix4f(new Quat4f(new org.terasology.math.geom.Vector3f(1, 0, 0), -angle), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-angle,1, 0, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '+':
-                    tempRotation = new Matrix4f(new Quat4f(new org.terasology.math.geom.Vector3f(0, 1, 0),
-                            (float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '-':
-                    tempRotation = new Matrix4f(new Quat4f(new org.terasology.math.geom.Vector3f(0, 1, 0),
-                            -(float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
                     rotation.mul(tempRotation);
                     break;
                 default:
@@ -652,8 +650,8 @@ public class AdvancedLSystemTreeDefinition {
         }
 
         @Override
-        public void setMainBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
-            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f), RoundingMode.FLOOR);
+        public void setMainBlock(Vector3fc blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x() + 0.5f, blockPosition.y() + 0.5f, blockPosition.z() + 0.5f), RoundingMode.FLOOR);
             if (integerPosition.y >= 0) {
                 branchLocation.setMainBlock(axionIndex, integerPosition);
                 branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
@@ -661,8 +659,8 @@ public class AdvancedLSystemTreeDefinition {
         }
 
         @Override
-        public void setAdditionalBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
-            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f), RoundingMode.FLOOR);
+        public void setAdditionalBlock(Vector3fc blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x() + 0.5f, blockPosition.y() + 0.5f, blockPosition.z() + 0.5f), RoundingMode.FLOOR);
             if (integerPosition.y >= 0) {
                 branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
             }
@@ -671,7 +669,7 @@ public class AdvancedLSystemTreeDefinition {
         @Override
         public void advance(float distance) {
             Vector3f dir = new Vector3f(0, distance, 0);
-            rotation.transformVector(JomlUtil.from(dir));
+            rotation.transformDirection(dir);
             position.add(dir);
         }
     }

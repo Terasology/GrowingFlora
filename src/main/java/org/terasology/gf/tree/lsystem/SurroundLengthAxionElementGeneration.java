@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.tree.lsystem;
 
+import org.joml.Matrix4fc;
 import org.joml.Vector3f;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Matrix4f;
+import org.joml.Vector3fc;
 
 public class SurroundLengthAxionElementGeneration implements AxionElementGeneration {
     private final TreeBlockDefinition baseBlock;
@@ -33,7 +33,7 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
     }
 
     @Override
-    public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
+    public void generate(AxionElementGenerationCallback callback, Vector3fc position, Matrix4fc rotation, String axionParameter) {
         Vector3f workVector = new Vector3f();
 
         float length = Float.parseFloat(axionParameter);
@@ -47,12 +47,12 @@ public class SurroundLengthAxionElementGeneration implements AxionElementGenerat
                         double distanceSquare = x * x + y * y + z * z;
                         if (distanceSquare < innerRangeSquare) {
                             workVector.set(x, y, z);
-                            rotation.transformVector(JomlUtil.from(workVector));
+                            rotation.transformDirection(workVector);
                             workVector.add(position);
                             callback.setAdditionalBlock(workVector, baseBlock);
                         } else if (distanceSquare < rangeSquare) {
                             workVector.set(x, y, z);
-                            rotation.transformVector(JomlUtil.from(workVector));
+                            rotation.transformDirection(workVector);
                             workVector.add(position);
                             callback.setAdditionalBlock(workVector, surroundBlock);
                         }
