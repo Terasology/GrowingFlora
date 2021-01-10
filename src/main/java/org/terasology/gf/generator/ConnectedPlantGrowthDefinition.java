@@ -15,8 +15,8 @@
  */
 package org.terasology.gf.generator;
 
+import org.joml.Vector3i;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 

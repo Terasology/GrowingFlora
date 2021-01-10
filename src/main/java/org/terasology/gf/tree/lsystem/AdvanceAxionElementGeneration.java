@@ -15,9 +15,9 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Vector3f;
 
+import org.joml.Matrix4fc;
+import org.joml.Vector3fc;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -30,7 +30,7 @@ public class AdvanceAxionElementGeneration implements AxionElementGeneration {
     }
 
     @Override
-    public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
+    public void generate(AxionElementGenerationCallback callback, Vector3fc position, Matrix4fc rotation, String axionParameter) {
         callback.advance(advance);
     }
 }

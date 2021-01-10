@@ -15,8 +15,10 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Vector3f;
+
+import org.joml.Matrix4fc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -48,7 +50,7 @@ public class SurroundAxionElementGeneration implements AxionElementGeneration {
     }
 
     @Override
-    public void generate(AxionElementGenerationCallback callback, Vector3f position, Matrix4f rotation, String axionParameter) {
+    public void generate(AxionElementGenerationCallback callback, Vector3fc position, Matrix4fc rotation, String axionParameter) {
         Vector3f workVector = new Vector3f();
 
         callback.setMainBlock(position, baseBlock);
@@ -59,12 +61,12 @@ public class SurroundAxionElementGeneration implements AxionElementGeneration {
                     double distanceSquare = x * x + y * y + z * z;
                     if (distanceSquare < innerRangeSquare) {
                         workVector.set(x, y, z);
-                        rotation.transformVector(workVector);
+                        rotation.transformDirection(workVector);
                         workVector.add(position);
                         callback.setAdditionalBlock(workVector, baseBlock);
                     } else if (distanceSquare < rangeSquare) {
                         workVector.set(x, y, z);
-                        rotation.transformVector(workVector);
+                        rotation.transformDirection(workVector);
                         workVector.add(position);
                         callback.setAdditionalBlock(workVector, surroundBlock);
                     }
