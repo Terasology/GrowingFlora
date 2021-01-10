@@ -1,40 +1,24 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
+import org.joml.Vector3i;
 import org.terasology.anotherWorld.GenerationLocalParameters;
 import org.terasology.anotherWorld.LocalParameters;
 import org.terasology.gf.PlantType;
-import org.terasology.math.ChunkMath;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockUri;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 
 import java.util.List;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefinition {
     private PlantType plantType;
     private Name biomeId;
@@ -85,11 +69,11 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     @Override
     public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
         if (chunk.getRegion().contains(x, y + 1, z) && chunk.getRegion().contains(x, y, z)
-                && groundFilter.apply(chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y, z))) && chunk.getBlock(ChunkMath.calcRelativeBlockPos(x, y + 1, z)).isPenetrable()
+                && groundFilter.apply(chunk.getBlock(Chunks.toRelative(x, y, z, new Vector3i()))) && chunk.getBlock(Chunks.toRelative(x, y + 1, z, new Vector3i())).isPenetrable()
                 && shouldSpawn(x, y, z, chunkRegion)) {
             BlockUri block = possibleBlocks.get(new FastRandom().nextInt(possibleBlocks.size()));
             Block blockToPlace = CoreRegistry.get(BlockManager.class).getBlockFamily(block).getArchetypeBlock();
-            chunk.setBlock(ChunkMath.calcRelativeBlockPos(x, y + 1, z), blockToPlace);
+            chunk.setBlock(Chunks.toRelative(x, y + 1, z, new Vector3i()), blockToPlace);
         }
     }
 
