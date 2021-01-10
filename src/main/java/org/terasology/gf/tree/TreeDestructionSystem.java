@@ -55,7 +55,7 @@ public class TreeDestructionSystem extends BaseComponentSystem {
         if (!processingDestruction) {
             processingDestruction = true;
             try {
-                Vector3i position = component.getPosition(new org.joml.Vector3i());
+                Vector3i position = component.getPosition(new Vector3i());
 
                 for (EntityRef testedTree : entityManager.getEntitiesWith(LSystemTreeComponent.class)) {
                     BlockComponent blockComponent = testedTree.getComponent(BlockComponent.class);
