@@ -331,6 +331,7 @@ public class AdvancedLSystemTreeDefinition {
 
         BranchLocation branchLocation = treeStructure.getRootBranch();
         Vector3f position = new Vector3f(location);
+        //TODO: use Quaternionf directly, as in https://github.com/Terasology/CoreWorlds/commit/6484ebc671bf27511a7eebceeb67e19968d7f33c
         Matrix4f rotation = new Matrix4f().translationRotateScale(new Vector3f(),new Quaternionf().setAngleAxis(treeRotation,0,1,0), 1.0f);
 
         Callback callback = new Callback(position, rotation);
