@@ -1,21 +1,15 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.tree.lsystem;
 
 import com.google.common.collect.Queues;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.anotherWorld.util.ChunkRandom;
@@ -23,16 +17,8 @@ import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.gf.LivingPlantComponent;
-import org.terasology.math.ChunkMath;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
-import org.terasology.math.geom.BaseVector3f;
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
@@ -42,10 +28,12 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.BlockUri;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateFinished;
 import org.terasology.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.CoreChunk;
 
 import java.util.Collection;
@@ -58,9 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 public class AdvancedLSystemTreeDefinition {
     private static final Logger logger = LoggerFactory.getLogger(AdvancedLSystemTreeDefinition.class);
     private static final long FAILED_GROWTH_INTERVAL = 10000;
@@ -107,20 +92,20 @@ public class AdvancedLSystemTreeDefinition {
             if (!blockLocation.equals(worldPos)) {
                 TreeBlockDefinition blockDefinition = treeBlock.getValue();
                 Block block = getBlock(blockManager, blockDefinition, blockLocation, treeBlocks.keySet());
-                if (chunk.getRegion().contains(JomlUtil.from(blockLocation))) {
-                    chunk.setBlock(ChunkMath.calcRelativeBlockPos(blockLocation), block);
+                if (chunk.getRegion().contains(blockLocation)) {
+                    chunk.setBlock(Chunks.toRelative(blockLocation, new Vector3i()), block);
                 }
             }
         }
 
-        if (chunk.getRegion().contains(JomlUtil.from(worldPos))) {
+        if (chunk.getRegion().contains(worldPos)) {
             Block sapling = blockManager.getBlock(saplingBlock);
-            chunk.setBlock(ChunkMath.calcRelativeBlockPos(worldPos), sapling);
+            chunk.setBlock(Chunks.toRelative(worldPos, new Vector3i()), sapling);
         }
     }
 
     public Long setupTreeBaseBlock(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, EntityRef sapling) {
-        Vector3i location = sapling.getComponent(BlockComponent.class).getPosition();
+        Vector3i location = sapling.getComponent(BlockComponent.class).getPosition(new Vector3i());
 
         LSystemTreeComponent treeComponent = createNewTreeComponent(worldProvider.getSeed().hashCode(), location);
 
@@ -145,8 +130,8 @@ public class AdvancedLSystemTreeDefinition {
         return (long) growthWait;
     }
 
-    private LSystemTreeComponent createNewTreeComponent(long seed, Vector3i location) {
-        Random random = ChunkRandom.getChunkRandom(seed, location, 345245);
+    private LSystemTreeComponent createNewTreeComponent(long seed, Vector3ic location) {
+        Random random = ChunkRandom.getChunkRandom(seed, new Vector3i(location), 345245);
 
         // New axion (grown)
         int generation = 1 + random.nextInt((int) treeLongevity.getMax() - 1);
@@ -192,7 +177,7 @@ public class AdvancedLSystemTreeDefinition {
 
             return (long) growthInterval;
         } else {
-            Vector3i treeLocation = treeRef.getComponent(BlockComponent.class).getPosition();
+            Vector3i treeLocation = treeRef.getComponent(BlockComponent.class).getPosition(new Vector3i());
             TreeStructure oldTreeStructure = generateTreeFromAxion(treeLocation, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
             if (isWholeTreeSpaceLoaded(worldProvider, oldTreeStructure)) {
                 FastRandom rand = new FastRandom();
@@ -253,7 +238,7 @@ public class AdvancedLSystemTreeDefinition {
             byte connections = 0;
             for (Side connectSide : SideBitFlag.getSides((byte) 63)) {
                 Vector3i neighborLocation = new Vector3i(location);
-                neighborLocation.add(connectSide.getVector3i());
+                neighborLocation.add(connectSide.direction());
 
                 if (treeBlocks.contains(neighborLocation)) {
                     connections += SideBitFlag.getSide(connectSide);
@@ -288,7 +273,7 @@ public class AdvancedLSystemTreeDefinition {
                 replaceCount++;
             } else if (oldBlock == null) {
                 if (worldProvider.getBlock(location).isReplacementAllowed()) {
-                    blocksToPlaceInNewPlaces.put(JomlUtil.from(location), resultBlock);
+                    blocksToPlaceInNewPlaces.put(location, resultBlock);
                     replaceCount++;
                 }
             }
@@ -345,8 +330,9 @@ public class AdvancedLSystemTreeDefinition {
         Deque<BranchLocation> stackBranch = Queues.newArrayDeque();
 
         BranchLocation branchLocation = treeStructure.getRootBranch();
-        Vector3f position = location.toVector3f();
-        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0), treeRotation), BaseVector3f.ZERO, 1.0f);
+        Vector3f position = new Vector3f(location);
+        //TODO: use Quaternionf directly, as in https://github.com/Terasology/CoreWorlds/commit/6484ebc671bf27511a7eebceeb67e19968d7f33c
+        Matrix4f rotation = new Matrix4f().translationRotateScale(new Vector3f(),new Quaternionf().setAngleAxis(treeRotation,0,1,0), 1.0f);
 
         Callback callback = new Callback(position, rotation);
         callback.setBranchLocation(branchLocation);
@@ -354,7 +340,7 @@ public class AdvancedLSystemTreeDefinition {
         int axionIndex = 0;
         for (AxionElement axion : parseAxions(currentAxion)) {
             Matrix4f tempRotation = new Matrix4f();
-            tempRotation.setIdentity();
+            tempRotation.identity();
 
             char c = axion.key;
             switch (c) {
@@ -373,21 +359,19 @@ public class AdvancedLSystemTreeDefinition {
                     callback.setBranchLocation(branchLocation);
                     break;
                 case '&':
-                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(1, 0, 0), angle), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(angle,1,0,0));
                     rotation.mul(tempRotation);
                     break;
                 case '^':
-                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(1, 0, 0), -angle), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-angle,1, 0, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '+':
-                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0),
-                            (float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '-':
-                    tempRotation = new Matrix4f(new Quat4f(new Vector3f(0, 1, 0),
-                            -(float) Math.toRadians(Integer.parseInt(axion.parameter))), BaseVector3f.ZERO, 1.0f);
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
                     rotation.mul(tempRotation);
                     break;
                 default:
@@ -435,7 +419,7 @@ public class AdvancedLSystemTreeDefinition {
             return false;
         }
 
-        Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition();
+        Vector3i location = treeRef.getComponent(BlockComponent.class).getPosition(new Vector3i());
 
         Map<Vector3i, TreeBlockDefinition> treeBlockMap = generateTreeFromAxion(location, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle)
                 .gatherBlockDefinitions();
@@ -449,7 +433,7 @@ public class AdvancedLSystemTreeDefinition {
             return null;
         }
 
-        Vector3i treeRootLocation = treeRef.getComponent(BlockComponent.class).getPosition();
+        Vector3i treeRootLocation = treeRef.getComponent(BlockComponent.class).getPosition(new Vector3i());
 
         // Does this tree have a block defined at that coordinate
         TreeStructure treeStructure = generateTreeFromAxion(treeRootLocation, lSystemTree.axion, lSystemTree.branchAngle, lSystemTree.rotationAngle);
@@ -520,7 +504,7 @@ public class AdvancedLSystemTreeDefinition {
             return connected.keySet();
         }
 
-        public Region3i getTreeRegion() {
+        public BlockRegion getTreeRegion() {
             int minX = Integer.MAX_VALUE;
             int minY = Integer.MAX_VALUE;
             int minZ = Integer.MAX_VALUE;
@@ -536,7 +520,7 @@ public class AdvancedLSystemTreeDefinition {
                 maxY = Math.max(maxY, block.y);
                 maxZ = Math.max(maxZ, block.z);
             }
-            return Region3i.createFromMinMax(new Vector3i(minX, minY, minZ), new Vector3i(maxX, maxY, maxZ));
+            return new BlockRegion(minX, minY, minZ, maxX, maxY, maxZ);
         }
     }
 
@@ -667,8 +651,8 @@ public class AdvancedLSystemTreeDefinition {
         }
 
         @Override
-        public void setMainBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
-            Vector3i integerPosition = new Vector3i(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f);
+        public void setMainBlock(Vector3fc blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x() + 0.5f, blockPosition.y() + 0.5f, blockPosition.z() + 0.5f), RoundingMode.FLOOR);
             if (integerPosition.y >= 0) {
                 branchLocation.setMainBlock(axionIndex, integerPosition);
                 branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
@@ -676,8 +660,8 @@ public class AdvancedLSystemTreeDefinition {
         }
 
         @Override
-        public void setAdditionalBlock(Vector3f blockPosition, TreeBlockDefinition blockDefinition) {
-            Vector3i integerPosition = new Vector3i(blockPosition.x + 0.5f, blockPosition.y + 0.5f, blockPosition.z + 0.5f);
+        public void setAdditionalBlock(Vector3fc blockPosition, TreeBlockDefinition blockDefinition) {
+            Vector3i integerPosition = new Vector3i(new Vector3f(blockPosition.x() + 0.5f, blockPosition.y() + 0.5f, blockPosition.z() + 0.5f), RoundingMode.FLOOR);
             if (integerPosition.y >= 0) {
                 branchLocation.addTreeBlock(axionIndex, integerPosition, blockDefinition);
             }
@@ -686,7 +670,7 @@ public class AdvancedLSystemTreeDefinition {
         @Override
         public void advance(float distance) {
             Vector3f dir = new Vector3f(0, distance, 0);
-            rotation.transformVector(dir);
+            rotation.transformDirection(dir);
             position.add(dir);
         }
     }

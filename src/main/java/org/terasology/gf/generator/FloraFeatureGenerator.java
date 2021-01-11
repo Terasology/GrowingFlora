@@ -1,23 +1,11 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
+import org.joml.Vector3i;
 import org.terasology.anotherWorld.AnotherWorldBiome;
 import org.terasology.anotherWorld.FeatureGenerator;
 import org.terasology.anotherWorld.generation.BiomeFacet;
@@ -25,7 +13,6 @@ import org.terasology.anotherWorld.util.ChanceRandomizer;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
@@ -41,36 +28,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 public class FloraFeatureGenerator implements FeatureGenerator {
 
     private Multimap<Name, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
-            new Comparator<PlantSpawnDefinition>() {
-                @Override
-                public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
-                    return o1.getPlantId().compareTo(o2.getPlantId());
-                }
-            });
+            Comparator.comparing(PlantSpawnDefinition::getPlantId));
     private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
     private Multimap<Name, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
-            new Comparator<PlantSpawnDefinition>() {
-                @Override
-                public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
-                    return o1.getPlantId().compareTo(o2.getPlantId());
-                }
-            });
+            Comparator.comparing(PlantSpawnDefinition::getPlantId));
     private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
 
     private Multimap<Name, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
-            new Comparator<PlantSpawnDefinition>() {
-                @Override
-                public int compare(PlantSpawnDefinition o1, PlantSpawnDefinition o2) {
-                    return o1.getPlantId().compareTo(o2.getPlantId());
-                }
-            });
+            Comparator.comparing(PlantSpawnDefinition::getPlantId));
     private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator() {
