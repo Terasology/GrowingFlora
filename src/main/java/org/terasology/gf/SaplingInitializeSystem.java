@@ -15,6 +15,7 @@
  */
 package org.terasology.gf;
 
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.climateConditions.ClimateConditionsSystem;
@@ -27,7 +28,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.world.BlockEntityRegistry;
@@ -69,7 +69,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
         if (!processingEvent) {
             processingEvent = true;
             try {
-                Vector3i blockLocation = blockComponent.getPosition();
+                Vector3i blockLocation = blockComponent.getPosition(new Vector3i());
                 String saplingType = livingPlant.type;
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
                 Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, climateConditionsSystem, blockEntityRegistry, sapling);
@@ -94,7 +94,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                 PerformanceMonitor.startActivity("GrowingFlora - Initializing sapling");
                 processingEvent = true;
                 try {
-                    Vector3i blockLocation = blockComponent.getPosition();
+                    Vector3i blockLocation = blockComponent.getPosition(new Vector3i());
                     String saplingType = generatedSapling.type;
                     PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
                     Long updateDelay = plantDefinition.initializeGeneratedPlant(worldProvider, blockEntityRegistry, sapling);
