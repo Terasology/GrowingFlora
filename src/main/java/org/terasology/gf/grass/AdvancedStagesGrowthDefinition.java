@@ -85,7 +85,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
 
             return null;
         } else {
-            int currentIndex = plantStages.indexOf(block.getBlock().getURI());
+            int currentIndex = plantStages.indexOf(block.block.getURI());
 
             int nextIndex = currentIndex + 1;
             BlockUri nextStage = plantStages.get(nextIndex);
