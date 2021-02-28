@@ -15,11 +15,12 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.terasology.utilities.random.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SimpleAxionElementReplacementTest {
     private SimpleAxionElementReplacement replacements = new SimpleAxionElementReplacement("A");
@@ -62,10 +63,12 @@ public class SimpleAxionElementReplacementTest {
         assertEquals("B", replacements.getReplacement(createRandom(0.99f), null, ""));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGoingAboveOne() {
-        replacements.addReplacement(0.3f, "B");
-        replacements.addReplacement(0.8f, "C");
+        assertThrows(IllegalArgumentException.class, () -> {
+            replacements.addReplacement(0.3f, "B");
+            replacements.addReplacement(0.8f, "C");
+        });
     }
 
     private Random createRandom(float value) {
