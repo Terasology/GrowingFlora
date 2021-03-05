@@ -110,7 +110,7 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
 
             return null;
         } else {
-            int currentIndex = plantStages.indexOf(block.block.getURI());
+            int currentIndex = plantStages.indexOf(block.getBlock().getURI());
 
             if (shouldGrow(plant, environmentSystem, position)) {
                 int nextIndex = currentIndex + 1;

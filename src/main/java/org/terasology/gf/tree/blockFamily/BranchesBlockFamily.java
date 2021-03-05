@@ -68,6 +68,6 @@ public class BranchesBlockFamily extends MultiConnectFamily {
         BlockComponent blockComponent = neighborEntity.getComponent(BlockComponent.class);
 
         return neighborEntity.hasComponent(ConnectsToBranchesComponent.class)
-            || (blockComponent != null && blockComponent.block.isFullSide(connectSide));
+            || (blockComponent != null && blockComponent.getBlock().isFullSide(connectSide));
     }
 }
