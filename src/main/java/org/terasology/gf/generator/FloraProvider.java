@@ -3,14 +3,14 @@
 package org.terasology.gf.generator;
 
 import org.joml.Vector3i;
-import org.terasology.utilities.procedural.NoiseTable;
-import org.terasology.world.generation.Facet;
-import org.terasology.world.generation.FacetBorder;
-import org.terasology.world.generation.FacetProvider;
-import org.terasology.world.generation.GeneratingRegion;
-import org.terasology.world.generation.Produces;
-import org.terasology.world.generation.Requires;
-import org.terasology.world.generation.facets.SurfacesFacet;
+import org.terasology.engine.utilities.procedural.NoiseTable;
+import org.terasology.engine.world.generation.Facet;
+import org.terasology.engine.world.generation.FacetBorder;
+import org.terasology.engine.world.generation.FacetProvider;
+import org.terasology.engine.world.generation.GeneratingRegion;
+import org.terasology.engine.world.generation.Produces;
+import org.terasology.engine.world.generation.Requires;
+import org.terasology.engine.world.generation.facets.SurfacesFacet;
 
 /**
  * Determines that ground that flora can be placed on

@@ -15,8 +15,8 @@
  */
 package org.terasology.gf;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.ForceBlockActive;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

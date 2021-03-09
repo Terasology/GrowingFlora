@@ -16,7 +16,7 @@
 package org.terasology.gf.tree.lsystem;
 
 
-import org.terasology.utilities.random.Random;
+import org.terasology.engine.utilities.random.Random;
 
 import java.util.ArrayList;
 import java.util.List;

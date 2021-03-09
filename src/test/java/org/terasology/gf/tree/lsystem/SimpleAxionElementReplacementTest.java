@@ -17,7 +17,7 @@ package org.terasology.gf.tree.lsystem;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.terasology.utilities.random.Random;
+import org.terasology.engine.utilities.random.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

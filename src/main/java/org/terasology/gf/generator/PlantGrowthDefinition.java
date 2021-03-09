@@ -16,12 +16,12 @@
 package org.terasology.gf.generator;
 
 import org.terasology.climateConditions.ClimateConditionsSystem;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generator.plugin.WorldGeneratorPlugin;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generator.plugin.WorldGeneratorPlugin;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

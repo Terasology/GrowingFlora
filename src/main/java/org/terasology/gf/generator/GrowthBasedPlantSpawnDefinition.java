@@ -17,14 +17,14 @@ package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
 import org.joml.Vector3i;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.chunks.Chunks;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
 import org.terasology.naming.Name;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.world.block.Block;
-import org.terasology.world.chunks.Chunks;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

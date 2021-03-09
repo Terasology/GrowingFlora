@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.tree.lsystem;
 
-import org.terasology.utilities.random.Random;
+import org.terasology.engine.utilities.random.Random;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

@@ -15,9 +15,9 @@
  */
 package org.terasology.gf.tree.lsystem;
 
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.world.block.BlockManager;
 import org.terasology.gf.tree.PartOfTreeComponent;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.world.block.BlockManager;
 
 public class TreeBlockDefinition {
     private String blockUri;

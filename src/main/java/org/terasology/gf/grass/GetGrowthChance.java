@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.grass;
 
-import org.terasology.entitySystem.event.AbstractConsumableValueModifiableEvent;
+import org.terasology.engine.entitySystem.event.AbstractConsumableValueModifiableEvent;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

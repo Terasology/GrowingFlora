@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.tree.blockFamily;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public class ConnectsToBranchesComponent implements Component {
 }

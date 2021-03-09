@@ -4,12 +4,12 @@ package org.terasology.gf.tree.lsystem;
 
 import org.joml.Vector3i;
 import org.terasology.climateConditions.ClimateConditionsSystem;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
 
 import java.util.Collection;
 

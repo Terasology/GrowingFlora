@@ -3,9 +3,9 @@
 package org.terasology.gf.generator;
 
 import org.joml.Vector3i;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
 
 import java.util.Collection;
 
