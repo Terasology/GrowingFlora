@@ -31,8 +31,8 @@ import org.terasology.engine.world.block.BlockUri;
 import org.terasology.engine.world.block.entity.neighbourUpdate.LargeBlockUpdateFinished;
 import org.terasology.engine.world.block.entity.neighbourUpdate.LargeBlockUpdateStarting;
 import org.terasology.engine.world.block.entity.placement.PlaceBlocks;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
-import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.gf.LivingPlantComponent;
 import org.terasology.naming.Name;
 
@@ -75,7 +75,7 @@ public class AdvancedLSystemTreeDefinition {
         this.blockMap = blockMap;
     }
 
-    public void generateTree(long seed, String saplingBlock, CoreChunk chunk, int x, int y, int z) {
+    public void generateTree(long seed, String saplingBlock, Chunk chunk, int x, int y, int z) {
         Vector3i worldPos = new Vector3i(x, y, z);
         LSystemTreeComponent treeComponent = createNewTreeComponent(seed, worldPos);
 

@@ -19,7 +19,7 @@ import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.engine.world.generator.plugin.WorldGeneratorPlugin;
 
@@ -29,7 +29,7 @@ import org.terasology.engine.world.generator.plugin.WorldGeneratorPlugin;
 public interface PlantGrowthDefinition extends WorldGeneratorPlugin {
     String getPlantId();
 
-    void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion);
+    void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region chunkRegion);
 
     /**
      * Returns how long to next update (if any). If null is returned, it's considered that the sapling was not initialized.

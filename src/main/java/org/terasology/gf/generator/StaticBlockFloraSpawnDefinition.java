@@ -11,8 +11,8 @@ import org.terasology.engine.utilities.random.FastRandom;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
-import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.PlantType;
 import org.terasology.naming.Name;
@@ -67,7 +67,7 @@ public abstract class StaticBlockFloraSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
+    public void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region chunkRegion) {
         if (chunk.getRegion().contains(x, y + 1, z) && chunk.getRegion().contains(x, y, z)
                 && groundFilter.apply(chunk.getBlock(Chunks.toRelative(x, y, z, new Vector3i()))) && chunk.getBlock(Chunks.toRelative(x, y + 1, z, new Vector3i())).isPenetrable()
                 && shouldSpawn(x, y, z, chunkRegion)) {
