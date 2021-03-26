@@ -19,8 +19,8 @@ import com.google.common.base.Predicate;
 import org.joml.Vector3i;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
-import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
@@ -72,7 +72,7 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     }
 
     @Override
-    public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region region) {
+    public void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region region) {
         if (chunk.getRegion().contains(x, y + 1, z) && chunk.getRegion().contains(x, y, z)
             && groundFilter.apply(chunk.getBlock(Chunks.toRelative(x, y, z, new Vector3i())))
             && chunk.getBlock(Chunks.toRelative(x, y + 1, z, new Vector3i())).isPenetrable()) {

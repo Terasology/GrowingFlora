@@ -14,7 +14,7 @@ import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.utilities.random.FastRandom;
 import org.terasology.engine.utilities.random.Random;
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.engine.world.generator.plugin.WorldGeneratorPluginLibrary;
 import org.terasology.gf.PlantRegistry;
@@ -79,7 +79,7 @@ public class FloraFeatureGenerator implements FeatureGenerator {
 
 
     @Override
-    public void generateChunk(CoreChunk chunk, Region chunkRegion) {
+    public void generateChunk(Chunk chunk, Region chunkRegion) {
         TreeFacet treeFacet = chunkRegion.getFacet(TreeFacet.class);
         BushFacet bushFacet = chunkRegion.getFacet(BushFacet.class);
         FoliageFacet foliageFacet = chunkRegion.getFacet(FoliageFacet.class);

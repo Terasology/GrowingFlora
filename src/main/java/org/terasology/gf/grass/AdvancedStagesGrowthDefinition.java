@@ -17,8 +17,8 @@ import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
-import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 
@@ -49,7 +49,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion) {
+    public void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region chunkRegion) {
         if (chunk.getRegion().contains(x, y, z) && shouldSpawn(chunkRegion, x, y, z)) {
             BlockManager blockManager = CoreRegistry.get(BlockManager.class);
             Block lastBlock = blockManager.getBlock(plantStages.get(plantStages.size() - 1));

@@ -15,7 +15,7 @@
  */
 package org.terasology.gf.generator;
 
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.engine.world.generator.plugin.WorldGeneratorPlugin;
 import org.terasology.gf.PlantType;
@@ -35,5 +35,5 @@ public interface PlantSpawnDefinition extends WorldGeneratorPlugin {
 
     String getPlantId();
 
-    void generatePlant(long seed, CoreChunk chunk, int x, int y, int z, Region chunkRegion);
+    void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region chunkRegion);
 }
