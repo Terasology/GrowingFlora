@@ -24,7 +24,7 @@ import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.naming.Name;
+import org.terasology.gestalt.naming.Name;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
