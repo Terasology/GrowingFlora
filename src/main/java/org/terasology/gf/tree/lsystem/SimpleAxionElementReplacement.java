@@ -37,11 +37,17 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
         replacements.add(null);
     }
 
-    public void addReplacement(float probability, String replacement) {
-        addReplacement(probability, new StaticReplacementGenerator(replacement));
+    /**
+     * @return {@code this}, to allow for method chaining
+     */
+    public SimpleAxionElementReplacement addReplacement(float probability, String replacement) {
+        return addReplacement(probability, new StaticReplacementGenerator(replacement));
     }
 
-    public void addReplacement(float probability, AxionElementReplacement replacement) {
+    /**
+     * @return {@code this}, to allow for method chaining
+     */
+    public SimpleAxionElementReplacement addReplacement(float probability, AxionElementReplacement replacement) {
         if (probabilitySum + probability > 1f) {
             throw new IllegalArgumentException("Sum of probabilities exceeds 1");
         }
@@ -49,6 +55,8 @@ public class SimpleAxionElementReplacement implements AxionElementReplacement {
 
         probabilities.add(1 - probabilitySum);
         replacements.add(replacement);
+
+        return this;
     }
 
     @Override

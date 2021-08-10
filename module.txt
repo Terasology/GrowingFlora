@@ -6,10 +6,6 @@
     "description": "Module providing mechanisms for growing plants (trees, bushes, crops)",
     "dependencies": [
         {
-            "id": "AnotherWorld",
-            "minVersion": "1.0.0"
-        },
-        {
             "id": "BiomesAPI",
             "minVersion": "4.0.0"
         },
@@ -19,6 +15,10 @@
         },
         {
             "id": "CoreAssets",
+            "minVersion": "2.0.1"
+        },
+        {
+            "id": "CoreWorlds",
             "minVersion": "2.0.1"
         },
         {

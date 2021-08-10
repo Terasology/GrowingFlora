@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
-import org.joml.Vector3i;
-import org.terasology.engine.utilities.procedural.NoiseTable;
+import org.joml.Vector3ic;
+import org.terasology.engine.utilities.procedural.WhiteNoise;
 import org.terasology.engine.world.generation.Facet;
 import org.terasology.engine.world.generation.FacetProvider;
 import org.terasology.engine.world.generation.GeneratingRegion;
@@ -19,7 +19,7 @@ import java.util.Map;
 @Requires(@Facet(FloraFacet.class))
 public class FoliageProvider implements FacetProvider {
     private float amount;
-    private NoiseTable noise;
+    private WhiteNoise noise;
 
     public FoliageProvider(float amount) {
         this.amount = amount;
@@ -27,7 +27,7 @@ public class FoliageProvider implements FacetProvider {
 
     @Override
     public void setSeed(long seed) {
-        noise = new NoiseTable(seed + 25873);
+        noise = new WhiteNoise(seed + 25873);
     }
 
     @Override
@@ -35,12 +35,12 @@ public class FoliageProvider implements FacetProvider {
         FoliageFacet facet = new FoliageFacet(region.getRegion(), region.getBorderForFacet(FoliageFacet.class));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
 
-        for (Map.Entry<Vector3i, Float> positionValue : floraFacet.getFlaggedPositions().entrySet()) {
-            Vector3i pos = positionValue.getKey();
+        for (Map.Entry<Vector3ic, Float> positionValue : floraFacet.getWorldEntries().entrySet()) {
+            Vector3ic pos = positionValue.getKey();
             float value = positionValue.getValue();
 
-            if (noise.noise(pos.x, pos.y, pos.z) / 256f < amount) {
-                facet.setFlag(pos, value);
+            if (noise.noise(pos.x(), pos.y(), pos.z()) / 256f < amount) {
+                facet.setWorld(pos, value);
             }
         }
 

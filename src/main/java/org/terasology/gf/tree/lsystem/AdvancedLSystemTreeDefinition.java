@@ -12,8 +12,6 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.anotherWorld.util.ChunkRandom;
-import org.terasology.anotherWorld.util.PDist;
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.math.Side;
@@ -35,6 +33,7 @@ import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.gf.LivingPlantComponent;
 import org.terasology.gestalt.naming.Name;
+import org.terasology.utilities.procedural.PDist;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -131,7 +130,7 @@ public class AdvancedLSystemTreeDefinition {
     }
 
     private LSystemTreeComponent createNewTreeComponent(long seed, Vector3ic location) {
-        Random random = ChunkRandom.getChunkRandom(seed, new Vector3i(location), 345245);
+        Random random = new FastRandom(seed + 345245 * (97L * location.x() + 13L * location.y() + location.z()));
 
         // New axion (grown)
         int generation = 1 + random.nextInt((int) treeLongevity.getMax() - 1);
@@ -142,7 +141,7 @@ public class AdvancedLSystemTreeDefinition {
 
         LSystemTreeComponent lSystemTree = new LSystemTreeComponent();
         lSystemTree.axion = nextAxion;
-        lSystemTree.branchAngle = branchAngle.getIntValue(random);
+        lSystemTree.branchAngle = branchAngle.getValue(random);
         lSystemTree.rotationAngle = (float) Math.PI * random.nextFloat();
         lSystemTree.generation = generation;
         return lSystemTree;
@@ -157,7 +156,7 @@ public class AdvancedLSystemTreeDefinition {
 
         LSystemTreeComponent lSystemTree = new LSystemTreeComponent();
         lSystemTree.axion = saplingAxion;
-        lSystemTree.branchAngle = branchAngle.getIntValue(random);
+        lSystemTree.branchAngle = branchAngle.getValue(random);
         lSystemTree.rotationAngle = (float) Math.PI * random.nextFloat();
         lSystemTree.generation = generation;
         // This tree was just planted
@@ -343,6 +342,7 @@ public class AdvancedLSystemTreeDefinition {
             tempRotation.identity();
 
             char c = axion.key;
+            float currentAngle = axion.parameter == null ? angle : (float) Math.toRadians(Integer.parseInt(axion.parameter));
             switch (c) {
                 case '[':
                     stackOrientation.push(new Matrix4f(rotation));
@@ -359,19 +359,27 @@ public class AdvancedLSystemTreeDefinition {
                     callback.setBranchLocation(branchLocation);
                     break;
                 case '&':
-                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(angle,1,0,0));
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, 1, 0, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '^':
-                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-angle,1, 0, 0));
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, -1, 0, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '+':
-                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, 0, 1, 0));
                     rotation.mul(tempRotation);
                     break;
                 case '-':
-                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(-Math.toRadians(Integer.parseInt(axion.parameter)),0, 1, 0));
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, 0, -1, 0));
+                    rotation.mul(tempRotation);
+                    break;
+                case '*':
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, 0, 0, 1));
+                    rotation.mul(tempRotation);
+                    break;
+                case '/':
+                    tempRotation = new Matrix4f().rotation(new Quaternionf().setAngleAxis(currentAngle, 0, 0, -1));
                     rotation.mul(tempRotation);
                     break;
                 default:
