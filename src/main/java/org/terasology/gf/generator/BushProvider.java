@@ -4,6 +4,7 @@ package org.terasology.gf.generator;
 
 import org.joml.Vector3ic;
 import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.world.block.BlockRegionc;
 import org.terasology.engine.world.generation.Facet;
 import org.terasology.engine.world.generation.FacetProvider;
 import org.terasology.engine.world.generation.GeneratingRegion;
@@ -34,12 +35,13 @@ public class BushProvider implements FacetProvider {
     public void process(GeneratingRegion region) {
         BushFacet facet = new BushFacet(region.getRegion(), region.getBorderForFacet(BushFacet.class));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
+        BlockRegionc bushRegion = facet.getWorldRegion();
 
          for (Map.Entry<Vector3ic, Float> positionValue : floraFacet.getWorldEntries().entrySet()) {
             Vector3ic pos = positionValue.getKey();
             float value = positionValue.getValue();
 
-            if (noise.noise(pos.x(), pos.y(), pos.z()) / 256f < amount) {
+            if (bushRegion.contains(pos) && noise.noise(pos.x(), pos.y(), pos.z()) / 256f < amount) {
                 facet.setWorld(pos, value);
             }
         }

@@ -15,12 +15,8 @@
  */
 package org.terasology.gf.generator;
 
-import com.google.common.base.Predicate;
-import org.joml.Vector3i;
 import org.terasology.engine.registry.CoreRegistry;
-import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.chunks.Chunk;
-import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
@@ -35,15 +31,13 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
     private Name biomeId;
     private float rarity;
     private float probability;
-    private Predicate<Block> groundFilter;
 
-    public GrowthBasedPlantSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability, Predicate<Block> groundFilter) {
+    public GrowthBasedPlantSpawnDefinition(PlantType plantType, String plantId, String biomeId, float rarity, float probability) {
         this.plantType = plantType;
         this.plantId = plantId;
         this.biomeId = new Name(biomeId);
         this.rarity = rarity;
         this.probability = probability;
-        this.groundFilter = groundFilter;
     }
 
     @Override
@@ -73,12 +67,8 @@ public abstract class GrowthBasedPlantSpawnDefinition implements PlantSpawnDefin
 
     @Override
     public void generatePlant(long seed, Chunk chunk, int x, int y, int z, Region region) {
-        if (chunk.getRegion().contains(x, y + 1, z) && chunk.getRegion().contains(x, y, z)
-            && groundFilter.apply(chunk.getBlock(Chunks.toRelative(x, y, z, new Vector3i())))
-            && chunk.getBlock(Chunks.toRelative(x, y + 1, z, new Vector3i())).isPenetrable()) {
-            PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
-            PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
-            plantGrowthDefinition.generatePlant(seed, chunk, x, y + 1, z, region);
-        }
+        PlantRegistry plantRegistry = CoreRegistry.get(PlantRegistry.class);
+        PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(plantId);
+        plantGrowthDefinition.generatePlant(seed, chunk, x, y + 1, z, region);
     }
 }

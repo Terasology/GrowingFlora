@@ -4,7 +4,9 @@ package org.terasology.gf.generator;
 
 import org.joml.Vector3ic;
 import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.world.generation.Border3D;
 import org.terasology.engine.world.generation.Facet;
+import org.terasology.engine.world.generation.FacetBorder;
 import org.terasology.engine.world.generation.FacetProvider;
 import org.terasology.engine.world.generation.GeneratingRegion;
 import org.terasology.engine.world.generation.Produces;
@@ -16,7 +18,7 @@ import java.util.Map;
  * Determines that ground that flora can be placed on
  */
 @Produces(TreeFacet.class)
-@Requires(@Facet(FloraFacet.class))
+@Requires(@Facet(value = FloraFacet.class, border = @FacetBorder(sides = 13, bottom = 35)))
 public class TreeProvider implements FacetProvider {
     private float amount;
     private WhiteNoise noise;
@@ -32,7 +34,8 @@ public class TreeProvider implements FacetProvider {
 
     @Override
     public void process(GeneratingRegion region) {
-        TreeFacet facet = new TreeFacet(region.getRegion(), region.getBorderForFacet(TreeFacet.class));
+        Border3D border = region.getBorderForFacet(TreeFacet.class);
+        TreeFacet facet = new TreeFacet(region.getRegion(), border.extendBy(0, 35, 13));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
 
         for (Map.Entry<Vector3ic, Float> positionValue : floraFacet.getWorldEntries().entrySet()) {
