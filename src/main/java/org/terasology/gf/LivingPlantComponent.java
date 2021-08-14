@@ -11,7 +11,7 @@ public class LivingPlantComponent implements Component<LivingPlantComponent> {
     public String type;
 
     @Override
-    public void copy(LivingPlantComponent other) {
+    public void copyFrom(LivingPlantComponent other) {
         this.type = other.type;
     }
 }

@@ -9,7 +9,7 @@ import org.terasology.gestalt.entitysystem.component.Component;
  */
 public class PartOfTreeComponent implements Component<PartOfTreeComponent> {
     @Override
-    public void copy(PartOfTreeComponent other) {
+    public void copyFrom(PartOfTreeComponent other) {
         this.part = other.part;
     }
 

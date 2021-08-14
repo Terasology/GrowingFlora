@@ -13,7 +13,7 @@ public class GeneratedSaplingComponent implements Component<GeneratedSaplingComp
     public String type;
 
     @Override
-    public void copy(GeneratedSaplingComponent other) {
+    public void copyFrom(GeneratedSaplingComponent other) {
         this.type = other.type;
     }
 }

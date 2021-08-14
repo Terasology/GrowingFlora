@@ -18,7 +18,7 @@ public class LSystemTreeComponent implements Component<LSystemTreeComponent> {
     public float rotationAngle;
 
     @Override
-    public void copy(LSystemTreeComponent other) {
+    public void copyFrom(LSystemTreeComponent other) {
         this.axion = other.axion;
         this.generation = other.generation;
         this.lastGrowthTime = other.lastGrowthTime;
