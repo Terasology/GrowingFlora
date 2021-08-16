@@ -33,7 +33,7 @@ import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.gf.LivingPlantComponent;
 import org.terasology.gestalt.naming.Name;
-import org.terasology.utilities.procedural.PDist;
+import org.terasology.engine.utilities.random.PDist;
 
 import java.util.Collection;
 import java.util.Collections;
