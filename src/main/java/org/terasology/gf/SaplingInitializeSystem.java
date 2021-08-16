@@ -33,6 +33,7 @@ import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.gf.util.EnvironmentLocalParameters;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -72,7 +73,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                 Vector3i blockLocation = blockComponent.getPosition(new Vector3i());
                 String saplingType = livingPlant.type;
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, climateConditionsSystem, blockEntityRegistry, sapling);
+                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, new EnvironmentLocalParameters(climateConditionsSystem, blockLocation), blockEntityRegistry, sapling);
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(blockLocation);
                 if (blockEntity.hasComponent(PlantedSaplingComponent.class)) {
                     blockEntity.removeComponent(PlantedSaplingComponent.class);

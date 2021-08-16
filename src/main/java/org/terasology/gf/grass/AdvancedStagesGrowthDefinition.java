@@ -5,10 +5,8 @@ package org.terasology.gf.grass;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.joml.Vector3i;
-import org.terasology.gf.util.EnvironmentLocalParameters;
 import org.terasology.gf.util.GenerationLocalParameters;
 import org.terasology.gf.util.LocalParameters;
-import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.world.BlockEntityRegistry;
@@ -68,19 +66,17 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
-        BlockComponent block = plant.getComponent(BlockComponent.class);
-        Vector3i position = block.getPosition(new Vector3i());
-        return growthTimeFunction.apply(new EnvironmentLocalParameters(environmentSystem, position));
+    public Long initializePlantedPlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+        return growthTimeFunction.apply(localParameters);
     }
 
     @Override
-    public Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long requestedUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition(new Vector3i());
 
-        if (shouldDie(environmentSystem, position)) {
+        if (shouldDie(localParameters)) {
             replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
 
             return null;
@@ -94,7 +90,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
             replaceBlock(worldProvider, blockManager, plant, position, nextStage, !hasMoreStages);
 
             if (hasMoreStages) {
-                return growthTimeFunction.apply(new EnvironmentLocalParameters(environmentSystem, position));
+                return growthTimeFunction.apply(localParameters);
             } else {
                 // Entered the last phase
                 return null;
@@ -103,12 +99,12 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public boolean randomUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
         Vector3i position = block.getPosition(new Vector3i());
 
-        if (shouldDie(environmentSystem, position)) {
+        if (shouldDie(localParameters)) {
             replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
 
             return true;
@@ -120,7 +116,7 @@ public class AdvancedStagesGrowthDefinition implements PlantGrowthDefinition {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
-    private boolean shouldDie(ClimateConditionsSystem environmentSystem, Vector3i position) {
-        return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem, position));
+    private boolean shouldDie(LocalParameters localParameters) {
+        return deathCondition != null && deathCondition.apply(localParameters);
     }
 }

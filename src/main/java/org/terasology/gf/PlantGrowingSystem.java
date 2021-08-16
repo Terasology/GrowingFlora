@@ -33,6 +33,7 @@ import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.gf.generator.PlantGrowthDefinition;
+import org.terasology.gf.util.EnvironmentLocalParameters;
 import org.terasology.randomUpdate.RandomUpdateEvent;
 
 /**
@@ -64,7 +65,7 @@ public class PlantGrowingSystem extends BaseComponentSystem {
             PerformanceMonitor.startActivity("GrowingFlora - Updating plant");
             try {
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
-                Long updateDelay = plantDefinition.requestedUpdatePlant(worldProvider, environmentSystem, blockEntityRegistry, plant);
+                Long updateDelay = plantDefinition.requestedUpdatePlant(worldProvider, new EnvironmentLocalParameters(environmentSystem, blockComponent.getPosition()), blockEntityRegistry, plant);
                 if (updateDelay != null) {
                     delayManager.addDelayedAction(plant, UPDATE_PLANT_ACTION_ID, updateDelay);
                 }
@@ -79,7 +80,7 @@ public class PlantGrowingSystem extends BaseComponentSystem {
         PerformanceMonitor.startActivity("GrowingFlora - Updating plant");
         try {
             PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(plantComponent.type);
-            if (plantDefinition.randomUpdatePlant(worldProvider, environmentSystem, blockEntityRegistry, plant)) {
+            if (plantDefinition.randomUpdatePlant(worldProvider, new EnvironmentLocalParameters(environmentSystem, blockComponent.getPosition()), blockEntityRegistry, plant)) {
                 if (delayManager.hasDelayedAction(plant, UPDATE_PLANT_ACTION_ID)) {
                     delayManager.cancelDelayedAction(plant, UPDATE_PLANT_ACTION_ID);
                 }
