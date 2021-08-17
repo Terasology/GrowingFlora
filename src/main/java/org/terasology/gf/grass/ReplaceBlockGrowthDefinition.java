@@ -5,10 +5,9 @@ package org.terasology.gf.grass;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.joml.Vector3i;
-import org.terasology.anotherWorld.EnvironmentLocalParameters;
-import org.terasology.anotherWorld.GenerationLocalParameters;
-import org.terasology.anotherWorld.LocalParameters;
-import org.terasology.climateConditions.ClimateConditionsSystem;
+import org.joml.Vector3ic;
+import org.terasology.gf.util.GenerationLocalParameters;
+import org.terasology.gf.util.LocalParameters;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.utilities.random.FastRandom;
@@ -91,7 +90,7 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long initializePlantedPlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         if (growthIntervals.size() > 0) {
             return growthIntervals.get(0);
         } else {
@@ -100,19 +99,19 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long requestedUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
-        Vector3i position = block.getPosition(new Vector3i());
+        Vector3ic position = block.getPosition();
 
-        if (shouldDie(environmentSystem, position)) {
+        if (shouldDie(localParameters)) {
             replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
 
             return null;
         } else {
             int currentIndex = plantStages.indexOf(block.getBlock().getURI());
 
-            if (shouldGrow(plant, environmentSystem, position)) {
+            if (shouldGrow(plant, localParameters)) {
                 int nextIndex = currentIndex + 1;
                 BlockUri nextStage = plantStages.get(nextIndex);
                 final boolean hasMoreStages = nextIndex < plantStages.size() - 1;
@@ -131,12 +130,12 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
     }
 
     @Override
-    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public boolean randomUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         BlockComponent block = plant.getComponent(BlockComponent.class);
-        Vector3i position = block.getPosition(new Vector3i());
+        Vector3ic position = block.getPosition();
 
-        if (shouldDie(environmentSystem, position)) {
+        if (shouldDie(localParameters)) {
             replaceBlock(worldProvider, blockManager, plant, position, deadPlantBlock, true);
 
             return true;
@@ -144,18 +143,18 @@ public class ReplaceBlockGrowthDefinition implements PlantGrowthDefinition {
         return false;
     }
 
-    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3i position, BlockUri nextStage, boolean isLast) {
+    protected void replaceBlock(WorldProvider worldProvider, BlockManager blockManager, EntityRef plant, Vector3ic position, BlockUri nextStage, boolean isLast) {
         worldProvider.setBlock(position, blockManager.getBlock(nextStage));
     }
 
-    private boolean shouldDie(ClimateConditionsSystem environmentSystem, Vector3i position) {
-        return deathCondition != null && deathCondition.apply(new EnvironmentLocalParameters(environmentSystem, position));
+    private boolean shouldDie(LocalParameters localParameters) {
+        return deathCondition != null && deathCondition.apply(localParameters);
     }
 
-    private boolean shouldGrow(EntityRef plant, ClimateConditionsSystem environmentSystem, Vector3i position) {
+    private boolean shouldGrow(EntityRef plant, LocalParameters localParameters) {
         float chance = 1f;
         if (growthChance != null) {
-            chance = growthChance.apply(new EnvironmentLocalParameters(environmentSystem, position));
+            chance = growthChance.apply(localParameters);
         }
         GetGrowthChance event = new GetGrowthChance(chance);
         plant.send(event);

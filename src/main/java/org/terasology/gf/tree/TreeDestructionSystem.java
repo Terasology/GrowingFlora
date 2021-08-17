@@ -3,7 +3,7 @@
 package org.terasology.gf.tree;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
@@ -55,21 +55,21 @@ public class TreeDestructionSystem extends BaseComponentSystem {
         if (!processingDestruction) {
             processingDestruction = true;
             try {
-                Vector3i position = component.getPosition(new Vector3i());
+                Vector3ic position = component.getPosition();
 
                 for (EntityRef testedTree : entityManager.getEntitiesWith(LSystemTreeComponent.class)) {
                     BlockComponent blockComponent = testedTree.getComponent(BlockComponent.class);
                     if (blockComponent != null) {
-                        Vector3i testedPosition = blockComponent.getPosition(new Vector3i());
+                        Vector3ic testedPosition = blockComponent.getPosition();
 
-                        double distance = Math.sqrt((testedPosition.x - position.x) * (testedPosition.x - position.x)
-                                + (testedPosition.z - position.z) * (testedPosition.z - position.z));
+                        double distance = Math.sqrt((testedPosition.x() - position.x()) * (testedPosition.x() - position.x())
+                                + (testedPosition.z() - position.z()) * (testedPosition.z() - position.z()));
                         if (distance < Math.sqrt(512)) {
                             String type = testedTree.getComponent(LivingPlantComponent.class).type;
                             PlantGrowthDefinition plantGrowthDefinition = plantRegistry.getPlantGrowthDefinition(type);
                             if (plantGrowthDefinition instanceof ConnectedPlantGrowthDefinition) {
                                 ConnectedPlantGrowthDefinition plantDef = (ConnectedPlantGrowthDefinition) plantGrowthDefinition;
-                                Collection<Vector3i> blocksConnectedTo = plantDef.getBlocksConnectedTo(worldProvider, blockEntityRegistry, position, testedTree);
+                                Collection<Vector3ic> blocksConnectedTo = plantDef.getBlocksConnectedTo(worldProvider, blockEntityRegistry, position, testedTree);
                                 if (blocksConnectedTo != null) {
                                     destroyTheConnectedBlocksAndGatherItems(position, blocksConnectedTo);
                                 }
@@ -83,7 +83,7 @@ public class TreeDestructionSystem extends BaseComponentSystem {
         }
     }
 
-    private void destroyTheConnectedBlocksAndGatherItems(Vector3i position, Collection<Vector3i> blocksConnectedTo) {
+    private void destroyTheConnectedBlocksAndGatherItems(Vector3ic position, Collection<Vector3ic> blocksConnectedTo) {
         EntityRef worldEntity = worldProvider.getWorldEntity();
         worldEntity.send(new LargeBlockUpdateStarting());
         try {
@@ -93,8 +93,8 @@ public class TreeDestructionSystem extends BaseComponentSystem {
                 tempInventoryEntity.addComponent(inventory);
                 Prefab damagePrefab = prefabManager.getPrefab("GrowingFlora:TreeCutDamage");
 
-                for (Vector3i vector3i : blocksConnectedTo) {
-                    blockEntityRegistry.getEntityAt(vector3i).send(
+                for (Vector3ic blockPosition : blocksConnectedTo) {
+                    blockEntityRegistry.getEntityAt(blockPosition).send(
                             new DestroyEvent(tempInventoryEntity, EntityRef.NULL, damagePrefab));
                 }
 

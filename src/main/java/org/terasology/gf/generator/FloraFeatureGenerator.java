@@ -5,21 +5,20 @@ package org.terasology.gf.generator;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
-import org.joml.Vector3i;
-import org.terasology.anotherWorld.AnotherWorldBiome;
-import org.terasology.anotherWorld.FeatureGenerator;
-import org.terasology.anotherWorld.generation.BiomeFacet;
-import org.terasology.anotherWorld.util.ChanceRandomizer;
-import org.terasology.biomesAPI.BiomeRegistry;
+import org.joml.Vector3ic;
+import org.terasology.biomesAPI.Biome;
+import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.utilities.random.FastRandom;
 import org.terasology.engine.utilities.random.Random;
 import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.WorldRasterizer;
 import org.terasology.engine.world.generator.plugin.WorldGeneratorPluginLibrary;
+import org.terasology.gestalt.naming.Name;
 import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.PlantType;
-import org.terasology.gestalt.naming.Name;
+import org.terasology.engine.utilities.random.DiscreteDistribution;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,19 +27,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FloraFeatureGenerator implements FeatureGenerator {
+public class FloraFeatureGenerator implements WorldRasterizer {
 
     private Multimap<Name, PlantSpawnDefinition> treeDefinitions = TreeMultimap.create(Ordering.natural(),
             Comparator.comparing(PlantSpawnDefinition::getPlantId));
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
+    private Map<Name, DiscreteDistribution<PlantSpawnDefinition>> treeDefinitionsCache = new HashMap<>();
 
     private Multimap<Name, PlantSpawnDefinition> bushDefinitions = TreeMultimap.create(Ordering.natural(),
             Comparator.comparing(PlantSpawnDefinition::getPlantId));
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
+    private Map<Name, DiscreteDistribution<PlantSpawnDefinition>> bushDefinitionsCache = new HashMap<>();
 
     private Multimap<Name, PlantSpawnDefinition> foliageDefinitions = TreeMultimap.create(Ordering.natural(),
             Comparator.comparing(PlantSpawnDefinition::getPlantId));
-    private Map<Name, ChanceRandomizer<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
+    private Map<Name, DiscreteDistribution<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator() {
         loadPlantGrowthDefinitions();
@@ -84,42 +83,41 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         BushFacet bushFacet = chunkRegion.getFacet(BushFacet.class);
         FoliageFacet foliageFacet = chunkRegion.getFacet(FoliageFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
-        BiomeRegistry biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
 
-        Set<Vector3i> usedPositions = new HashSet<>();
+        Set<Vector3ic> usedPositions = new HashSet<>();
 
         // First, generate trees, as these are the rarest ones
-        for (Map.Entry<Vector3i, Float> positionEntry : treeFacet.getFlaggedPositions().entrySet()) {
-            Vector3i position = positionEntry.getKey();
+        for (Map.Entry<Vector3ic, Float> positionEntry : treeFacet.getWorldEntries().entrySet()) {
+            Vector3ic position = positionEntry.getKey();
             float value = positionEntry.getValue();
 
-            AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
+            Biome biome = biomeFacet.getWorld(position.x(), position.z());
 
             long seed = Float.floatToRawIntBits(value);
             Random random = new FastRandom(seed);
-            ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, treeDefinitionsCache, treeDefinitions);
-            PlantSpawnDefinition treeDefinition = definitionsForBiome.randomizeObject(random);
+            DiscreteDistribution<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, treeDefinitionsCache, treeDefinitions);
+            PlantSpawnDefinition treeDefinition = definitionsForBiome.sample(random);
             if (treeDefinition != null && random.nextFloat() < treeDefinition.getProbability()) {
-                treeDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
+                treeDefinition.generatePlant(seed, chunk, position.x(), position.y(), position.z(), chunkRegion);
             }
 
             usedPositions.add(position);
         }
 
         // Second, generate bushes, as these are a bit more common
-        for (Map.Entry<Vector3i, Float> positionEntry : bushFacet.getFlaggedPositions().entrySet()) {
-            Vector3i position = positionEntry.getKey();
+        for (Map.Entry<Vector3ic, Float> positionEntry : bushFacet.getWorldEntries().entrySet()) {
+            Vector3ic position = positionEntry.getKey();
             if (!usedPositions.contains(position)) {
                 float value = positionEntry.getValue();
 
-                AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
+                Biome biome = biomeFacet.getWorld(position.x(), position.z());
 
                 long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
-                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, bushDefinitionsCache, bushDefinitions);
-                PlantSpawnDefinition bushDefinition = definitionsForBiome.randomizeObject(random);
+                DiscreteDistribution<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, bushDefinitionsCache, bushDefinitions);
+                PlantSpawnDefinition bushDefinition = definitionsForBiome.sample(random);
                 if (bushDefinition != null && random.nextFloat() < bushDefinition.getProbability()) {
-                    bushDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
+                    bushDefinition.generatePlant(seed, chunk, position.x(), position.y(), position.z(), chunkRegion);
                 }
 
                 usedPositions.add(position);
@@ -127,19 +125,19 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         }
 
         // Third, generate grass and flowers, as these are the most common
-        for (Map.Entry<Vector3i, Float> positionEntry : foliageFacet.getFlaggedPositions().entrySet()) {
-            Vector3i position = positionEntry.getKey();
+        for (Map.Entry<Vector3ic, Float> positionEntry : foliageFacet.getWorldEntries().entrySet()) {
+            Vector3ic position = positionEntry.getKey();
             if (!usedPositions.contains(position)) {
                 float value = positionEntry.getValue();
 
-                AnotherWorldBiome biome = biomeFacet.getWorld(position.x, position.z);
+                Biome biome = biomeFacet.getWorld(position.x(), position.z());
 
                 long seed = Float.floatToRawIntBits(value);
                 Random random = new FastRandom(seed);
-                ChanceRandomizer<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, biomeRegistry, foliageDefinitionsCache, foliageDefinitions);
-                PlantSpawnDefinition foliageDefinition = definitionsForBiome.randomizeObject(random);
+                DiscreteDistribution<PlantSpawnDefinition> definitionsForBiome = getDefinitionsForBiome(biome, foliageDefinitionsCache, foliageDefinitions);
+                PlantSpawnDefinition foliageDefinition = definitionsForBiome.sample(random);
                 if (foliageDefinition != null && random.nextFloat() < foliageDefinition.getProbability()) {
-                    foliageDefinition.generatePlant(seed, chunk, position.x, position.y, position.z, chunkRegion);
+                    foliageDefinition.generatePlant(seed, chunk, position.x(), position.y(), position.z(), chunkRegion);
                 }
 
                 usedPositions.add(position);
@@ -147,31 +145,17 @@ public class FloraFeatureGenerator implements FeatureGenerator {
         }
     }
 
-    private ChanceRandomizer<PlantSpawnDefinition> getDefinitionsForBiome(
-            AnotherWorldBiome biome, BiomeRegistry biomeRegistry,
-            Map<Name, ChanceRandomizer<PlantSpawnDefinition>> cache, Multimap<Name, PlantSpawnDefinition> definitions) {
-        ChanceRandomizer<PlantSpawnDefinition> result = cache.get(biome.getId());
+    private DiscreteDistribution<PlantSpawnDefinition> getDefinitionsForBiome(Biome biome, Map<Name,
+            DiscreteDistribution<PlantSpawnDefinition>> cache, Multimap<Name, PlantSpawnDefinition> definitions) {
+        DiscreteDistribution<PlantSpawnDefinition> result = cache.get(biome.getId());
         if (result != null) {
             return result;
         }
 
-        result = new ChanceRandomizer<>(100);
-        AnotherWorldBiome biomeToAdd = biome;
-        boolean parentFound = true;
-        while (parentFound) {
-            parentFound = false;
-            for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getId())) {
-                result.addChance(floraDefinition.getRarity(), floraDefinition);
-            }
-            for (AnotherWorldBiome biome1 : biomeRegistry.getRegisteredBiomes(AnotherWorldBiome.class)) {
-                if (biomeToAdd.getBiomeParent().equals(biome1.getId())) {
-                    biomeToAdd = biome1;
-                    parentFound = true;
-                    break;
-                }
-            }
+        result = new DiscreteDistribution<>();
+        for (PlantSpawnDefinition floraDefinition : definitions.get(biome.getId())) {
+            result.add(floraDefinition, floraDefinition.getRarity());
         }
-        result.initialize();
         cache.put(biome.getId(), result);
         return result;
     }
