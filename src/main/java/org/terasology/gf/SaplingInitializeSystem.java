@@ -18,7 +18,6 @@ package org.terasology.gf;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
@@ -33,7 +32,8 @@ import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.gf.generator.PlantGrowthDefinition;
-import org.terasology.gf.util.EnvironmentLocalParameters;
+import org.terasology.gf.util.LocalParameters;
+import org.terasology.gf.util.StaticLocalParameters;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -52,7 +52,15 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     @In
     private DelayManager delayManager;
     @In
-    private ClimateConditionsSystem climateConditionsSystem;
+    private EnvironmentParametersSystem environmentSystem;
+
+    private LocalParameters createLocalParameters(Vector3ic position) {
+        if (environmentSystem != null) {
+            return environmentSystem.createLocalParameters(position);
+        } else {
+            return new StaticLocalParameters();
+        }
+    }
 
     // To avoid stack overflow
     private boolean processingEvent;
@@ -70,10 +78,10 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
         if (!processingEvent) {
             processingEvent = true;
             try {
-                Vector3i blockLocation = blockComponent.getPosition(new Vector3i());
+                Vector3ic blockLocation = blockComponent.getPosition();
                 String saplingType = livingPlant.type;
                 PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
-                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, new EnvironmentLocalParameters(climateConditionsSystem, blockLocation), blockEntityRegistry, sapling);
+                Long updateDelay = plantDefinition.initializePlantedPlant(worldProvider, createLocalParameters(blockLocation), blockEntityRegistry, sapling);
                 EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(blockLocation);
                 if (blockEntity.hasComponent(PlantedSaplingComponent.class)) {
                     blockEntity.removeComponent(PlantedSaplingComponent.class);
