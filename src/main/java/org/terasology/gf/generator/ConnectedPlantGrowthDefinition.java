@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
@@ -22,7 +22,7 @@ public interface ConnectedPlantGrowthDefinition extends PlantGrowthDefinition {
      * @param plant
      * @return
      */
-    boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
+    boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant);
 
     /**
      * Returns a collection of locations that are dependand on existance of this block in this plant.
@@ -34,5 +34,5 @@ public interface ConnectedPlantGrowthDefinition extends PlantGrowthDefinition {
      * @param plant
      * @return
      */
-    Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant);
+    Collection<Vector3ic> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant);
 }

@@ -15,7 +15,7 @@
  */
 package org.terasology.gf;
 
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.climateConditions.ClimateConditionsSystem;
@@ -95,7 +95,7 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
                 PerformanceMonitor.startActivity("GrowingFlora - Initializing sapling");
                 processingEvent = true;
                 try {
-                    Vector3i blockLocation = blockComponent.getPosition(new Vector3i());
+                    Vector3ic blockLocation = blockComponent.getPosition();
                     String saplingType = generatedSapling.type;
                     PlantGrowthDefinition plantDefinition = plantRegistry.getPlantGrowthDefinition(saplingType);
                     Long updateDelay = plantDefinition.initializeGeneratedPlant(worldProvider, blockEntityRegistry, sapling);

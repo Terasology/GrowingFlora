@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.tree.lsystem;
 
-import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
@@ -45,12 +45,12 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     }
 
     @Override
-    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant) {
         return getTreeDefinition().isBlockOwnedByPlant(worldProvider, blockEntityRegistry, block, plant);
     }
 
     @Override
-    public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+    public Collection<Vector3ic> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant) {
         return getTreeDefinition().getBlocksConnectedTo(worldProvider, blockEntityRegistry, block, plant);
     }
 }
