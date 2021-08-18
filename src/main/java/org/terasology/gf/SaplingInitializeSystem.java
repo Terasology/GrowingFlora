@@ -19,7 +19,8 @@ import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.engine.entitySystem.event.EventPriority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
@@ -66,14 +67,14 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
     private boolean processingEvent;
 
     @ReceiveEvent
-    public void generatedSaplingLoaded(OnAddedComponent event, EntityRef sapling,
+    public void generatedSaplingLoaded(OnActivatedComponent event, EntityRef sapling,
                                        GeneratedSaplingComponent generatedSaplingComponent, BlockComponent blockComponent) {
         delayManager.addDelayedAction(sapling, INITIALIZE_PLANT_ACTION, 0);
     }
 
-    @ReceiveEvent
-    public void plantedSapling(OnAddedComponent event, EntityRef sapling, LivingPlantComponent livingPlant,
-                               PlantedSaplingComponent plantedSaplingComponent, LivingPlantComponent livingPlantComponent,
+    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
+    public void plantedSapling(OnActivatedComponent event, EntityRef sapling, LivingPlantComponent livingPlant,
+                               PlantedSaplingComponent plantedSaplingComponent,
                                BlockComponent blockComponent) {
         if (!processingEvent) {
             processingEvent = true;
