@@ -3,7 +3,7 @@
 package org.terasology.gf.generator;
 
 import org.joml.Vector3i;
-import org.terasology.engine.utilities.procedural.NoiseTable;
+import org.terasology.engine.utilities.procedural.WhiteNoise;
 import org.terasology.engine.world.generation.Facet;
 import org.terasology.engine.world.generation.FacetBorder;
 import org.terasology.engine.world.generation.FacetProvider;
@@ -19,7 +19,7 @@ import org.terasology.engine.world.generation.facets.SurfacesFacet;
 @Requires(@Facet(value = SurfacesFacet.class, border = @FacetBorder(bottom = 1)))
 public class FloraProvider implements FacetProvider {
 
-    private NoiseTable noiseTable;
+    private WhiteNoise noiseTable;
     private int seaLevel;
 
     public FloraProvider(int seaLevel) {
@@ -28,7 +28,7 @@ public class FloraProvider implements FacetProvider {
 
     @Override
     public void setSeed(long seed) {
-        noiseTable = new NoiseTable(seed);
+        noiseTable = new WhiteNoise(seed);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class FloraProvider implements FacetProvider {
                 for (int height  : surface.getWorldColumn(x, z)) {
                     // if the surface is in range, and if we are above sea level
                     if (facet.getWorldRegion().contains(x, height, z) && facet.getWorldRegion().contains(x, height + 1, z) && height >= seaLevel) {
-                        facet.setFlag(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
+                        facet.setWorld(new Vector3i(x, height, z), noiseTable.noise(x, z) / 256f);
                     }
                 }
             }

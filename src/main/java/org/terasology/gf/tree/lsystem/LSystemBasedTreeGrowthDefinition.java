@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.tree.lsystem;
 
-import org.joml.Vector3i;
-import org.terasology.climateConditions.ClimateConditionsSystem;
+import org.joml.Vector3ic;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
+import org.terasology.gf.util.LocalParameters;
 
 import java.util.Collection;
 
@@ -29,28 +29,28 @@ public abstract class LSystemBasedTreeGrowthDefinition implements ConnectedPlant
     }
 
     @Override
-    public Long initializePlantedPlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public Long initializePlantedPlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().setupPlantedSapling(plant);
     }
 
     @Override
-    public final Long requestedUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public final Long requestedUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         return getTreeDefinition().updateTree(worldProvider, blockEntityRegistry, plant);
     }
 
     @Override
-    public boolean randomUpdatePlant(WorldProvider worldProvider, ClimateConditionsSystem environmentSystem, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
+    public boolean randomUpdatePlant(WorldProvider worldProvider, LocalParameters localParameters, BlockEntityRegistry blockEntityRegistry, EntityRef plant) {
         // Do nothing on random update
         return false;
     }
 
     @Override
-    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+    public boolean isBlockOwnedByPlant(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant) {
         return getTreeDefinition().isBlockOwnedByPlant(worldProvider, blockEntityRegistry, block, plant);
     }
 
     @Override
-    public Collection<Vector3i> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3i block, EntityRef plant) {
+    public Collection<Vector3ic> getBlocksConnectedTo(WorldProvider worldProvider, BlockEntityRegistry blockEntityRegistry, Vector3ic block, EntityRef plant) {
         return getTreeDefinition().getBlocksConnectedTo(worldProvider, blockEntityRegistry, block, plant);
     }
 }

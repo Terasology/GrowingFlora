@@ -4,8 +4,8 @@ package org.terasology.gf.generator;
 
 import com.google.common.base.Predicate;
 import org.joml.Vector3i;
-import org.terasology.anotherWorld.GenerationLocalParameters;
-import org.terasology.anotherWorld.LocalParameters;
+import org.terasology.gf.util.GenerationLocalParameters;
+import org.terasology.gf.util.LocalParameters;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.utilities.random.FastRandom;
 import org.terasology.engine.world.block.Block;

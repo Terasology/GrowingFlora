@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.gf.generator;
 
-import org.joml.Vector3i;
-import org.terasology.engine.utilities.procedural.NoiseTable;
+import org.joml.Vector3ic;
+import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.world.block.BlockRegionc;
 import org.terasology.engine.world.generation.Facet;
 import org.terasology.engine.world.generation.FacetProvider;
 import org.terasology.engine.world.generation.GeneratingRegion;
@@ -19,7 +20,7 @@ import java.util.Map;
 @Requires(@Facet(FloraFacet.class))
 public class BushProvider implements FacetProvider {
     private float amount;
-    private NoiseTable noise;
+    private WhiteNoise noise;
 
     public BushProvider(float amount) {
         this.amount = amount;
@@ -27,20 +28,21 @@ public class BushProvider implements FacetProvider {
 
     @Override
     public void setSeed(long seed) {
-        noise = new NoiseTable(seed + 28873);
+        noise = new WhiteNoise(seed + 28873);
     }
 
     @Override
     public void process(GeneratingRegion region) {
         BushFacet facet = new BushFacet(region.getRegion(), region.getBorderForFacet(BushFacet.class));
         FloraFacet floraFacet = region.getRegionFacet(FloraFacet.class);
+        BlockRegionc bushRegion = facet.getWorldRegion();
 
-        for (Map.Entry<Vector3i, Float> positionValue : floraFacet.getFlaggedPositions().entrySet()) {
-            Vector3i pos = positionValue.getKey();
+         for (Map.Entry<Vector3ic, Float> positionValue : floraFacet.getWorldEntries().entrySet()) {
+            Vector3ic pos = positionValue.getKey();
             float value = positionValue.getValue();
 
-            if (noise.noise(pos.x, pos.y, pos.z) / 256f < amount) {
-                facet.setFlag(pos, value);
+            if (bushRegion.contains(pos) && noise.noise(pos.x(), pos.y(), pos.z()) / 256f < amount) {
+                facet.setWorld(pos, value);
             }
         }
 
