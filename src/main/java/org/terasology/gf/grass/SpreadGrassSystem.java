@@ -5,7 +5,6 @@ package org.terasology.gf.grass;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.In;
@@ -14,6 +13,7 @@ import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.entity.placement.PlaceBlocks;
 import org.terasology.engine.world.block.typeEntity.BlockTypeComponent;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.randomUpdate.RandomUpdateBlockTypeEvent;
 
 import java.util.HashMap;

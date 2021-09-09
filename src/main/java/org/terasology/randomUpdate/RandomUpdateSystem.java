@@ -8,7 +8,6 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
@@ -22,6 +21,7 @@ import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.chunks.event.BeforeChunkUnload;
 import org.terasology.engine.world.chunks.event.OnChunkLoaded;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 
 import java.util.HashSet;
 import java.util.Set;
