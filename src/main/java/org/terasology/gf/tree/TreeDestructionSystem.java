@@ -14,8 +14,6 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.health.BeforeDestroyEvent;
 import org.terasology.engine.logic.health.DestroyEvent;
-import org.terasology.module.inventory.components.InventoryComponent;
-import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.engine.logic.inventory.events.DropItemEvent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.BlockEntityRegistry;
@@ -28,6 +26,8 @@ import org.terasology.gf.PlantRegistry;
 import org.terasology.gf.generator.ConnectedPlantGrowthDefinition;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.gf.tree.lsystem.LSystemTreeComponent;
+import org.terasology.module.inventory.components.InventoryComponent;
+import org.terasology.module.inventory.systems.InventoryManager;
 
 import java.util.Collection;
 
