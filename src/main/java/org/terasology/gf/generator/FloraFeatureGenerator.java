@@ -42,13 +42,12 @@ public class FloraFeatureGenerator implements WorldRasterizer {
     private Map<Name, DiscreteDistribution<PlantSpawnDefinition>> foliageDefinitionsCache = new HashMap<>();
 
     public FloraFeatureGenerator() {
-        loadPlantGrowthDefinitions();
-        loadPlantSpawnDefinition();
-
     }
 
     @Override
     public void initialize() {
+        loadPlantGrowthDefinitions();
+        loadPlantSpawnDefinition();
     }
 
     private void loadPlantGrowthDefinitions() {
