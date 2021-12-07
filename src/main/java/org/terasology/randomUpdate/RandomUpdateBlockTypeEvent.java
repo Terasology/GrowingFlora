@@ -3,7 +3,7 @@
 package org.terasology.randomUpdate;
 
 import org.joml.Vector3i;
-import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 import java.util.Collection;
 

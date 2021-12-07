@@ -15,7 +15,7 @@
  */
 package org.terasology.randomUpdate;
 
-import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.engine.entitySystem.event.EventPriority;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
@@ -32,6 +32,7 @@ import org.terasology.engine.registry.In;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.gf.generator.PlantGrowthDefinition;
 import org.terasology.gf.util.LocalParameters;
 import org.terasology.gf.util.StaticLocalParameters;
@@ -72,7 +73,8 @@ public class SaplingInitializeSystem extends BaseComponentSystem {
         delayManager.addDelayedAction(sapling, INITIALIZE_PLANT_ACTION, 0);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
+    @Priority(EventPriority.PRIORITY_LOW)
+    @ReceiveEvent
     public void plantedSapling(OnActivatedComponent event, EntityRef sapling, LivingPlantComponent livingPlant,
                                PlantedSaplingComponent plantedSaplingComponent,
                                BlockComponent blockComponent) {
